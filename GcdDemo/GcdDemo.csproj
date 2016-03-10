@@ -97,7 +97,7 @@
       <Project>{d0817b1b-5a50-4948-9bc2-b9ed9026237e}</Project>
       <Name>Gcd</Name>
     </ProjectReference>
-    <ProjectReference Include="..\MaybeMonad\Monad.csproj">
+    <ProjectReference Include="..\Monad\Monad.csproj">
       <Project>{1d5fe5a9-de3b-4663-b140-1b9bb0373c9e}</Project>
       <Name>Monad</Name>
     </ProjectReference>

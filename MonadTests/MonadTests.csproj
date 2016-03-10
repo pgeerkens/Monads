@@ -170,18 +170,18 @@
     <Compile Include="UnitTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MaybeMonad\Monad.csproj">
-      <Project>{1d5fe5a9-de3b-4663-b140-1b9bb0373c9e}</Project>
-      <Name>Monad</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <CodeAnalysisDictionary Include="..\CustomDictionary.xml">
       <Link>CustomDictionary.xml</Link>
     </CodeAnalysisDictionary>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Monad\Monad.csproj">
+      <Project>{1d5fe5a9-de3b-4663-b140-1b9bb0373c9e}</Project>
+      <Name>Monad</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

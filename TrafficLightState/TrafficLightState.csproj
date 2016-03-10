@@ -99,7 +99,7 @@
     <None Include="PGSoftwareSolutions.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MaybeMonad\Monad.csproj">
+    <ProjectReference Include="..\Monad\Monad.csproj">
       <Project>{1d5fe5a9-de3b-4663-b140-1b9bb0373c9e}</Project>
       <Name>Monad</Name>
     </ProjectReference>
