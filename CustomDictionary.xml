@@ -1,0 +1,41 @@
+﻿<Dictionary>
+      <Words>
+         <Unrecognized>
+            <Word>knokker</Word>
+         </Unrecognized>
+         <Recognized>
+            <Word>_</Word>
+            <Word>a</Word><Word>b</Word><Word>c</Word><Word>d</Word><Word>e</Word>
+            <Word>f</Word><Word>g</Word><Word>h</Word><Word>i</Word><Word>j</Word>
+            <Word>k</Word><Word>l</Word><Word>m</Word><Word>n</Word><Word>o</Word>
+            <Word>p</Word><Word>q</Word><Word>r</Word><Word>s</Word><Word>t</Word>
+            <Word>u</Word><Word>v</Word><Word>w</Word><Word>x</Word><Word>y</Word>
+            <Word>z</Word>
+
+            <Word>eval</Word>
+            <Word>exec</Word>
+            <Word>functor</Word>
+            <Word>gcd</Word>
+            <Word>lhs</Word>
+            <Word>rhs</Word>
+            <Word>secs</Word>
+
+            <Word>Hadlow</Word>
+            <Word>Napoleonics</Word>
+         </Recognized>
+         <Deprecated>
+            <Term PreferredAlternate=""></Term>
+         </Deprecated>
+         <Compound>
+            <Term CompoundAlternate=""></Term>
+         </Compound>
+         <DiscreteExceptions>
+            <Term></Term>
+         </DiscreteExceptions>
+      </Words>
+      <Acronyms>
+         <CasingExceptions>
+            <Acronym>GCD</Acronym>
+         </CasingExceptions>
+      </Acronyms>
+   </Dictionary>
