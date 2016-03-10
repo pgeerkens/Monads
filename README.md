@@ -15,8 +15,8 @@ that is optimized for **class** basetypes, by not storing the *HasValue* propert
 
 All the monads above:
 
-- come with the methods *Select(), SelectMany() and 
-SelectMany(,) predefined to enable the LINQ Comprehension (or Query) syntax.
+- come with the methods *Select()*, *SelectMany()* and 
+*SelectMany(,)* predefined to enable the **LINQ** Comprehension (or Query) syntax.
 
 - Have been fully annotated with CodeContracts to statically disprove the 
 largest possible number of null reference possibilities as possible. 
