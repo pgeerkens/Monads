@@ -3,15 +3,15 @@ C# library of basic monads and accompanying demos from my presentation to [Coder
 Hamilton][1] [S16E03 on March 9, 2016][2]. It is licensed under the MIT License and 
 can be used under those terms.
 
-- **Maybe<T>** is implemented as a struct similar to **Nullable<T>**, but allowing any
+- **Maybe&lt;T>** is implemented as a struct similar to **Nullable&lt;T>**, but allowing any
  subclass of **object** as its basetype whether **struct** or **class**.
 
-- **MaybeX<T>** is also implemented as a struct, with an implicit cast to **Maybe<T>**, 
+- **MaybeX&lt;T>** is also implemented as a struct, with an implicit cast to **Maybe&lt;T>**, 
 that is optimized for **class** basetypes, by not storing the *HasValue* property explicitly.
 
-- **Reader<E,T>** and **State<S,T>** are delegate implementations of these well-known monads.
+- **Reader&lt;E,T>** and **State&lt;S,T>** are delegate implementations of these well-known monads.
 
-- **IO<T>** is also a elegate implementation, with many common Console I/O functions predefined.
+- **IO&lt;T>** is also a elegate implementation, with many common Console I/O functions predefined.
 
 All the monads above:
 
