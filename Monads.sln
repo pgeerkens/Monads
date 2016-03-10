@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonadDemo", "MaybeMonadPerformanceTest\MonadDemo.csproj", "{AA4ADF78-F755-4C61-B934-5F7B9DD0DB06}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9906F8F1-3C39-457F-BDD6-A9F70EA39F57}"
 	ProjectSection(SolutionItems) = preProject
 		CustomDictionary.xml = CustomDictionary.xml
@@ -32,16 +30,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIDemo", "DIDemo\DIDemo.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monad", "Monad\Monad.csproj", "{1D5FE5A9-DE3B-4663-B140-1B9BB0373C9E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonadDemo", "MonadDemo\MonadDemo.csproj", "{AA4ADF78-F755-4C61-B934-5F7B9DD0DB06}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{AA4ADF78-F755-4C61-B934-5F7B9DD0DB06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AA4ADF78-F755-4C61-B934-5F7B9DD0DB06}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AA4ADF78-F755-4C61-B934-5F7B9DD0DB06}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AA4ADF78-F755-4C61-B934-5F7B9DD0DB06}.Release|Any CPU.Build.0 = Release|Any CPU
 		{54900A19-C0FF-4BA6-B695-9FA6644CBCEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{54900A19-C0FF-4BA6-B695-9FA6644CBCEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{54900A19-C0FF-4BA6-B695-9FA6644CBCEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -74,6 +70,10 @@ Global
 		{1D5FE5A9-DE3B-4663-B140-1B9BB0373C9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D5FE5A9-DE3B-4663-B140-1B9BB0373C9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D5FE5A9-DE3B-4663-B140-1B9BB0373C9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA4ADF78-F755-4C61-B934-5F7B9DD0DB06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA4ADF78-F755-4C61-B934-5F7B9DD0DB06}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA4ADF78-F755-4C61-B934-5F7B9DD0DB06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA4ADF78-F755-4C61-B934-5F7B9DD0DB06}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
