@@ -19,7 +19,7 @@ All the monads above:
 *SelectMany(,)* predefined to enable the **LINQ** Comprehension (or Query) syntax.
 
 - Have been fully annotated with CodeContracts to statically disprove the 
-largest possible number of null reference possibilities as possible. 
+largest possible number of null references. 
 
 The slide presentation will be publlished shortly under a separate project.
 I will amend this note once that is complete.
