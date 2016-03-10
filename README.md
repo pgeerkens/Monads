@@ -1,7 +1,7 @@
 # Monads
 C# library of basic monads (Maybe, Reader, State, IO) and accompanying demos
 
-This is the monad library and demo code for my presentation to CoderCamp 
+This is the monad library and demo code for my presentation to [CoderCamp 
 Hamilton][1] [S16E03 on March 9, 2016][2]. It is licensed under the MIT License and 
 can be used under those terms.
 
