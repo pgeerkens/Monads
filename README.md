@@ -21,8 +21,7 @@ All the monads above:
 - Have been fully annotated with CodeContracts to statically disprove the 
 largest possible number of null references. 
 
-The slide presentation will be publlished shortly under a separate project.
-I will amend this note once that is complete.
+The slide presentation is available [here as Mathless Monads in C#][3].
 
 Enjoy!
 
@@ -30,3 +29,4 @@ Pieter Geerkens
 
 [1]: http://www.codercamphamilton.com/
 [2]: http://www.codercamphamilton.com/Events/2016/03/09/CoderCamp-S16E03
+[3]: https://github.com/pgeerkens/Presentations
