@@ -158,8 +158,6 @@
       this.MaximizeBox = false;
       this.Name = "Form1";
       this.Text = "Form1";
-      this.Load += new System.EventHandler(this.Form1_Load);
-      this.Click += new System.EventHandler(this.ResetLights);
       ((System.ComponentModel.ISupportInitialize)(this.UpTownLeftTurnLight)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.DownTownLeftTurnLight)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.CrossTownLight)).EndInit();

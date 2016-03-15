@@ -28,7 +28,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.Linq;
@@ -48,8 +48,18 @@ namespace TrafficLightDemo {
 
   public partial class Form1 : Form, ICancellationTokenSource {
     public Form1() {
-      InitializeComponent();
+      Contract.Ensures( (Source == null) == (_cts == null) );
+      Contract.Ensures( _cts != null );
 
+      InitializeComponent();
+      this.Load += new System.EventHandler(this.Form1_Load);
+      this.Click += new System.EventHandler(this.ResetLights);
+
+      VerifyObjectInvariants();
+
+      _cts = new CancellationTokenSource();
+
+      this.AssumeInvariant();
       _trafficLight = new TrafficLight(this,
               CrossTownLight,
               UpTownLeftTurnLight,
@@ -58,7 +68,7 @@ namespace TrafficLightDemo {
             );
     }
 
-    TrafficLight _trafficLight;
+    readonly TrafficLight _trafficLight;
     
     private void Form1_Load(object sender, EventArgs e) { ResetLights(sender,e); }
 
@@ -88,22 +98,66 @@ namespace TrafficLightDemo {
         return Unit._;
     }
 
-    CancellationTokenSource ICancellationTokenSource.Source { get { return _cts; } }
+    public CancellationTokenSource Source {
+      get {Contract.Ensures(Contract.Result<CancellationTokenSource>() != null); return _cts; }
+    }
     CancellationTokenSource _cts;
 
     static readonly Image _red    = SetTransparent(Properties.Resources.RedLight);
     static readonly Image _yellow = SetTransparent(Properties.Resources.YellowLight);
     static readonly Image _green  = SetTransparent(Properties.Resources.GreenLight);
 
+    /// <summary>The invariants enforced by this struct type.</summary>
+    [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+    [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
+    [ContractInvariantMethod]
+    [Pure]
+    private void ObjectInvariant() {
+      Contract.Invariant( (Source == null) == (_cts == null) );
+      Contract.Invariant( _cts != null );
+    }
+
     struct SettableLight : ISettableLight {
-        public SettableLight(PictureBox pictureBox) { _pictureBox = pictureBox; }
+        public SettableLight(PictureBox pictureBox) : this() {
+          pictureBox.ContractedNotNull("pictureBox");
+          Contract.Ensures(_pictureBox != null);
+
+          _pictureBox = pictureBox;
+        }
+
         IO<Unit> ISettableLight.SetColour(Image image) { _pictureBox.Image = image; return Unit._.ToIO(); }
         readonly PictureBox _pictureBox;
+
+      /// <summary>The invariants enforced by this struct type.</summary>
+      [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+      [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
+      [ContractInvariantMethod]
+      [Pure]
+      private void ObjectInvariant() {
+          Contract.Invariant( _pictureBox != null );
+      }
     }
 
     struct TrafficLight : ITrafficLight<Image> {
       public TrafficLight(ICancellationTokenSource ctsSource, params PictureBox[] lights) : this() {
-        _ctsSource = ctsSource;
+        ctsSource.ContractedNotNull("ctsSource");
+        Contract.Requires(ctsSource.Source != null);
+        lights.ContractedNotNull("lights");
+        Contract.Requires(3 < lights.Length);
+        Contract.Requires( lights[0] != null );
+        Contract.Requires( lights[1] != null );
+        Contract.Requires( lights[2] != null );
+        Contract.Requires( lights[3] != null );
+
+        Contract.Ensures(_ctsSource != null);
+        Contract.Ensures(_ctsSource.Source != null);
+
+        Contract.Ensures( _crossTownLight != null );
+        Contract.Ensures( _upTownLeftTurnLight != null );
+        Contract.Ensures( _downTownLeftTurnLight != null );
+        Contract.Ensures( _upDownTownLight != null );
+
+        _ctsSource             = ctsSource;
         _crossTownLight        = lights[0];
         _upTownLeftTurnLight   = lights[1];
         _downTownLeftTurnLight = lights[2];
@@ -126,7 +180,58 @@ namespace TrafficLightDemo {
       ISettableLight ITrafficLight.UpTownLeftTurn   { [Pure]get {return new SettableLight(_upTownLeftTurnLight);  } }
       ISettableLight ITrafficLight.DownTownLeftTurn { [Pure]get {return new SettableLight(_downTownLeftTurnLight);} }
       ISettableLight ITrafficLight.UpDownTown       { [Pure]get {return new SettableLight(_upDownTownLight);      } }
+
+      /// <summary>The invariants enforced by this struct type.</summary>
+      [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+      [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
+      [ContractInvariantMethod]
+      [Pure]
+      private void ObjectInvariant() {
+          Contract.Invariant( _ctsSource != null );
+          Contract.Invariant( _ctsSource.Source != null );
+
+          Contract.Invariant( _crossTownLight != null );
+          Contract.Invariant( _upTownLeftTurnLight != null );
+          Contract.Invariant( _downTownLeftTurnLight != null );
+          Contract.Invariant( _upDownTownLight != null );
+      }
     }
     #endregion
+
+    /// <summary>Enforce required Code Contracts after temporarily suspending layout logic for control.</summary>
+    public new void SuspendLayout() {
+      Contract.Ensures(UpTownLeftTurnLight   != null);
+      Contract.Ensures(DownTownLeftTurnLight != null);
+      Contract.Ensures(CrossTownLight        != null);
+      Contract.Ensures(UpDownTownLight       != null);
+
+      Contract.Ensures(label1 != null);
+      Contract.Ensures(label2 != null);
+      Contract.Ensures(label3 != null);
+      Contract.Ensures(label4 != null);
+
+      base.SuspendLayout();
+
+      VerifyObjectInvariants();
+    }
+
+    /// <summary>Validates ObjectInvariants, throwing an InvalidOperationException on failure.</summary>
+    /// <exception cref="InvalidOperationException"/>
+    void VerifyObjectInvariants() {
+      Contract.Ensures(UpTownLeftTurnLight   != null);
+      Contract.Ensures(DownTownLeftTurnLight != null);
+      Contract.Ensures(CrossTownLight        != null);
+      Contract.Ensures(UpDownTownLight       != null);
+
+      Contract.Ensures(label1 != null);
+      Contract.Ensures(label2 != null);
+      Contract.Ensures(label3 != null);
+      Contract.Ensures(label4 != null);
+
+      if ( label1 == null || label2 == null || label3 == null || label4 == null
+        || UpTownLeftTurnLight == null || DownTownLeftTurnLight == null
+        || CrossTownLight      == null || UpDownTownLight       == null )
+        throw new InvalidOperationException("InitializeComponent failure");
+    }
   }
 }
