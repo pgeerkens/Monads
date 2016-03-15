@@ -52,10 +52,6 @@ namespace TrafficLightDemo {
       Contract.Ensures( _cts != null );
 
       InitializeComponent();
-      this.Load += new System.EventHandler(this.Form1_Load);
-      this.Click += new System.EventHandler(this.ResetLights);
-
-      VerifyObjectInvariants();
 
       _cts = new CancellationTokenSource();
 
@@ -113,6 +109,16 @@ namespace TrafficLightDemo {
     [ContractInvariantMethod]
     [Pure]
     private void ObjectInvariant() {
+      Contract.Invariant(UpTownLeftTurnLight   != null);
+      Contract.Invariant(DownTownLeftTurnLight != null);
+      Contract.Invariant(CrossTownLight        != null);
+      Contract.Invariant(UpDownTownLight       != null);
+
+      Contract.Invariant(label1 != null);
+      Contract.Invariant(label2 != null);
+      Contract.Invariant(label3 != null);
+      Contract.Invariant(label4 != null);
+
       Contract.Invariant( (Source == null) == (_cts == null) );
       Contract.Invariant( _cts != null );
     }
@@ -197,41 +203,5 @@ namespace TrafficLightDemo {
       }
     }
     #endregion
-
-    /// <summary>Enforce required Code Contracts after temporarily suspending layout logic for control.</summary>
-    public new void SuspendLayout() {
-      Contract.Ensures(UpTownLeftTurnLight   != null);
-      Contract.Ensures(DownTownLeftTurnLight != null);
-      Contract.Ensures(CrossTownLight        != null);
-      Contract.Ensures(UpDownTownLight       != null);
-
-      Contract.Ensures(label1 != null);
-      Contract.Ensures(label2 != null);
-      Contract.Ensures(label3 != null);
-      Contract.Ensures(label4 != null);
-
-      base.SuspendLayout();
-
-      VerifyObjectInvariants();
-    }
-
-    /// <summary>Validates ObjectInvariants, throwing an InvalidOperationException on failure.</summary>
-    /// <exception cref="InvalidOperationException"/>
-    void VerifyObjectInvariants() {
-      Contract.Ensures(UpTownLeftTurnLight   != null);
-      Contract.Ensures(DownTownLeftTurnLight != null);
-      Contract.Ensures(CrossTownLight        != null);
-      Contract.Ensures(UpDownTownLight       != null);
-
-      Contract.Ensures(label1 != null);
-      Contract.Ensures(label2 != null);
-      Contract.Ensures(label3 != null);
-      Contract.Ensures(label4 != null);
-
-      if ( label1 == null || label2 == null || label3 == null || label4 == null
-        || UpTownLeftTurnLight == null || DownTownLeftTurnLight == null
-        || CrossTownLight      == null || UpDownTownLight       == null )
-        throw new InvalidOperationException("InitializeComponent failure");
-    }
   }
 }
