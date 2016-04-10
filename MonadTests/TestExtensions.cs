@@ -36,14 +36,14 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
     /// <summary>A string representing the object's value, or "Nothing" if it has no value.</summary>
     public static string ToNothingString<T>(this Maybe<T> @this) {
       Contract.Ensures(Contract.Result<string>() != null);
-      return @this.Bind<string>(v => v.ToString()).Extract("Nothing");
+      return @this.Bind<string>(v => v.ToString()) | "Nothing";
     }
 
     /// <summary>A string representing the object's value, or "Nothing" if it has no value.</summary>
     public static string ToNothingString<T>(this MaybeX<T> @this
     ) where T:class {
       Contract.Ensures(Contract.Result<string>() != null);
-      return @this.Bind<string>(v => v.ToString()).Extract("Nothing");
+      return @this.Bind<string>(v => v.ToString()) | "Nothing";
     }
   }
 

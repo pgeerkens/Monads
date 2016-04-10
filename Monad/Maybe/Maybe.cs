@@ -69,7 +69,8 @@ namespace PGSolutions.Utilities.Monads {
 
     ///<summary>The monadic Bind operation from type T to type 
     ///Maybe&lt;TResult>.</summary>
-    [Pure]public Maybe<TResult>       Bind<TResult>(
+    [Pure]
+    public Maybe<TResult>       Bind<TResult>(
         Func<T, Maybe<TResult>> selector
     ) {
         selector.ContractedNotNull("selector");
@@ -80,11 +81,21 @@ namespace PGSolutions.Utilities.Monads {
 
     ///<summary>Extract value of the Maybe&lt;T>, substituting 
     ///<paramref name="defaultValue"/> as needed.</summary>
-    [Pure]public T                    Extract(T defaultValue) {
+    [Pure]
+    public T                    Extract(T defaultValue) {
         defaultValue.ContractedNotNull("defaultValue");
         Contract.Ensures(Contract.Result<T>() != null);
 
         return ! HasValue  ?  defaultValue  :  Value;
+    }
+    ///<summary>Extract value of the Maybe&lt;T>, substituting 
+    ///<paramref name="defaultValue"/> as needed.</summary>
+    [Pure]
+    public static T operator |(Maybe<T> value, T defaultValue) {
+        defaultValue.ContractedNotNull("defaultValue");
+        Contract.Ensures(Contract.Result<T>() != null);
+
+        return value.Extract(defaultValue);
     }
 
     /// <summary>The invariants enforced by this struct type.</summary>
@@ -101,7 +112,7 @@ namespace PGSolutions.Utilities.Monads {
     /// <inheritdoc/>
     [Pure]public override string ToString() {
       Contract.Ensures(Contract.Result<string>() != null);
-      return Bind<string>(v => v.ToString()).Extract("");
+      return Bind<string>(v => v.ToString()) | "";
     }
     #region Non-Core
     /// <summary>Optimized implementation of Map.</summary>
@@ -191,28 +202,34 @@ namespace PGSolutions.Utilities.Monads {
     #endregion
 
     /// <inheritdoc/>
-    [Pure]public override bool Equals(object obj) { 
+    [Pure]
+    public override bool Equals(object obj) { 
       var other = obj as Maybe<T>?;
       return other.HasValue  &&  other.Equals(obj);
     }
 
     /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-    [Pure]public bool Equals(Maybe<T> other) {
+    [Pure]
+    public bool Equals(Maybe<T> other) {
       return this.HasValue  &&  other.HasValue  &&  _equals(this._value,other._value);
     }
     /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist.</summary>
-    [Pure]public bool NotEquals(Maybe<T> other) {
+    [Pure]
+    public bool NotEquals(Maybe<T> other) {
       return this.HasValue  &&  other.HasValue  &&  ! _equals(this._value,other._value);
     }
 
     /// <inheritdoc/>
-    [Pure]public override int GetHashCode() { return HasValue ? Value.GetHashCode() : 0; }
+    [Pure]
+    public override int GetHashCode() { return HasValue ? Value.GetHashCode() : 0; }
 
     /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-    [Pure]public static bool operator == (Maybe<T> lhs, Maybe<T> rhs) { return lhs.Equals(rhs); }
+    [Pure]
+    public static bool operator == (Maybe<T> lhs, Maybe<T> rhs) { return lhs.Equals(rhs); }
 
     /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
-    [Pure]public static bool operator != (Maybe<T> lhs, Maybe<T> rhs) { return lhs.NotEquals(rhs); }
+    [Pure]
+    public static bool operator != (Maybe<T> lhs, Maybe<T> rhs) { return lhs.NotEquals(rhs); }
     #endregion
   }
 
@@ -232,7 +249,7 @@ namespace PGSolutions.Utilities.Monads {
     ///<summary>Extract value of the Maybe&lt;T>, substituting <paramref name="defaultValue"/> as needed.</summary>
     [Pure]
     public static  TStruct            Extract<TStruct>
-      (this Maybe<TStruct> @this) where TStruct:struct { return @this.Extract(default(TStruct)); }
+      (this Maybe<TStruct> @this) where TStruct:struct { return @this | default(TStruct); }
 
     ///<summary>Extract value of the Maybe&lt;T>, substituting <paramref name="defaultValue"/> as needed.</summary>
     [Pure]
@@ -240,7 +257,7 @@ namespace PGSolutions.Utilities.Monads {
       (this Maybe<Func<TStruct>> @this) where TStruct:struct {
       Contract.Ensures(Contract.Result<Func<TStruct>>() != null);
 
-      return @this.Extract(()=>default(TStruct));
+      return @this | (()=>default(TStruct));
     }
 
     /////<summary>The monadic Bind operation from type T to type Maybe&lt;TResult>.</summary>

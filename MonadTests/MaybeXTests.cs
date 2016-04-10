@@ -153,7 +153,7 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
       var state = new ExternalState();
       var x = ( from a in new MaybeX<Func<int>>(state.GetState)
                 select a
-              ).Extract(()=>0);
+              ) | (()=>0);
       var y = x();
 
       for (int i = 0; i++ < 5; ) state.GetState();

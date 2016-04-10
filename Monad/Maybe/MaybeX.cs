@@ -83,6 +83,14 @@ namespace PGSolutions.Utilities.Monads {
 
         return ! HasValue  ?  defaultValue  :  Value;
     }
+    ///<summary>Extract value of the MaybeX&lt;T>, substituting <paramref name="defaultValue"/> as needed.</summary>
+    [Pure]
+    public static TValue operator |(MaybeX<TValue> value, TValue defaultValue) {
+        defaultValue.ContractedNotNull("defaultValue");
+        Contract.Ensures(Contract.Result<TValue>() != null);
+
+        return value.Extract(defaultValue);
+    }
 
     ///<summary>Optimized LINQ-compatible implementation of Bind/Map as Select.</summary>
     ///<remarks>Always available from Bind():
@@ -191,7 +199,7 @@ namespace PGSolutions.Utilities.Monads {
     /// <inheritdoc/>
     [Pure]public override string ToString() {
       Contract.Ensures(Contract.Result<string>() != null);
-      return Bind<string>(v => v.ToString()).Extract("");
+      return Bind<string>(v => v.ToString()) | "";
     }
 
     /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>

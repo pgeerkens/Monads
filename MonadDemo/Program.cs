@@ -140,7 +140,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
 
     public static string ToNothingString<T>(this Maybe<T> @this) {
       Contract.Ensures(Contract.Result<string>() != null);
-      return @this.Bind<string>(v => v.ToString()).Extract("Nothing");
+      return @this.Bind<string>(v => v.ToString()) | "Nothing";
     }
 
     private static void ExternalStateTest() {
