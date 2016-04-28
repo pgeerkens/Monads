@@ -42,7 +42,7 @@ namespace TrafficLightDemo {
     public static async Task<Unit> ExecuteTrafficLight<T>
       (this ITrafficLight<T> e) {
         e.ContractedNotNull("e");
-        //Contract.Ensures(Contract.Result<Task<Unit>>() != null);  // not supported for async/await
+        Contract.Ensures(Contract.Result<Task<Unit>>() != null);  // not supported for async/await
         try {
             var trafficLightState = await LightStates<T>.Start(e)(e);
             while (trafficLightState != null)  trafficLightState = await trafficLightState()(e);

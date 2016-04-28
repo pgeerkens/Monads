@@ -52,13 +52,14 @@ namespace PGSolutions.Utilities.Monads {
         value.ContractedNotNull("value");
         Contract.Ensures((_value==null) == (value==null));
         Contract.Ensures(HasValue == (value!=null));
+        Contract.Ensures((_value != null) || !ValueIsStruct);
 
         _value    = value;
         _hasValue = true;
     }
 
-    /// <summary>The Invalid data value.</summary>
-    public static Maybe<T>            Nothing {
+        /// <summary>The Invalid data value.</summary>
+        public static Maybe<T>            Nothing {
       [Pure]get { Contract.Ensures( ! Contract.Result<Maybe<T>>().HasValue);
                   return new Maybe<T>();
       }
@@ -106,11 +107,11 @@ namespace PGSolutions.Utilities.Monads {
     private void ObjectInvariant() {
         Contract.Invariant( HasValue == (Value != null) );
         Contract.Invariant( this != null );
-        Contract.Invariant( ValueIsStruct.Implies(_value != null) );
-    }
+            Contract.Invariant((_value != null)  ||  !ValueIsStruct);
+        }
 
-    /// <inheritdoc/>
-    [Pure]public override string ToString() {
+        /// <inheritdoc/>
+        [Pure]public override string ToString() {
       Contract.Ensures(Contract.Result<string>() != null);
       return Bind<string>(v => v.ToString()) | "";
     }

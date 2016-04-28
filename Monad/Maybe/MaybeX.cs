@@ -194,7 +194,7 @@ namespace PGSolutions.Utilities.Monads {
     }
 
     ///<summary>Retrieves the hash code of the object returned by the <see cref="Value"/> property.</summary>
-    [Pure]public override int GetHashCode() { return Value.GetHashCode(); }
+    [Pure]public override int GetHashCode() { return HasValue ? Value.GetHashCode() : 0; }
 
     /// <inheritdoc/>
     [Pure]public override string ToString() {

@@ -59,6 +59,10 @@ namespace System.Diagnostics.Contracts {
     public static void AssumeInvariant<T>(this T t) { }
 
     /// <summary>Asserts the 'truth' of the logical implication <paramref name="condition"/> => <paramref name="contract"/>.</summary>
+    /// <remarks>
+    /// Doesn't work anymore in VS 2015 and CC 1.10.10126.4.
+    /// Unfortunate, bt not critical.
+    /// </remarks>
     public static bool Implies(this bool condition, bool contract) {
         Contract.Ensures((! condition || contract)  ==  Contract.Result<bool>() );
         return ! condition || contract;
