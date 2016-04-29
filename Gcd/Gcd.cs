@@ -31,6 +31,7 @@
 #define FluentStyle
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
@@ -82,8 +83,9 @@ namespace PGSolutions.Utilities.Monads.Demos {
         ).LastUnit();
       }
 #else // ComprehensionStyle
-      /// <summary>TODO</summary>
-      public static IO<Unit> Run(IEnumerable<GcdStart> states) {          
+        /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
+        public static IO<Unit> Run(IEnumerable<GcdStart> states) {          
         states.ContractedNotNull("states");
         Contract.Ensures(Contract.Result<IO<Unit>>() != null);
 

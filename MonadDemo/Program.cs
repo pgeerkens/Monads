@@ -33,13 +33,16 @@ using System.Globalization;
 using System.Linq;
 
 using PGSolutions.Utilities.Monads;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PGSolutions.Utilities.Monads.Demos {
+#pragma warning disable CA1303
 
-  static class Program {
+    static class Program {
     static readonly CultureInfo  _culture = CultureInfo.InvariantCulture;
 
-    static void Main() {
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String,System.Object,System.Object,System.Object)")]
+        static void Main() {
         BasicTest();
 
         WesDyerTest();
@@ -74,7 +77,8 @@ namespace PGSolutions.Utilities.Monads.Demos {
         Console.ReadLine();
     }
 
-    static void BasicTest() {
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String)")]
+        static void BasicTest() {
         var data = new List<Maybe<String>>() { "Fred", "George", null, "Ron", null };
         Console.WriteLine(string.Join("/", from e in data
                                            select e.ToString() ) + "/" );
@@ -95,8 +99,9 @@ namespace PGSolutions.Utilities.Monads.Demos {
       Console.WriteLine("_______________________");
     }
 
-    // after Wes Dyer: http://blogs.msdn.com/b/wesdyer/archive/2008/01/11/the-marvels-of-monads.aspx
-    static void WesDyerTest() {
+        // after Wes Dyer: http://blogs.msdn.com/b/wesdyer/archive/2008/01/11/the-marvels-of-monads.aspx
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String)")]
+        static void WesDyerTest() {
       Console.WriteLine();
       {
         Console.WriteLine( ( from x in 5.ToMaybe()
@@ -116,8 +121,9 @@ namespace PGSolutions.Utilities.Monads.Demos {
       Console.WriteLine("_______________________");
     }
 
-    // after Mike Hadlow: http://mikehadlow.blogspot.ca/2011/01/monads-in-c-5-maybe.html
-    static void MikeHadlowTest() {
+        // after Mike Hadlow: http://mikehadlow.blogspot.ca/2011/01/monads-in-c-5-maybe.html
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String)")]
+        static void MikeHadlowTest() {
       Console.WriteLine();
       { int denominator = 2;
         Console.WriteLine( ( from a in "Hello World!".ToMaybe()
@@ -143,7 +149,8 @@ namespace PGSolutions.Utilities.Monads.Demos {
       return @this.Bind<string>(v => v.ToString()) | "Nothing";
     }
 
-    private static void ExternalStateTest() {
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String)")]
+        private static void ExternalStateTest() {
       Console.WriteLine();
       var state = new ExternalState();
       var x = ( from a in new Maybe<Func<int>>(state.GetState)
@@ -162,7 +169,8 @@ namespace PGSolutions.Utilities.Monads.Demos {
       //Console.WriteLine(xx);
     }
 
-    private static void GcdTest1(IList<int> list) {
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String,System.Object,System.Object)")]
+        private static void GcdTest1(IList<int> list) {
         list.ContractedNotNull("null");
         if (list.Any()) {
             int gcd   = list[0];
@@ -215,4 +223,5 @@ namespace PGSolutions.Utilities.Monads.Demos {
       return new MyString(@this.Value??"" + suffix??"");
     }
   }
+#pragma warning restore CA1303
 }

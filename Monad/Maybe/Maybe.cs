@@ -92,7 +92,7 @@ namespace PGSolutions.Utilities.Monads {
     ///<summary>Extract value of the Maybe&lt;T>, substituting 
     ///<paramref name="defaultValue"/> as needed.</summary>
     [Pure]
-    public static T operator |(Maybe<T> value, T defaultValue) {
+    public static T operator | (Maybe<T> value, T defaultValue) {
         defaultValue.ContractedNotNull("defaultValue");
         Contract.Ensures(Contract.Result<T>() != null);
 

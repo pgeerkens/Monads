@@ -12,13 +12,6 @@ namespace PGSolutions.Utilities.Monads {
   /// </remarks>
   [Pure]
   public static class IOLinqExtensions {
-    // η: T -> IO<T>
-    /// <summary>TODO</summary>
-    public static IO<T>                   IO<T>(this T value) {
-      Contract.Ensures(Contract.Result<IO<T>>() != null);
-      return () => value;
-    }
-
     // Select: (TSource -> TResult) -> (IO<TSource> -> IO<TResult>)
     /// <summary>TODO</summary>
     public static IO<TResult>             Select<TSource, TResult>(this
@@ -29,7 +22,7 @@ namespace PGSolutions.Utilities.Monads {
       selector.ContractedNotNull("selector");
       Contract.Ensures(Contract.Result<IO<TResult>>() != null);
 
-      return source.SelectMany(item => selector(item).IO());
+      return source.SelectMany(item => selector(item).ToIO());
     }
 
     // Required by LINQ.

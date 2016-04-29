@@ -36,36 +36,45 @@ using System.Linq;
 using PGSolutions.Utilities.Monads;
 
 namespace PGSolutions.Utilities.Monads.Demos {
-  using StateBool    = State<GcdStart, bool>;
-  using PayloadBool  = StatePayload<GcdStart, bool>;
-  using StateInt     = State<GcdStart, int>;
-  using PayloadInt   = StatePayload<GcdStart, int>;
-  using StateRes     = State<GcdStart, GcdResult>;
+    using StateBool    = State<GcdStart, bool>;
+    using PayloadBool  = StatePayload<GcdStart, bool>;
+    using StateInt     = State<GcdStart, int>;
+    using PayloadInt   = StatePayload<GcdStart, int>;
+    using StateRes     = State<GcdStart, GcdResult>;
 
-  using BindFlags    = System.Reflection.BindingFlags;
+    using BindFlags    = System.Reflection.BindingFlags;
 
-  /// <summary>TODO</summary>
-  [Pure]
-  public static class Gcd_S4 { // Beware! - These must be declared & initialized in this order
+    /// <summary>TODO</summary>
+    public interface ITest {
+        /// <summary>TODO</summary>
+        StateRes Transform { get; }
+        /// <summary>TODO</summary>
+        string Title { get; }
+    }
+
+    /// <summary>TODO</summary>
+    [SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+    [Pure]
+    public static class Gcd_S4 { // Beware! - These must be declared & initialized in this order
       /// <summary>TODO</summary>
-      public static IEnumerable<Test> GetTests(bool getAll) {
-          Contract.Ensures(Contract.Result<IEnumerable<Test>>() != null);
+      public static IEnumerable<ITest> GetTests(bool getAll) {
+          Contract.Ensures(Contract.Result<IEnumerable<ITest>>() != null);
 
           var list =  ( from test2 in new List<StateRes>() {
                           Gcd_S4.Imperative.Run1, Gcd_S4.Imperative.Run2,
                           Gcd_S4.Haskell.Run1,    Gcd_S4.Haskell.Run2,  Gcd_S4.Haskell.Run3,
-                          Gcd_S4.LINQ.Run1,       Gcd_S4.LINQ.Run2,     Gcd_S4.LINQ.Run3,
+                          Gcd_S4.Linq.Run1,       Gcd_S4.Linq.Run2,     Gcd_S4.Linq.Run3,
                           Gcd_S4.Best.Run
                         }
-                        select new Test(test2,GetTitle(test2))
+                        select new Test(test2,GetTitle(test2)) as ITest
                       );
 
           if ( ! getAll) 
               list = ( from item in list
                        where item.Transform != Gcd_S4.Haskell.Run1
                           && item.Transform != Gcd_S4.Haskell.Run2
-                          && item.Transform != Gcd_S4.LINQ.Run1
-                          && item.Transform != Gcd_S4.LINQ.Run2
+                          && item.Transform != Gcd_S4.Linq.Run1
+                          && item.Transform != Gcd_S4.Linq.Run2
                        select item);
 
           return list.ToList().AsReadOnly();
@@ -89,9 +98,10 @@ namespace PGSolutions.Utilities.Monads.Demos {
           return result;
       }
 
-    #region Utilities
-    /// <summary>TODO</summary>
-    public static readonly Func<StateInt, StateRes> ToStateRes = (transform) =>
+        #region Utilities
+        /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
+        public static readonly Func<StateInt, StateRes> ToStateRes = (transform) =>
 #if ! true
           transform.Select( gcd => new GcdResult(gcd) );
 #else
@@ -119,7 +129,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
 
     /// <summary>TODO</summary>
     [Pure]
-    public static class Haskell {
+    internal static class Haskell {
         #region Older Haskell implementations
       /* from http://mvanier.livejournal.com/5846.html
               gcd_s3 :: State GCDState Int
@@ -167,7 +177,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
 
     /// <summary>TODO</summary>
     [Pure]
-    public static class LINQ {
+    internal static class Linq {
         #region Older LINQ implementations
           // ~ 3.5 sec
         private static readonly StateInt _run1 = start =>
@@ -205,8 +215,8 @@ namespace PGSolutions.Utilities.Monads.Demos {
         public static readonly StateRes Run3 = ToStateRes(_run3);
     }
 
-    /// <summary>TODO</summary>
-    public struct Test {
+        /// <summary>TODO</summary>
+    private struct Test : ITest {
         /// <summary>TODO</summary>
         public Test(StateRes transform, string title) { _transform = transform; _title = title; }
         /// <summary>TODO</summary>
@@ -217,11 +227,12 @@ namespace PGSolutions.Utilities.Monads.Demos {
 
     /// <summary>TODO</summary>
     [Pure]
-    public static class Imperative {
+    internal static class Imperative {
 
-          // ~ 0.91 sec
-        /// <summary>TODO</summary>
-        [Description("Fully imperative; w/o substitution.")]
+            // ~ 0.91 sec
+            /// <summary>TODO</summary>
+            [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
+            [Description("Fully imperative; w/o substitution.")]
         public static readonly StateRes Run1 = Gcd_S4.ToStateRes(_run1);
         private static PayloadInt _run1(GcdStart state) {
             while (state.A != state.B) {
@@ -232,9 +243,10 @@ namespace PGSolutions.Utilities.Monads.Demos {
             return new PayloadInt(state, state.A);
         }
 
-          // ~ 0.60 sec
-        /// <summary>TODO</summary>
-        [Description("Fully imperative; w/ substitution.")]
+            // ~ 0.60 sec
+            /// <summary>TODO</summary>
+            [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
+            [Description("Fully imperative; w/ substitution.")]
         public static readonly StateRes Run2 = Gcd_S4.ToStateRes(_run2);
         private static PayloadInt _run2(GcdStart state) {
             while (state.A != state.B) {
@@ -248,14 +260,16 @@ namespace PGSolutions.Utilities.Monads.Demos {
         }
     }
 
-    /// <summary>TODO</summary>
-    [Pure]
+        /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
+        [Pure]
     public static class Best {
           // ~ 1.0 sec
         private static readonly StateInt _run = AlgorithmTransform.DoWhile(s => s.A != s.B)
                                                                   .Then(GcdExtract);
-        /// <summary>TODO</summary>
-        [Description("Optimized DoWhile().")]
+            /// <summary>TODO</summary>
+            [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
+            [Description("Optimized DoWhile().")]
         public static readonly StateRes Run = ToStateRes(_run);
     }
   }

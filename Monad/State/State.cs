@@ -213,8 +213,10 @@ namespace PGSolutions.Utilities.Monads {
   [Pure]public sealed class State<TState> {
       private State() { }
 
-      /// <summary>Get's the current state as both State and Value.</summary>
-      public readonly static State<TState,TState>       Get = 
+        /// <summary>Get's the current state as both State and Value.</summary>
+        [SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
+        [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
+        public readonly static State<TState,TState>       Get = 
           s => new StatePayload<TState,TState>(s, s);
   }
 }

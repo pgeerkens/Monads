@@ -137,11 +137,11 @@ namespace PGSolutions.Utilities.Monads {
     [Pure]
     public override string ToString() {
         Contract.Ensures(Contract.Result<string>() != null);
-        return String.Format(CultureInfo.InvariantCulture, "({0},{1})", Value, State);
-    }
+            return String.Format(CultureInfo.InvariantCulture, "({0},{1})",Value, State);
+        }
 
-    /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-    [Pure]
+        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
+        [Pure]
     public static bool operator ==(StatePayload<TState, TValue> lhs, StatePayload<TState, TValue> rhs) {
 #if PayloadAsClass
         lhs.ContractedNotNull("lhs");

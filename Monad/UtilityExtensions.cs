@@ -29,16 +29,22 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 
 namespace PGSolutions.Utilities.Monads {
-  public static class StringExtensions {
-      public static string BuildMe(this string @this, params object[] arg) {
-        @this.ContractedNotNull("this");
-        arg.ContractedNotNull("arg");
-        Contract.Ensures(Contract.Result<string>() != null);
+    public static class StringExtensions {
 
-        return String.Format(@this,arg);
-      }
-  }
+        /// <summary>Shortcut for String.Format(CultureInfo.InvariantCulture, @this, arg).</summary>
+        /// <param name="this">The Format string.</param>
+        /// <param name="arg">The arguments to be formatted into the FOrmat string.</param>
+        /// <returns></returns>
+        public static string BuildMe(this string @this, params object[] arg) {
+            @this.ContractedNotNull("this");
+            arg.ContractedNotNull("arg");
+            Contract.Ensures(Contract.Result<string>() != null);
+
+            return String.Format(CultureInfo.InvariantCulture, @this, arg);
+        }
+    }
 }

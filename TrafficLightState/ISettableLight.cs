@@ -45,7 +45,7 @@ namespace TrafficLightDemo {
     public IO<Unit> SetColour(T colour) {
       colour.ContractedNotNull("colour");
       Contract.Ensures(Contract.Result<IO<Unit>>() != null);
-      return Unit._.IO(); 
+      return Unit._.ToIO(); 
     }
   }
 }

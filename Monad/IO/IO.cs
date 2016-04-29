@@ -6,17 +6,17 @@ using System.IO;
 using System.Linq;
 
 namespace PGSolutions.Utilities.Monads {
-  /// <summary>TODO</summary>
-  /// <typeparam name="T"></typeparam>
-  public delegate T IO<out T>();
+      /// <summary>TODO</summary>
+      /// <typeparam name="T"></typeparam>
+      public delegate T IO<out T>();
 
-  /// <summary>TODO</summary>
-  /// <remarks>
-  /// This pretty much comes straight from Dixin's Blog:
-  ///     https://weblogs.asp.net/dixin/category-theory-via-c-sharp-18-more-monad-io-monad
-  /// except for all the Contract verification and some code reformatting.
-  /// </remarks>
-  [SuppressMessage("Microsoft.Naming", "CA1724:TypeNamesShouldNotMatchNamespaces"), Pure]
+      /// <summary>TODO</summary>
+      /// <remarks>
+      /// This pretty much comes straight from Dixin's Blog:
+      ///     https://weblogs.asp.net/dixin/category-theory-via-c-sharp-18-more-monad-io-monad
+      /// except for all the Contract verification and some code reformatting.
+      /// </remarks>
+    // [SuppressMessage("Microsoft.Naming", "CA1724:TypeNamesShouldNotMatchNamespaces"), Pure]
   public static partial class IO {
     // η: T -> IO<T>
     /// <summary>TODO</summary>

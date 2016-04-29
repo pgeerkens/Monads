@@ -6,5 +6,6 @@ using Xunit;
 
 namespace MaybeMonadTests {
   class StateTests {
+        private StateTests() { }
   }
 }

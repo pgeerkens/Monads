@@ -12,6 +12,7 @@
     protected override void Dispose(bool disposing) {
       if (disposing && (components != null)) {
         components.Dispose();
+        _cts.Dispose();
       }
       base.Dispose(disposing);
     }

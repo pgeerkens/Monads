@@ -18,12 +18,12 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
       bool isExecuted4 = false;
       IO<int> one = () => { isExecuted1 = true; return 1; }; Contract.Assert(one != null);
       IO<int> two = () => { isExecuted2 = true; return 2; }; Contract.Assert(two != null);
-      Func<int, IO<int>> addOne = x => { isExecuted3 = true; return (x + 1).IO(); };
-      Func<int, Func<int, IO<int>>> add = x => y => { isExecuted4 = true; return (x + y).IO(); };
+      Func<int, IO<int>> addOne = x => { isExecuted3 = true; return (x + 1).ToIO(); };
+      Func<int, Func<int, IO<int>>> add = x => y => { isExecuted4 = true; return (x + y).ToIO(); };
       IO<IO<int>> query1 = from x in one
                            from y in two
                            from z in addOne(y)  //from z in addOne.Partial(y)()
-                           from _ in "abc".IO()
+                           from _ in "abc".ToIO()
                            let addOne2 = add(x)
                            select addOne2(z);
       Assert.False(isExecuted1); // Laziness.
@@ -43,13 +43,13 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
     }
 
    
-    static Func<int, IO<int>> addOne3 = x => (x + 1).IO();
-    static IO<int> M = 1.IO();
+    static Func<int, IO<int>> addOne3 = x => (x + 1).ToIO();
+    static IO<int> M = 1.ToIO();
 
     [MsTest.TestMethod()]
     public void MonadLaw1Test() {
       // Monad law 1: m.Monad().SelectMany(f) == f(m)
-      IO<int> left = 1.IO().SelectMany(addOne3);Contract.Assert(left  != null);
+      IO<int> left = 1.ToIO().SelectMany(addOne3);Contract.Assert(left  != null);
       IO<int> right = addOne3(1);               Contract.Assume(right != null);
       var lhs = left();
       var rhs = right();
@@ -59,7 +59,7 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
     [MsTest.TestMethod()]
     public void MonadLaw2Test() {
       // Monad law 2: M.SelectMany(Monad) == M
-      var left = M.SelectMany(m => m.IO());
+      var left = M.SelectMany(m => m.ToIO());
       var right = M;
       Assert.Equal(left(), right());
     }
@@ -67,7 +67,7 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
     [MsTest.TestMethod()]
     public void MonadLaw3Test() {
       // Monad law 3: M.SelectMany(f1).SelectMany(f2) == M.SelectMany(x => f1(x).SelectMany(f2))
-      Func<int, IO<int>> addTwo = x => (x + 2).IO();
+      Func<int, IO<int>> addTwo = x => (x + 2).ToIO();
       var left = M.SelectMany(addOne3).SelectMany(addTwo);
       var right = M.SelectMany(x => addOne3(x).SelectMany(addTwo));
       Assert.Equal(left(), right());
@@ -75,13 +75,13 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
       bool isExecuted5 = false;
       bool isExecuted6 = false;
       bool isExecuted7 = false;
-      Func<int, IO<int>> addOne4 = x => { isExecuted5 = true; return (x + 1).IO(); };
-      Func<string, IO<int>> length = x => { isExecuted6 = true; return (x.Length).IO(); };
+      Func<int, IO<int>> addOne4 = x => { isExecuted5 = true; return (x + 1).ToIO(); };
+      Func<string, IO<int>> length = x => { isExecuted6 = true; return (x.Length).ToIO(); };
       Func<int, Func<int, IO<string>>> f7 = x => y => 
-            {Contract.Ensures(Contract.Result<IO<string>>() != null); isExecuted7 = true; return (new string('a', x + y)).IO(); };
-      Func<int, Func<string, IO<string>>> query2 = a => b => ( from x in addOne4(a).IO()
-                                                               from y in length(b).IO()
-                                                               from z in 0.IO()
+            {Contract.Ensures(Contract.Result<IO<string>>() != null); isExecuted7 = true; return (new string('a', x + y)).ToIO(); };
+      Func<int, Func<string, IO<string>>> query2 = a => b => ( from x in addOne4(a).ToIO()
+                                                               from y in length(b).ToIO()
+                                                               from z in 0.ToIO()
                                                                select f7 (x()) (y())
                                                              ) ();
 

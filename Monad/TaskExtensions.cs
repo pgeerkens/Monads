@@ -103,7 +103,8 @@ namespace PGSolutions.Utilities.Monads {
         // ι: Unit -> Func<Unit>
     //    public static Task<Unit> Unit(Unit unit) { return unit.Task(); }
         public static Task<T> Task<T>(this T value) {
-          return System.Threading.Tasks.Task.FromResult(value);
+            Contract.Ensures(Contract.Result<System.Threading.Tasks.Task<T>>() != null);
+            return System.Threading.Tasks.Task.FromResult(value);
         }
 
         //// μ: Task<Task<T> => Task<T>
