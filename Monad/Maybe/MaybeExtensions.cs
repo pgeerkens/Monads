@@ -80,13 +80,11 @@ namespace PGSolutions.Utilities.Monads {
     }
 
     ///<summary>Tests value-equality, returning <b>Nothing</b> if either value doesn't exist.</summary>
-    public static Maybe<bool> AreEqual<T>(this Maybe<T> lhs, Maybe<T> rhs) {
-      return from l in lhs from r in rhs select l.Equals(r);
-    }
+    public static Maybe<bool> AreEqual<T>(this Maybe<T> lhs, Maybe<T> rhs) =>
+        from lv in lhs from rv in rhs select lv.Equals(rv);
 
     ///<summary>Tests value-inequality, returning <b>Nothing</b> if either value doesn't exist.</summary>
-    public static Maybe<bool> AreUnequal<T>(this Maybe<T> lhs, Maybe<T> rhs) {
-      return from l in lhs from r in rhs select ! l.Equals(r);
-    }
+    public static Maybe<bool> AreUnequal<T>(this Maybe<T> lhs, Maybe<T> rhs) =>
+        from lv in lhs from rv in rhs select ! lv.Equals(rv);
   }
 }
