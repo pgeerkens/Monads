@@ -194,7 +194,7 @@ namespace PGSolutions.Utilities.Monads {
         [Pure]
         public override bool Equals(object obj) { 
             var other = obj as Maybe<T>?;
-            return other.HasValue  &&  other.Equals(obj);
+            return other.HasValue && Equals(other.Value);
         }
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
