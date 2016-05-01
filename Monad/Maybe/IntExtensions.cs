@@ -45,19 +45,19 @@ namespace PGSolutions.Utilities.Monads {
       denominators.ContractedNotNull("denominators");
 
       var intermediate = @this.ToMaybe();
-      foreach (var d in denominators) intermediate = intermediate.Bind(v => v.Div(d));
+      foreach (var d in denominators) intermediate = intermediate.SelectMany(v => v.Div(d));
       return intermediate;
     }
 
     [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Div")]
     public static Maybe<int> Div(this Maybe<int> numerator, Maybe<int> denominator) {
-      return numerator.Bind(n => denominator.Bind(d => n.Div(d)));
+      return numerator.SelectMany(n => denominator.SelectMany(d => n.Div(d)));
     }
     public static Maybe<int> Add(this Maybe<int> numerator, Maybe<int> denominator) {
-      return numerator.Bind(n => denominator.Bind(d => n.Add(d)));
+      return numerator.SelectMany(n => denominator.SelectMany(d => n.Add(d)));
     }
     public static Maybe<int> Sub(this Maybe<int> numerator, Maybe<int> denominator) {
-      return numerator.Bind(n => denominator.Bind(d => n.Sub(d)));
+      return numerator.SelectMany(n => denominator.SelectMany(d => n.Sub(d)));
     }
 
     [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Div")]
@@ -81,7 +81,7 @@ namespace PGSolutions.Utilities.Monads {
     }
     public static Maybe<int> Sub(this int a, int b) {
       return b != int.MinValue ? a.Add(-b)
-                       : a < 0 ? b.Add(a).Bind<int>(e => -e)
+                       : a < 0 ? b.Add(a).SelectMany<int>(e => -e)
                                : Maybe<int>.Nothing;
     }
   }

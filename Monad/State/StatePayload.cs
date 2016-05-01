@@ -112,7 +112,7 @@ namespace PGSolutions.Utilities.Monads {
         var other = (obj as StatePayload<TState, TValue>?).ToMaybe();
 #endif
         var @this = this;
-        return other.Bind<bool>(o => o.Equals(@this)).Extract();
+        return other.SelectMany<bool>(o => o.Equals(@this)) | false;
         //return other != null  &&  this.Equals(other);
     }
 

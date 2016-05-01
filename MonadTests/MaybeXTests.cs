@@ -115,8 +115,7 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
         public void ExcludedMiddleTest1() {
             Assert.Equal("George/",
                     string.Join("/",  from e in data
-                                      let s = e.AreNonNullEqual("George")
-                                      where s.Extract()
+                                      where e.AreNonNullEqual("George") | false
                                       select e.ToNothingString()
                                ) + "/" );
         }
@@ -124,8 +123,7 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
         public void ExcludedMiddleTest2() {
             Assert.Equal("Fred/Ron/Ginny/",
                     string.Join("/",  from e in data
-                                      let s = e.AreNonNullUnequal("George")
-                                      where s.Extract()
+                                      where e.AreNonNullUnequal("George") | false
                                       select e.ToNothingString()
                                ) + "/" );
         }
@@ -133,8 +131,7 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
         public void ExcludedMiddleTest3() {
             Assert.Equal("Nothing/",
                     string.Join("/",  from e in data
-                                      let s = e.AreNonNullUnequal("George")
-                                      where ! s.HasValue
+                                      where ! e.AreNonNullUnequal("George").HasValue
                                       select e.ToNothingString()
                                 ) + "/" );
         }
@@ -143,8 +140,8 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
         public void MemberAccessTestNotNothing() {
             Assert.Equal("Fred/Ron/Ginny/",
                     string.Join("/",  from e in data
-                                        where e.Bind<string>(s=>s).AreNonNullUnequal("George").Extract()
-                                        select e.ToNothingString()
+                                      where e.SelectMany<string>(s=>s).AreNonNullUnequal("George") | false
+                                      select e.ToNothingString()
                                 ) + "/" );
         }
 
@@ -200,10 +197,9 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
         [Fact][MsTest.TestMethod]
         public void WesDyerTest3() {
             Assert.Equal("Nothing",
-                    ( "Fred".ToMaybeX()
-                        .SelectMany(x => MaybeX<string>.Nothing,  (x,y) => new {x, y})
-                        .Select(z => z.x + z.y )
-                    ).ToNothingString() );
+                    "Fred".ToMaybeX().SelectMany(x => MaybeX<string>.Nothing, (x, y) => new { x, y })
+                                     .Select(z => z.x + z.y)
+                                     .ToNothingString() );
         }
 
         /// <summary>Equivalency of chaining in "Fluent" and then "Comprehension" syntax: all valid</summary>
@@ -213,13 +209,12 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
         [Fact][MsTest.TestMethod]
         public void CompoundLinqEquivalenceTest() {
             Assert.Equal(
-                    ( "Fred".ToMaybeX()
-                        .SelectMany(x => " Weasley".ToMaybeX(),  (x,y) => new {x, y})
-                        .Select(z => z.x + z.y )
-                    ).ToNothingString(),
+                    "Fred".ToMaybeX().SelectMany(x => " Weasley".ToMaybeX(), (x, y) => new { x, y })
+                                     .Select(z => z.x + z.y )
+                                     .ToNothingString(),
                     ( from x in "Fred".ToMaybeX()
-                        from y in " Weasley".ToMaybeX()
-                        select x + y
+                      from y in " Weasley".ToMaybeX()
+                      select x + y
                     ).ToNothingString() );
         }
 
@@ -231,7 +226,7 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
         public void MonadLaw1MaybeX() {
             const string description = "Monad law 1: m.Monad().Bind(f) == f(m)";
 
-            var lhs = "1".ToMaybeX().Bind(addOne);
+            var lhs = "1".ToMaybeX().SelectMany(addOne);
             var rhs = addOne("1");
             Assert.True(lhs == rhs, description);
         }
@@ -242,7 +237,7 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
             const string description = "Monad law 2: M.Bind(Monad) == M";
 
             var M   = " four".ToMaybeX();
-            var lhs = M.Bind(i => i.ToMaybeX());
+            var lhs = M.SelectMany(i => i.ToMaybeX());
             var rhs = M;
             Assert.True(lhs == rhs, description);
         }
@@ -254,8 +249,8 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
 
             //Func<string,MaybeX<string>> addOne = x => x + 1;
             var M   = " four".ToMaybeX();
-            var lhs = M.Bind(addOne).Bind(addEight);
-            var rhs = M.Bind(x => addOne(x).Bind(addEight));
+            var lhs = M.SelectMany(addOne).SelectMany(addEight);
+            var rhs = M.SelectMany(x => addOne(x).SelectMany(addEight));
             Assert.True(lhs == rhs, description);
         }
 

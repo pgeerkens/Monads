@@ -65,7 +65,7 @@ namespace PGSolutions.Utilities.Monads {
           };
       }
 
-      /// <summary>Generates an unending stream of successive StatePayload&amp;TState,TValue> objects.</summary>
+      /// <summary>Generates an unending stream of successive StatePayload&amp;TState,T> objects.</summary>
       public static IEnumerable<StatePayload<TState,TValue>>  Enumerate<TState,TValue>( this
           State<TState,TValue> @this,
           TState startState
@@ -144,11 +144,11 @@ namespace PGSolutions.Utilities.Monads {
       }
 
 //      /// <summary>TODO</summary>
-//      public static State<TState,Maybe<TValue>>         LiftMaybe<TState,TValue>( this
-//          Maybe<TValue> @this
+//      public static State<TState,Maybe<T>>         LiftMaybe<TState,T>( this
+//          Maybe<T> @this
 //      ) {
-//          Contract.Ensures(Contract.Result<State<TState,Maybe<TValue>>>() != null);
-//          return s => new StatePayload<TState,Maybe<TValue>>(s, Maybe.Bind(@this,x=>x.ToMaybe()));
+//          Contract.Ensures(Contract.Result<State<TState,Maybe<T>>>() != null);
+//          return s => new StatePayload<TState,Maybe<T>>(s, Maybe.Bind(@this,x=>x.ToMaybe()));
 //      }
 
       /// <summary>TODO</summary>

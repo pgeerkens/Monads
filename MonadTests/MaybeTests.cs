@@ -66,155 +66,172 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
   //  }
   //}
 
-  [MsTest.TestClass] [ExcludeFromCodeCoverage]
-  public class ExecutionTests {
+    [MsTest.TestClass] [ExcludeFromCodeCoverage]
+    public class ExecutionTests {
 
-    static IList<Maybe<String>> data = new List<Maybe<String>>()
-                      { "Fred", "George", null, "Ron", "Ginny" }.AsReadOnly();
+        static IList<Maybe<String>> data = new List<Maybe<String>>()
+                        { "Fred", "George", null, "Ron", "Ginny" }.AsReadOnly();
 
-    [Fact][MsTest.TestMethod]
-    public void BasicTest1() {
-        var actual = string.Join("/", from e in data
-                                      select e.ToString()
-                                ) + "/";
-        Contract.Assert(actual != null);
-        Xunit.Assert.Equal("Fred/George//Ron/Ginny/", actual);
-    }
-    [Fact][MsTest.TestMethod]
-    public void BasicTest2() {
-        var actual = string.Join("/", from e in data
-                                      select e.ToNothingString()
-                                ) + "/";
-        Contract.Assert(actual != null);
-        Xunit.Assert.Equal("Fred/George/Nothing/Ron/Ginny/",actual);
-    }
-    /// <summary>Equivalent code in first "Fluent" and then "Comprehension" syntax:</summary>
-    [Fact][MsTest.TestMethod]
-    public void SimpleLinqEquivalenceTest() {
-        var expected= string.Join("/",data.Where (e => e.HasValue).
-                                      Select(e => e.ToString())
-                                ) + "/";
-        var actual = string.Join("/", from e in data
-                                      where e.HasValue
-                                      select e.ToString()
-                                ) + "/";
-        //Contract.Assert(expected != null);  // redundant
-        Contract.Assert(actual != null);
-        Xunit.Assert.Equal(expected, actual);
-    }
-    [Fact][MsTest.TestMethod]
-    public void InequalityTest() {
-        var actual = string.Join("/", from e in data
-                                      where e != "George"
-                                      select e.ToNothingString()
-                                ) + "/";
-        Contract.Assert(actual != null);
-        Xunit.Assert.Equal("Fred/Ron/Ginny/", actual);
-    }
+        [Fact][MsTest.TestMethod]
+        public void BasicTest1() {
+            var actual = string.Join("/", from e in data
+                                            select e.ToString()
+                                    ) + "/";
+            Contract.Assert(actual != null);
+            Assert.Equal("Fred/George//Ron/Ginny/", actual);
+        }
+        [Fact][MsTest.TestMethod]
+        public void BasicTest2() {
+            var actual = string.Join("/", from e in data
+                                            select e.ToNothingString()
+                                    ) + "/";
+            Contract.Assert(actual != null);
+            Assert.Equal("Fred/George/Nothing/Ron/Ginny/",actual);
+        }
+        /// <summary>Equivalent code in first "Fluent" and then "Comprehension" syntax:</summary>
+        [Fact][MsTest.TestMethod]
+        public void SimpleLinqEquivalenceTest() {
+            var expected= string.Join("/",data.Where (e => e.HasValue).
+                                            Select(e => e.ToString())
+                                    ) + "/";
+            var actual = string.Join("/", from e in data
+                                            where e.HasValue
+                                            select e.ToString()
+                                    ) + "/";
+            //Contract.Assert(expected != null);  // redundant
+            Contract.Assert(actual != null);
+            Assert.Equal(expected, actual);
+        }
 
-    [Fact][MsTest.TestMethod]
-    public void ExcludedMiddleTest1() {
-        string george = string.Copy("George");
-        var actual = string.Join("/", from e in data
-                                      where e == george  ||  e != george
-                                      select e.ToNothingString()
-                                ) + "/";
-        Contract.Assert(actual != null);
-        Xunit.Assert.Equal("Fred/George/Ron/Ginny/", actual);
-    }
-    [Fact][MsTest.TestMethod]
-    public void ExcludedMiddleTest2() {
-        var actual = string.Join("/", from e in data
-                                      where ! (e == "George"  ||  e != "George")
-                                      select e.ToNothingString()
-                                ) + "/";
-        Contract.Assert(actual != null);
-        Xunit.Assert.Equal("Nothing/", actual);
-    }
-    [Fact][MsTest.TestMethod]
-    public void ExcludedMiddleTest3() {
-        var actual = string.Join("/", from e in data
-                                      where e.AreEqual("George").Extract()
-                                      select e.ToNothingString()
-                                ) + "/";
-        Contract.Assert(actual != null);
-        Xunit.Assert.Equal("George/", actual);
-    }
-    [Fact][MsTest.TestMethod]
-    public void ExcludedMiddleTest4() {
-        var actual = string.Join("/", from e in data
-                                      where e.AreUnequal("George").Extract()
-                                      select e.ToNothingString()
-                                ) + "/";
-        Contract.Assert(actual != null);
-        Xunit.Assert.Equal("Fred/Ron/Ginny/", actual);
-    }
-    [Fact][MsTest.TestMethod]
-    public void ExcludedMiddleTest5() {
-        var actual = string.Join("/", from e in data
-                                  where ! e.AreUnequal("George").HasValue
-                                  select e.ToNothingString()
-                                ) + "/";
-        Contract.Assert(actual != null);
-        Xunit.Assert.Equal("Nothing/", actual);
-    }
+        [Fact]
+        [MsTest.TestMethod]
+        public void ValueEqualityTest1() {
+            string george = string.Copy("George");
+            Assert.Equal(george, "George");
+        }
+        [Fact]
+        [MsTest.TestMethod]
+        public void ValueEqualityTest2() {
+            string george = string.Copy("George");
+            Assert.Equal("George/",
+                    string.Join("/", from e in data
+                                     let s = from item in e select item
+                                     where s == george
+                                     select e.ToNothingString()
+                                ) + "/");
+        }
+        [Fact]
+        [MsTest.TestMethod]
+        public void ValueEqualityTest3() {
+            string george = string.Copy("George");
+            Assert.Equal("Fred/Nothing/Ron/Ginny/",
+                string.Join("/", from e in data
+                                 let s = from item in e select item
+                                 where s != george
+                                 select e.ToNothingString()
+                            ) + "/");
+        }
 
+        [Fact]
+        [MsTest.TestMethod]
+        public void IncludedMiddleTest1() {
+            Assert.Equal("George/",
+                    string.Join("/", from e in data
+                                     where e == "George"
+                                     select e.ToNothingString()
+                               ) + "/");
+        }
+        [Fact]
+        [MsTest.TestMethod]
+        public void IncludedMiddleTest2() {
+            Assert.Equal("Fred/Nothing/Ron/Ginny/",
+                    string.Join("/", from e in data
+                                     where e != "George"
+                                     select e.ToNothingString()
+                               ) + "/");
+        }
 
-    /// <summary>Chaining with LINQ Comprehension syntax: all valid</summary>
-    /// <remarks>
-    /// after Wes Dyer: http://blogs.msdn.com/b/wesdyer/archive/2008/01/11/the-marvels-of-monads.aspx
-    /// </remarks>
-    [Fact][MsTest.TestMethod]
-    public void WesDyerTest1() {
-        Xunit.Assert.Equal("12",
+        [Fact]
+        [MsTest.TestMethod]
+        public void ExcludedMiddleTest1() {
+            Assert.Equal("George/",
+                    string.Join("/", from e in data
+                                     where e.AreNonNullEqual("George") | false
+                                     select e.ToNothingString()
+                               ) + "/");
+        }
+        [Fact]
+        [MsTest.TestMethod]
+        public void ExcludedMiddleTest2() {
+            Assert.Equal("Fred/Ron/Ginny/",
+                    string.Join("/", from e in data
+                                     where e.AreNonNullUnequal("George") | false
+                                     select e.ToNothingString()
+                               ) + "/");
+        }
+        [Fact]
+        [MsTest.TestMethod]
+        public void ExcludedMiddleTest3() {
+            Assert.Equal("Nothing/",
+                    string.Join("/", from e in data
+                                     where !e.AreNonNullUnequal("George").HasValue
+                                     select e.ToNothingString()
+                                ) + "/");
+        }
+
+        /// <summary>Chaining with LINQ Comprehension syntax: all valid</summary>
+        /// <remarks>
+        /// after Wes Dyer: http://blogs.msdn.com/b/wesdyer/archive/2008/01/11/the-marvels-of-monads.aspx
+        /// </remarks>
+        [Fact][MsTest.TestMethod]
+        public void WesDyerTest1() {
+            Assert.Equal("12",
+                    ( from x in 5.ToMaybe()
+                      from y in 7.ToMaybe()
+                      select x + y ).ToNothingString() );
+        }
+
+        /// <summary>Chaining with LINQ Comprehension syntax: one invalid</summary>
+        /// <remarks>
+        /// after Wes Dyer: http://blogs.msdn.com/b/wesdyer/archive/2008/01/11/the-marvels-of-monads.aspx
+        /// </remarks>
+        [Fact][MsTest.TestMethod]
+        public void WesDyerTest2() {
+            Assert.Equal("Nothing",
+                    ( from x in 5.ToMaybe()
+                      from y in Maybe<int>.Nothing
+                      select x + y
+                    ).ToNothingString() );
+        }
+
+        /// <summary>Chaining with LINQ Fluent syntax: one invalid</summary>
+        /// <remarks>
+        /// after Wes Dyer: http://blogs.msdn.com/b/wesdyer/archive/2008/01/11/the-marvels-of-monads.aspx
+        /// </remarks>
+        [Fact][MsTest.TestMethod]
+        public void WesDyerTest3() {
+            Assert.Equal("Nothing",
+                5.ToMaybe().SelectMany(x => Maybe<int>.Nothing, (x, y) => new { x, y })
+                           .Select(z => z.x + z.y )
+                           .ToNothingString() );
+        }
+
+        /// <summary>Equivalency of chaining in "Fluent" and then "Comprehension" syntax: all valid</summary>
+        /// <remarks>
+        /// after Wes Dyer: http://blogs.msdn.com/b/wesdyer/archive/2008/01/11/the-marvels-of-monads.aspx
+        /// </remarks>
+        [Fact][MsTest.TestMethod]
+        public void CompoundLinqEquivalenceTest() {
+            Assert.Equal(
+                5.ToMaybe().SelectMany(x => 7.ToMaybe(), (x, y) => new { x, y })
+                           .Select(z => z.x + z.y )
+                           .ToNothingString(),
                 ( from x in 5.ToMaybe()
                   from y in 7.ToMaybe()
-                  select x + y ).ToNothingString() );
-    }
-
-    /// <summary>Chaining with LINQ Comprehension syntax: one invalid</summary>
-    /// <remarks>
-    /// after Wes Dyer: http://blogs.msdn.com/b/wesdyer/archive/2008/01/11/the-marvels-of-monads.aspx
-    /// </remarks>
-    [Fact][MsTest.TestMethod]
-    public void WesDyerTest2() {
-        Xunit.Assert.Equal("Nothing",
-                ( from x in 5.ToMaybe()
-                  from y in Maybe<int>.Nothing
                   select x + y
                 ).ToNothingString() );
+        }
     }
-
-    /// <summary>Chaining with LINQ Fluent syntax: one invalid</summary>
-    /// <remarks>
-    /// after Wes Dyer: http://blogs.msdn.com/b/wesdyer/archive/2008/01/11/the-marvels-of-monads.aspx
-    /// </remarks>
-    [Fact][MsTest.TestMethod]
-    public void WesDyerTest3() {
-        Xunit.Assert.Equal("Nothing",
-                ( 5.ToMaybe()
-                   .SelectMany(x => Maybe<int>.Nothing,  (x,y) => new {x, y})
-                   .Select(z => z.x + z.y )
-                ).ToNothingString() );
-    }
-
-    /// <summary>Equivalency of chaining in "Fluent" and then "Comprehension" syntax: all valid</summary>
-    /// <remarks>
-    /// after Wes Dyer: http://blogs.msdn.com/b/wesdyer/archive/2008/01/11/the-marvels-of-monads.aspx
-    /// </remarks>
-    [Fact][MsTest.TestMethod]
-    public void CompoundLinqEquivalenceTest() {
-        Xunit.Assert.Equal(
-                ( 5.ToMaybe()
-                   .SelectMany(x => 7.ToMaybe(),  (x,y) => new {x, y})
-                   .Select(z => z.x + z.y )
-                ).ToNothingString(),
-                ( from x in 5.ToMaybe()
-                  from y in 7.ToMaybe()
-                  select x + y
-                ).ToNothingString() );
-    }
-  }
 
   /// <remarks>
   /// after Mike Hadlow: http://mikehadlow.blogspot.ca/2011/01/monads-in-c-5-maybe.html
@@ -304,7 +321,7 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
       const string description = "Monad law 1: m.Monad().Bind(f) == f(m)";
 
       Func<int,Maybe<int>> addOne = x => x + 1;
-      var lhs = 1.ToMaybe().Bind(addOne);
+      var lhs = 1.ToMaybe().SelectMany(addOne);
       var rhs = addOne(1);
       Assert.True(lhs == rhs, description);
     }
@@ -315,7 +332,7 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
       const string description = "Monad law 2: M.Bind(Monad) == M";
 
       var M   = 4.ToMaybe();
-      var lhs = M.Bind(i => i.ToMaybe());
+      var lhs = M.SelectMany(i => i.ToMaybe());
       var rhs = M;
       Assert.True(lhs == rhs, description);
     }
@@ -328,8 +345,8 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
       Func<int,Maybe<int>> addOne = x => x + 1;
       Func<int, Maybe<int>> addEight = x => x + 8;
       var M   = 4.ToMaybe();
-      var lhs = M.Bind(addOne).Bind(addEight);
-      var rhs = M.Bind(x => addOne(x).Bind(addEight));
+      var lhs = M.SelectMany(addOne).SelectMany(addEight);
+      var rhs = M.SelectMany(x => addOne(x).SelectMany(addEight));
       Assert.True(lhs == rhs, description);
     }
   }

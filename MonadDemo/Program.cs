@@ -57,7 +57,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
 
         var start = new GcdStart(40,1024);
   #if true
-        Gcd_S4.Best.Run(start).ToMaybe().Bind( result => {
+        Gcd_S4.Best.Run(start).ToMaybe().SelectMany( result => {
             var value   = result.Value;
             var title = Gcd_S4.GetTitle(Gcd_S4.Best.Run);
             Console.WriteLine("    GCD = {0} for {1} - {2}", value.Gcd, start, title);
@@ -113,10 +113,9 @@ namespace PGSolutions.Utilities.Monads.Demos {
                              select x + y
                            ).ToNothingString() );
 
-        Console.WriteLine( ( 5.ToMaybe()
-                              .SelectMany(x => Maybe<int>.Nothing,  (x,y) => new {x, y})
-                              .Select(z => z.x + z.y )
-                           ).ToNothingString() );
+                Console.WriteLine(5.ToMaybe().SelectMany(x => Maybe<int>.Nothing, (x, y) => new { x, y })
+                                             .Select(z => z.x + z.y )
+                                             .ToNothingString() );
       }
       Console.WriteLine("_______________________");
     }
@@ -146,7 +145,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
 
     public static string ToNothingString<T>(this Maybe<T> @this) {
       Contract.Ensures(Contract.Result<string>() != null);
-      return @this.Bind<string>(v => v.ToString()) | "Nothing";
+      return @this.SelectMany<string>(v => v.ToString()) | "Nothing";
     }
 
         [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String)")]
