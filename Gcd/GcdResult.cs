@@ -33,46 +33,46 @@ using System.Globalization;
 using System.Linq;
 
 namespace PGSolutions.Utilities.Monads.Demos {
-  /// <summary>TODO</summary>
-  public struct GcdResult : IEquatable<GcdResult> {
     /// <summary>TODO</summary>
-    public GcdResult(int gcd) {
-        _gcd    = gcd;
+    public struct GcdResult : IEquatable<GcdResult> {
+        /// <summary>TODO</summary>
+        public GcdResult(int gcd) {
+            _gcd    = gcd;
+        }
+
+        /// <summary>TODO</summary>
+        public int      Gcd     { get {return _gcd;  } } private readonly int      _gcd;
+
+        #region Value Equality with IEquatable<T>.
+        static readonly CultureInfo _culture = CultureInfo.CurrentUICulture;
+
+        /// <inheritdoc/>
+        public override string ToString() { 
+            return String.Format(_culture,"    GCD = {0}",Gcd); //, Title);
+        }
+
+        /// <inheritdoc/>
+        [Pure]
+        public override bool Equals(object obj) {
+            var other = obj as GcdResult?;
+            return other.HasValue && other.Equals(obj);
+        }
+
+        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
+        [Pure]
+        public bool Equals(GcdResult other) { return this.Gcd == other.Gcd; }
+
+        /// <inheritdoc/>
+        [Pure]
+        public override int GetHashCode() { unchecked { return Gcd.GetHashCode(); } }
+
+        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
+        [Pure]
+        public static bool operator ==(GcdResult lhs, GcdResult rhs) { return lhs.Equals(rhs); }
+
+        /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
+        [Pure]
+        public static bool operator !=(GcdResult lhs, GcdResult rhs) { return !lhs.Equals(rhs); }
+        #endregion
     }
-
-    /// <summary>TODO</summary>
-    public int      Gcd     { get {return _gcd;  } } private readonly int      _gcd;
-
-    #region Value Equality with IEquatable<T>.
-    static readonly CultureInfo _culture = CultureInfo.CurrentUICulture;
-
-    /// <inheritdoc/>
-    public override string ToString() { 
-        return String.Format(_culture,"    GCD = {0}",Gcd); //, Title);
-    }
-
-    /// <inheritdoc/>
-    [Pure]
-    public override bool Equals(object obj) {
-      var other = obj as GcdResult?;
-      return other.HasValue && other.Equals(obj);
-    }
-
-    /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-    [Pure]
-    public bool Equals(GcdResult other) { return this.Gcd == other.Gcd; }
-
-    /// <inheritdoc/>
-    [Pure]
-    public override int GetHashCode() { unchecked { return Gcd.GetHashCode(); } }
-
-    /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-    [Pure]
-    public static bool operator ==(GcdResult lhs, GcdResult rhs) { return lhs.Equals(rhs); }
-
-    /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
-    [Pure]
-    public static bool operator !=(GcdResult lhs, GcdResult rhs) { return !lhs.Equals(rhs); }
-    #endregion
-  }
 }

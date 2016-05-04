@@ -40,43 +40,43 @@ namespace PGSolutions.Utilities.Monads {
   [Pure]
   public static class StateExtensions {
 
-    /// <summary>LINQ-compatible alias for <b>liftM/fmap</b>: (liftM): liftM f m = m >>= (\x -> return (f x)).</summary>
-    public static State<TState,TResult>           Select<TState,TValue,TResult>( this
-        State<TState, TValue> @this,
-        Func<TValue, TResult> projector
-    ) {
-        @this.ContractedNotNull("this");
-        projector.ContractedNotNull("projector");
-        Contract.Ensures(Contract.Result<State<TState,TResult>>() != null);
+    ///// <summary>LINQ-compatible alias for <b>liftM/fmap</b>: (liftM): liftM f m = m >>= (\x -> return (f x)).</summary>
+    //public static State<TState,TResult>           Select<TState,TValue,TResult>( this
+    //    State<TState, TValue> @this,
+    //    Func<TValue, TResult> projector
+    //) {
+    //    @this.ContractedNotNull("this");
+    //    projector.ContractedNotNull("projector");
+    //    Contract.Ensures(Contract.Result<State<TState,TResult>>() != null);
 
-        return @this.LiftM(projector);
-    }
+    //    return State.Select(@this, projector);
+    //}
 
-    /// <summary>LINQ-compatible alias for <b>Bind</b>: (>>=): m a -> (a -> m b) -> m b.</summary>
-    public static State<TState,TResult>           SelectMany<TState,TValue,TResult>( this
-        State<TState, TValue> @this,
-        Func<StatePayload<TState,TValue>, State<TState,TResult>> selector
-    ) {
-        @this.ContractedNotNull("this");
-        selector.ContractedNotNull("selector");
-        Contract.Ensures(Contract.Result<State<TState,TResult>>() != null);
+    ///// <summary>LINQ-compatible alias for <b>Bind</b>: (>>=): m a -> (a -> m b) -> m b.</summary>
+    //public static State<TState,TResult>           SelectMany<TState,TValue,TResult>( this
+    //    State<TState, TValue> @this,
+    //    Func<StatePayload<TState,TValue>, State<TState,TResult>> selector
+    //) {
+    //    @this.ContractedNotNull("this");
+    //    selector.ContractedNotNull("selector");
+    //    Contract.Ensures(Contract.Result<State<TState,TResult>>() != null);
 
-        return @this.Bind(selector);
-    }
+    //    return State.SelectMany(@this, selector);
+    //}
 
-    /// <summary>LINQ-compatible alias for ?join?.</summary>
-    public static State<TState,TResult>           SelectMany<TState,TValue,T,TResult>( this
-        State<TState, TValue> @this,
-        Func<StatePayload<TState,TValue>, State<TState,T>> selector,
-        Func<TValue,T, TResult> projector
-    ) {
-        @this.ContractedNotNull("this");
-        selector.ContractedNotNull("selector");
-        projector.ContractedNotNull("projector");
-        Contract.Ensures(Contract.Result<State<TState,TResult>>() != null);
+    ///// <summary>LINQ-compatible alias for ?join?.</summary>
+    //public static State<TState,TResult>           SelectMany<TState,TValue,T,TResult>( this
+    //    State<TState, TValue> @this,
+    //    Func<StatePayload<TState,TValue>, State<TState,T>> selector,
+    //    Func<TValue,T, TResult> projector
+    //) {
+    //    @this.ContractedNotNull("this");
+    //    selector.ContractedNotNull("selector");
+    //    projector.ContractedNotNull("projector");
+    //    Contract.Ensures(Contract.Result<State<TState,TResult>>() != null);
 
-        return @this.Flatten(selector,projector);
-    }
+    //    return State.SelectMany(@this, selector, projector);
+    //}
 
     /// <summary>Implementation of <b>compose</b>: (>=>): f >=> g = \x -> (f x >>= g). </summary>
     /// <remarks> Optimized implementation of:

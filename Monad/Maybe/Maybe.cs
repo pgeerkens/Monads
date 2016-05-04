@@ -84,7 +84,7 @@ namespace PGSolutions.Utilities.Monads {
             selector.ContractedNotNull("selector");
 
             Maybe<TResult>.Nothing.AssumeInvariant();
-            return ! HasValue  ?  Maybe<TResult>.Nothing  :  selector(Value);
+            return ! HasValue  ?  Maybe<TResult>.Nothing  :  selector(_value);
         }
 
         /// <summary>LINQ-compatible implementation of Flatten.</summary>
@@ -97,7 +97,7 @@ namespace PGSolutions.Utilities.Monads {
 
             var @this = this;
             return !HasValue ? Maybe<TResult>.Nothing
-                             : selector(Value).Select(e => projector(@this._value, e));
+                             : selector(_value).Select(e => projector(@this._value, e));
         }
 
         ///<summary>Extract value of the Maybe&lt;T>, substituting 
@@ -107,7 +107,7 @@ namespace PGSolutions.Utilities.Monads {
             defaultValue.ContractedNotNull("defaultValue");
             Contract.Ensures(Contract.Result<T>() != null);
 
-            return ! HasValue  ?  defaultValue  :  Value;
+            return ! HasValue  ?  defaultValue  : _value;
         }
         ///<summary>Extract value of the Maybe&lt;T>, substituting 
         ///<paramref name="defaultValue"/> as needed.</summary>
@@ -125,7 +125,7 @@ namespace PGSolutions.Utilities.Monads {
         [ContractInvariantMethod]
         [Pure]
         private void ObjectInvariant() {
-            Contract.Invariant( HasValue == (Value != null) );
+            Contract.Invariant( HasValue == (_value != null) );
             Contract.Invariant( this != null );
             Contract.Invariant((_value != null)  ||  ! _valueIsStruct);
         }
@@ -149,31 +149,21 @@ namespace PGSolutions.Utilities.Monads {
         ) {
             maybe.AssumeInvariant();
             Maybe<TValue>.Nothing.AssumeInvariant();
-            return ! maybe.HasValue ? Maybe<TValue>.Nothing : maybe.Value;
+            return ! maybe.HasValue ? Maybe<TValue>.Nothing : maybe._value;
         }
 
         /// <summary>Re-wraps a <typeparamref name="TValue"/> from a Maybe to a MaybeX.</summary>
         public MaybeX<TValue>      ToMaybeX<TValue>(Maybe<TValue> maybe
         ) where TValue : class {
-            //@this.ContractedNotNull("this");
             Contract.Ensures(Contract.Result<MaybeX<TValue>>() != null); 
 
             maybe.AssumeInvariant();
             MaybeX<TValue>.Nothing.AssumeInvariant();
-            return ! maybe.HasValue ? MaybeX<TValue>.Nothing : maybe.Value;
+            return ! maybe.HasValue ? MaybeX<TValue>.Nothing : maybe._value;
         }
 
         ///<summary>If this Maybe&lt;T> has a value, returns it.</summary>
-        private  T Value    {
-            [Pure]get { Contract.Requires(HasValue);
-                        Contract.Ensures((Contract.Result<T>()==null) == (_value==null));  
-                        return _value;}
-        } readonly   T  _value;
-
-        [Pure]
-        public static implicit operator Maybe<T>(Maybe<Maybe<T>> value) {
-            return value.HasValue && value.Value.HasValue ? value.Value : Maybe<T>.Nothing;
-        }
+        private readonly   T  _value;
 
         ///<summary>Returns the type of the underlying type &lt.TValue>.</summary>
         public Type GetUnderlyingType {
@@ -199,13 +189,13 @@ namespace PGSolutions.Utilities.Monads {
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]
-        public bool Equals(Maybe<T> rhs) =>
-               ( ! this.HasValue  &&  ! rhs.HasValue )
-            || ( this.HasValue  &&  rhs.HasValue  &&  _equals(this._value, rhs._value) );
+        public bool Equals(Maybe<T> other) =>
+               ( ! HasValue  &&  ! other.HasValue )
+            || ( HasValue  &&  other.HasValue  &&  _equals(_value, other._value) );
 
         /// <inheritdoc/>
         [Pure]
-        public override int GetHashCode() { return HasValue ? Value.GetHashCode() : 0; }
+        public override int GetHashCode() { return HasValue ? _value.GetHashCode() : 0; }
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]

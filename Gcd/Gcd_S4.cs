@@ -32,6 +32,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Reflection;
 
 using PGSolutions.Utilities.Monads;
 
@@ -41,8 +42,6 @@ namespace PGSolutions.Utilities.Monads.Demos {
     using StateInt     = State<GcdStart, int>;
     using PayloadInt   = StatePayload<GcdStart, int>;
     using StateRes     = State<GcdStart, GcdResult>;
-
-    using BindFlags    = System.Reflection.BindingFlags;
 
     /// <summary>TODO</summary>
     public interface ITest {
@@ -56,66 +55,66 @@ namespace PGSolutions.Utilities.Monads.Demos {
     [SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
     [Pure]
     public static class Gcd_S4 { // Beware! - These must be declared & initialized in this order
-      /// <summary>TODO</summary>
-      public static IEnumerable<ITest> GetTests(bool getAll) {
-          Contract.Ensures(Contract.Result<IEnumerable<ITest>>() != null);
+        /// <summary>TODO</summary>
+        public static IEnumerable<ITest> GetTests(bool getAll) {
+            Contract.Ensures(Contract.Result<IEnumerable<ITest>>() != null);
 
-          var list =  ( from test2 in new List<StateRes>() {
-                          Gcd_S4.Imperative.Run1, Gcd_S4.Imperative.Run2,
-                          Gcd_S4.Haskell.Run1,    Gcd_S4.Haskell.Run2,  Gcd_S4.Haskell.Run3,
-                          Gcd_S4.Linq.Run1,       Gcd_S4.Linq.Run2,     Gcd_S4.Linq.Run3,
-                          Gcd_S4.Best.Run
-                        }
-                        select new Test(test2,GetTitle(test2)) as ITest
-                      );
+            var list =  ( from test2 in new List<StateRes>() {
+                             Imperative.Run1, Imperative.Run2,
+                             Haskell.Run1,    Haskell.Run2,  Haskell.Run3,
+                             Linq.Run1,       Linq.Run2,     Linq.Run3,
+                             Best.Run
+                           }
+                          select new Test(test2,GetTitle(test2)) as ITest
+                        );
 
-          if ( ! getAll) 
-              list = ( from item in list
-                       where item.Transform != Gcd_S4.Haskell.Run1
-                          && item.Transform != Gcd_S4.Haskell.Run2
-                          && item.Transform != Gcd_S4.Linq.Run1
-                          && item.Transform != Gcd_S4.Linq.Run2
-                       select item);
+            if ( ! getAll) 
+                list = ( from item in list
+                         where item.Transform != Haskell.Run1
+                            && item.Transform != Haskell.Run2
+                            && item.Transform != Linq.Run1
+                            && item.Transform != Linq.Run2
+                         select item);
 
-          return list.ToList().AsReadOnly();
-      }
+            return list.ToList().AsReadOnly();
+        }
 
-      /// <summary>TODO</summary>
-      public static string GetTitle(StateRes transform) {
-          const BindFlags bindFlags = BindFlags.Static | BindFlags.NonPublic | BindFlags.Public;
+        /// <summary>TODO</summary>
+        public static string GetTitle(StateRes transform) {
+            const BindingFlags bindFlags = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
 
-          transform.ContractedNotNull("transform");
-          Contract.Ensures(Contract.Result<string>() != null);
+            transform.ContractedNotNull("transform");
+            Contract.Ensures(Contract.Result<string>() != null);
 
-          var result  = ( from @class  in typeof(Gcd_S4).GetNestedTypes(bindFlags)
-                          from fields in @class.GetFields(bindFlags)
-                          from atts in fields.CustomAttributes
-                          where atts.ConstructorArguments.Count > 0
-                            &&  object.ReferenceEquals(fields.GetValue(typeof(StateRes)), transform)
-                          select atts.ConstructorArguments[0].Value as string
-                          ).FirstOrDefault()
-                          ?? "";
-          return result;
-      }
+            var result  = ( from @class  in typeof(Gcd_S4).GetNestedTypes(bindFlags)
+                            from fields in @class.GetFields(bindFlags)
+                            from atts in fields.CustomAttributes
+                            where atts.ConstructorArguments.Count > 0
+                              &&  ReferenceEquals(fields.GetValue(typeof(StateRes)), transform)
+                            select atts.ConstructorArguments[0].Value as string
+                            ).FirstOrDefault()
+                            ?? "";
+            return result;
+        }
 
         #region Utilities
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly Func<StateInt, StateRes> ToStateRes = (transform) =>
 #if ! true
-          transform.Select( gcd => new GcdResult(gcd) );
+            transform.Select( gcd => new GcdResult(gcd) );
 #else
-          from gcd in transform select new GcdResult(gcd);
+            from gcd in transform select new GcdResult(gcd);
 #endif
-    /// <summary>Functor to calculate GCD of two input integers.</summary>
-    private static readonly Transform<GcdStart> AlgorithmTransform = s => {
+        /// <summary>Functor to calculate GCD of two input integers.</summary>
+        private static readonly Transform<GcdStart> AlgorithmTransform = s => {
                                       var x = s.A; var y = s.B;
                                       return  x > y ? new GcdStart(x - y,   y  )
                                             : x < y ? new GcdStart(  x,   y - x)
                                                     : s;
                                     };
-    /// <summary>State monad to calculate GCD of two input integers.</summary>
-    private static readonly StateBool AlgorithmState = s => {
+        /// <summary>State monad to calculate GCD of two input integers.</summary>
+        private static readonly StateBool AlgorithmState = s => {
                                       var x = s.A; var y = s.B;
                                       return  new PayloadBool(
                                               x > y ? new GcdStart(x - y,   y  )
@@ -123,13 +122,13 @@ namespace PGSolutions.Utilities.Monads.Demos {
                                                     : s
                                             , x != y);
                                     };
-    /// <summary>Extract either member from state as the exposed int value.</summary>
-    private static readonly StateInt GcdExtract = s => new PayloadInt(s, s.A);
-    #endregion
+        /// <summary>Extract either member from state as the exposed int value.</summary>
+        private static readonly StateInt GcdExtract = s => new PayloadInt(s, s.A);
+        #endregion
 
-    /// <summary>TODO</summary>
-    [Pure]
-    internal static class Haskell {
+        /// <summary>TODO</summary>
+        [Pure]
+        internal static class Haskell {
         #region Older Haskell implementations
       /* from http://mvanier.livejournal.com/5846.html
               gcd_s3 :: State GCDState Int
@@ -168,109 +167,109 @@ namespace PGSolutions.Utilities.Monads.Demos {
         public static readonly StateRes Run2 = ToStateRes(_run2);
         #endregion
 
-          // ~ 1.5 sec
-        private static readonly StateInt _run3 = AlgorithmState.DoWhile().Then(GcdExtract);
-        /// <summary>TODO</summary>
-        [Description("Straight Haskel w/ DoWhile().")]
-        public static readonly StateRes Run3 = ToStateRes(_run3);
-    }
+              // ~ 1.5 sec
+            private static readonly StateInt _run3 = AlgorithmState.DoWhile().Then(GcdExtract);
+            /// <summary>TODO</summary>
+            [Description("Straight Haskel w/ DoWhile().")]
+            public static readonly StateRes Run3 = ToStateRes(_run3);
+        }
 
-    /// <summary>TODO</summary>
-    [Pure]
-    internal static class Linq {
-        #region Older LINQ implementations
-          // ~ 3.5 sec
-        private static readonly StateInt _run1 = start =>
+        /// <summary>TODO</summary>
+        [Pure]
+        internal static class Linq {
+            #region Older LINQ implementations
+              // ~ 3.5 sec
+            private static readonly StateInt _run1 = start =>
                           ( from s in AlgorithmTransform.Enumerate(start)
                             let A = s.A
                             let B = s.B
                             where A == B
                             select new PayloadInt(s, A)
                           ).First();
-        /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
-        [Description("Basic LINQ w/ Enumerate(Transform<TState>, TState) and using l'let'.")]
-        public static readonly StateRes Run1 = ToStateRes(_run1);
+            /// <summary>TODO</summary>
+            [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
+            [Description("Basic LINQ w/ Enumerate(Transform<TState>, TState) and using l'let'.")]
+            public static readonly StateRes Run1 = ToStateRes(_run1);
 
-          // ~ 2.3 sec
-        private static readonly StateInt _run2 = new StateBool(start =>
+              // ~ 2.3 sec
+            private static readonly StateInt _run2 = new StateBool(start =>
                           ( from payload in AlgorithmState.Enumerate(start)
                             where !payload.Value
                             select payload
                           ).First()).Then(GcdExtract);
-        /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
-        [Description("Better LINQ w/ Enumerate(State<TState,TValue>, TState).")]
-        public static readonly StateRes Run2 = ToStateRes(_run2); 
-        #endregion
+            /// <summary>TODO</summary>
+            [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
+            [Description("Better LINQ w/ Enumerate(State<TState,TValue>, TState).")]
+            public static readonly StateRes Run2 = ToStateRes(_run2); 
+            #endregion
 
-          // ~ 1.5 sec
-        private static readonly StateInt _run3 = start =>
+               // ~ 1.5 sec
+            private static readonly StateInt _run3 = start =>
                           ( from s in AlgorithmTransform.Enumerate(start)
                             where s.A == s.B
                             select new PayloadInt(s, s.A)
                           ).First();
-        /// <summary>TODO</summary>
-        [Description("Best LINQ w/ Enumerate(Transform<TState>, TState) and w/o using 'let'.")]
-        public static readonly StateRes Run3 = ToStateRes(_run3);
-    }
+            /// <summary>TODO</summary>
+            [Description("Best LINQ w/ Enumerate(Transform<TState>, TState) and w/o using 'let'.")]
+            public static readonly StateRes Run3 = ToStateRes(_run3);
+        }
 
         /// <summary>TODO</summary>
-    private struct Test : ITest {
-        /// <summary>TODO</summary>
-        public Test(StateRes transform, string title) { _transform = transform; _title = title; }
-        /// <summary>TODO</summary>
-        public StateRes       Transform  { get { return _transform;} } readonly StateRes _transform;
-        /// <summary>TODO</summary>
-        public string         Title      { get { return _title;    } } readonly string   _title;
-    }
+        private struct Test : ITest {
+            /// <summary>TODO</summary>
+            public Test(StateRes transform, string title) { _transform = transform; _title = title; }
+            /// <summary>TODO</summary>
+            public StateRes       Transform  { get { return _transform;} } readonly StateRes _transform;
+            /// <summary>TODO</summary>
+            public string         Title      { get { return _title;    } } readonly string   _title;
+        }
 
-    /// <summary>TODO</summary>
-    [Pure]
-    internal static class Imperative {
+        /// <summary>TODO</summary>
+        [Pure]
+        internal static class Imperative {
 
-            // ~ 0.91 sec
+              // ~ 0.91 sec
             /// <summary>TODO</summary>
             [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
             [Description("Fully imperative; w/o substitution.")]
-        public static readonly StateRes Run1 = Gcd_S4.ToStateRes(_run1);
-        private static PayloadInt _run1(GcdStart state) {
-            while (state.A != state.B) {
-                state  = state.A > state.B ? new GcdStart(state.A - state.B,      state.A     )
-                       : state.A < state.B ? new GcdStart(     state.A,      state.B - state.A)
-                                           : state;
+            public static readonly StateRes Run1 = Gcd_S4.ToStateRes(_run1);
+            private static PayloadInt _run1(GcdStart state) {
+                while (state.A != state.B) {
+                    state  = state.A > state.B ? new GcdStart(state.A - state.B,      state.A     )
+                           : state.A < state.B ? new GcdStart(     state.A,      state.B - state.A)
+                                               : state;
+                  }
+              return new PayloadInt(state, state.A);
             }
-            return new PayloadInt(state, state.A);
-        }
 
-            // ~ 0.60 sec
+              // ~ 0.60 sec
             /// <summary>TODO</summary>
             [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
             [Description("Fully imperative; w/ substitution.")]
-        public static readonly StateRes Run2 = Gcd_S4.ToStateRes(_run2);
-        private static PayloadInt _run2(GcdStart state) {
-            while (state.A != state.B) {
-                var x = state.A; var y = state.B;
+            public static readonly StateRes Run2 = Gcd_S4.ToStateRes(_run2);
+            private static PayloadInt _run2(GcdStart state) {
+                while (state.A != state.B) {
+                    var x = state.A; var y = state.B;
 
-                state  =    x    >    y    ? new GcdStart(   x    -    y,            x        )
-                       :    x    <    y    ? new GcdStart(        x,            y    -    x   )
-                                           : state;
+                    state  =    x    >    y    ? new GcdStart(   x    -    y,            x        )
+                           :    x    <    y    ? new GcdStart(        x,            y    -    x   )
+                                               : state;
+                }
+                return new PayloadInt(state, state.A);
             }
-            return new PayloadInt(state, state.A);
         }
-    }
 
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
         [Pure]
-    public static class Best {
-          // ~ 1.0 sec
-        private static readonly StateInt _run = AlgorithmTransform.DoWhile(s => s.A != s.B)
-                                                                  .Then(GcdExtract);
-            /// <summary>TODO</summary>
-            [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-            [Description("Optimized DoWhile().")]
-        public static readonly StateRes Run = ToStateRes(_run);
+        public static class Best {
+              // ~ 1.0 sec
+            private static readonly StateInt _run = AlgorithmTransform.DoWhile(s => s.A != s.B)
+                                                                      .Then(GcdExtract);
+                /// <summary>TODO</summary>
+                [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
+                [Description("Optimized DoWhile().")]
+            public static readonly StateRes Run = ToStateRes(_run);
+        }
     }
-  }
 }

@@ -171,10 +171,10 @@ namespace PGSolutions.Utilities.Monads {
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]
-        public bool Equals(MaybeX<T> rhs)  =>
-               ((_value == null) && (rhs._value == null))
-            || ((_value != null) && (rhs._value != null)
-              && (_value == rhs._value || (_valueIsString && _value.Equals(rhs._value)))
+        public bool Equals(MaybeX<T> other)  =>
+               ( (_value == null) && (other._value == null))
+            || ( (_value != null) && (other._value != null)
+              && (_value == other._value || (_valueIsString && _value.Equals(other._value)))
                );
 
         ///<summary>Retrieves the hash code of the object returned by the <see cref="_value"/> property.</summary>

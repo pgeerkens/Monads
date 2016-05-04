@@ -26,9 +26,8 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
-#define PreventIncalculable
-#define TrapOnes
 #define FluentStyle
+//#define PreventIncalculable
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -119,27 +118,24 @@ namespace PGSolutions.Utilities.Monads.Demos {
       }
 #endif
 
-      /// <summary>TODO</summary>
-      private static PayloadMaybe ValidateState(Maybe<GcdStart> start) { return
-          new PayloadMaybe(
-              from state in start
-#if ! TrapOnes
-              select state.A==1 || state.B==1 ? new GcdStart(1,1)
-                   : state.A != int.MinValue
-#else
-              select state.A != int.MinValue
+        /// <summary>TODO</summary>
+        private static PayloadMaybe ValidateState(Maybe<GcdStart> start) {
+            return new PayloadMaybe(
+                    from state in start
+                    from x in state.A == 1 || state.B == 1 ? new GcdStart(1, 1)
+                            : state.A != int.MinValue
+                           && state.B != int.MinValue ? new GcdStart(Math.Abs(state.A), Math.Abs(state.B))
+                            : state.A == state.B      ? new GcdStart(state.A, state.B)
+                            : state.A == int.MinValue ? new GcdStart(Math.Abs(state.A + Math.Abs(state.B)),
+                                                                     Math.Abs(state.B))
+#if PreventIncalculable
+                            : state.B == int.MinValue  ? new GcdStart(Math.Abs(state.A), 
+                                                                      Math.Abs(state.B + Math.Abs(state.A)))
 #endif
-                  && state.B != int.MinValue  ? new GcdStart(Math.Abs(state.A), Math.Abs(state.B))
-                   : state.A == state.B       ? new GcdStart(state.A, state.B)
-                   : state.A == int.MinValue  ? new GcdStart(Math.Abs(state.A + Math.Abs(state.B)), 
-                                                             Math.Abs(state.B))
-#if ! PreventIncalculable
-                   : state.B == int.MinValue  ? new GcdStart(Math.Abs(state.A), 
-                                                             Math.Abs(state.B + Math.Abs(state.A)))
-#endif
-                   : Maybe<GcdStart>.Nothing
-          , Unit._);
+                            : Maybe<GcdStart>.Nothing
+                    select x
+                , Unit._);
         }
-  }
+    }
 
 }
