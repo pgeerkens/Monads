@@ -51,3 +51,23 @@ namespace PGSolutions.Utilities.Monads {
     }
   }
 }
+namespace PGSolutions.Utilities.Monads.IO2 {
+    /// <summary>TODO</summary>
+    public static class EnumerableExtensions {
+        /// <summary>TODO</summary>
+        public static IO2.IO<Unit> FirstUnit(this IEnumerable<IO2.IO<Unit>> @this) {
+            @this.ContractedNotNull("this");
+        //    Contract.Ensures(Contract.Result<IO2.IO<Unit>>() != null);
+
+            return @this.FirstOrDefault();// ?? (() => Unit._);
+        }
+
+        /// <summary>TODO</summary>
+        public static IO2.IO<Unit> LastUnit(this IEnumerable<IO2.IO<Unit>> @this) {
+            @this.ContractedNotNull("this");
+        //    Contract.Ensures(Contract.Result<IO2.IO<Unit>>() != null);
+
+            return @this.LastOrDefault();// ?? (() => Unit._);
+        }
+    }
+}

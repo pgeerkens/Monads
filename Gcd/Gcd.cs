@@ -84,9 +84,9 @@ namespace PGSolutions.Utilities.Monads.Demos {
 #else // ComprehensionStyle
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
-        public static IO<Unit> Run(IEnumerable<GcdStart> states) {          
+        public static IO2.IO<Unit> Run(IEnumerable<GcdStart> states) {          
         states.ContractedNotNull("states");
-        Contract.Ensures(Contract.Result<IO<Unit>>() != null);
+     //   Contract.Ensures(Contract.Result<IO2.IO<Unit>>() != null);
 
         return (
             from test in Gcd_S4.GetTests(false)
@@ -99,9 +99,9 @@ namespace PGSolutions.Utilities.Monads.Demos {
                                        select test.Transform(validated).Value
                           }
             
-            select ( from _   in IO.ConsoleWriteLine("{0}", test.Title)
+            select ( from _   in IO2.IO.ConsoleWriteLine("{0}", test.Title)
                      from __  in ( from item in results
-                                   select IO.ConsoleWriteLine(
+                                   select IO2.IO.ConsoleWriteLine(
                                        @"    GCD = {0,14} for {1}: Elapsed = {2:ss\.fff} secs; {3}",
                                        ( from r in item.Result
                                          select String.Format(_culture,"{0,14:N0}", r.Gcd)
@@ -111,10 +111,10 @@ namespace PGSolutions.Utilities.Monads.Demos {
                                        isThird() ? "I'm third!" : ""
                                    )
                                  ).Last()
-                     from ___ in IO.ConsoleWriteLine(@"Elapsed Time: {0:ss\.ff} secs", elapsed())
-                     select IO.ConsoleWriteLine()
-                   )()
-        ).LastUnit();
+                     from ___ in IO2.IO.ConsoleWriteLine(@"Elapsed Time: {0:ss\.ff} secs", elapsed())
+                     select IO2.IO.ConsoleWriteLine()
+                   ).Result()
+        ).LastOrDefault(); //Unit();
       }
 #endif
 
@@ -137,5 +137,4 @@ namespace PGSolutions.Utilities.Monads.Demos {
                 , Unit._);
         }
     }
-
 }

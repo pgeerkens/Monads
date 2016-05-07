@@ -46,14 +46,16 @@ namespace PGSolutions.Utilities.Monads.Demos {
                                          select state
                                 )
                   where ( from A in Gcd.Run(list.ToList())
-                          from B in IO.ConsoleWrite(prompt)
-                          from c in IO.ConsoleReadKey()
-                          from D in IO.ConsoleWriteLine()
+                          from B in IO2.IO.ConsoleWrite(prompt)
+                          from c in IO2.IO.ConsoleReadKey()
+                          from D in IO2.IO.ConsoleWriteLine()
                           select Char.ToUpper(c.KeyChar) == 'Q' 
-                        ) ()
+                        ).Result()
                   select 0
                 ).FirstOrDefault(); // Doesn't assume result list non-empty, which is assumed by: ).First();
         }
+
+
         private static int FluentSyntax() {
             return
                 ( Enumerable.Range(0,int.MaxValue)
@@ -63,10 +65,10 @@ namespace PGSolutions.Utilities.Monads.Demos {
                                    )
                 ).Where(list => 
                    ( Gcd.Run(list.ToList())
-                        .SelectMany(_ => IO.ConsoleWrite(prompt),(_,__) => new {_,__})
-                        .SelectMany(_ => IO.ConsoleReadKey(),    (_,__) => new {_,c=__})
-                        .SelectMany(_ => IO.ConsoleWriteLine(),  (_,__) => Char.ToUpper(_.c.KeyChar) == 'Q')
-                   ) ()
+                        .SelectMany(_ => IO2.IO.ConsoleWrite(prompt),(_,__) => new {_,__})
+                        .SelectMany(_ => IO2.IO.ConsoleReadKey(),    (_,__) => new {_,c=__})
+                        .SelectMany(_ => IO2.IO.ConsoleWriteLine(),  (_,__) => Char.ToUpper(_.c.KeyChar) == 'Q')
+                   ).Result()
                 ).Select(list => 0
                 ).FirstOrDefault(); // Doesn't assume result list non-empty, unlike: ).First();
         }
