@@ -66,8 +66,11 @@ namespace PGSolutions.Utilities.Monads {
             Contract.Assert(HasValue == (_value != null), "ccCheck failure - necessary for ObjectInvariant but trivial to prove.");
         }
 
-        ///<summary>Optimized LINQ-compatible implementation of Bind/Map as Select.</summary>
-        ///<remarks>Always available from Bind():
+        /// <summary>LINQ-compatible implementation of the monadic map operator.</summary>
+        ///<remarks>
+        /// Used to implement the LINQ <i>let</i> clause.
+        /// 
+        /// Always available from Bind():
         ///         return @this.Bind(v => projector(v).ToMaybe());
         ///</remarks>
         public MaybeX<TResult>  Select<TResult>(
@@ -80,6 +83,9 @@ namespace PGSolutions.Utilities.Monads {
         }
 
         ///<summary>The monadic Bind operation of type T to type MaybeX&lt;TResult>.</summary>
+        /// <remarks>
+        /// Used for LINQ queries with a single <i>from</i> clause.
+        /// </remarks>
         [Pure]
         public  MaybeX<TResult> SelectMany<TResult>(
             Func<T, MaybeX<TResult>> selector
@@ -93,7 +99,10 @@ namespace PGSolutions.Utilities.Monads {
             return result;
         }
 
-        ///<summary>LINQ-compatible implementation of Flatten as SelectMany.</summary>
+        /// <summary>LINQ-compatible implementation of the monadic join operator.</summary>
+        /// <remarks>
+        /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
+        /// </remarks>
         public MaybeX<TResult> SelectMany<TIntermediate, TResult>(
             Func<T, MaybeX<TIntermediate>> selector,
             Func<T,TIntermediate,TResult> projector
@@ -192,13 +201,24 @@ namespace PGSolutions.Utilities.Monads {
         ///<summary>Tests value-equality, returning <b>Nothing</b> if either value doesn't exist.</summary>
         [Pure]
         public Maybe<bool> AreNonNullEqual(MaybeX<T> rhs) =>
-            _value == null || rhs._value == null  ?  Maybe<bool>.Nothing  :  _value == rhs._value;
+            from t in ( from lv in this
+                        from rv in rhs
+                        select new { lv, rv }).ToMaybe()
+            select t.lv.Equals(t.rv);
 
         ///<summary>Tests value-equality, returning <b>Nothing</b> if either value doesn't exist.</summary>
         [Pure]
         public Maybe<bool> AreNonNullUnequal(MaybeX<T> rhs) =>
-            _value == null || rhs._value == null  ?  Maybe<bool>.Nothing  :  _value != rhs._value;
+            from t in ( from lv in this
+                        from rv in rhs
+                        select new { lv, rv }).ToMaybe()
+            select ! t.lv.Equals(t.rv);
         #endregion
+
+        ///<summary>Amplifies a reference-type T to a MaybeX&lt;T>.</summary>
+        ///<remarks>The monad <i>unit</i> function.</remarks>
+        public Maybe<T> ToMaybe()  =>
+            _value == null ? Maybe<T>.Nothing : new Maybe<T>(_value);
 
         /// <inheritdoc/>
         [Pure]

@@ -90,7 +90,8 @@ namespace PGSolutions.Utilities.Monads.IO2.UnitTests {
 
             var lhs = new string('a', 1 + 1 + "abc".Length);
             Contract.Assert(query2 != null);
-            var rhs = query2(1)("abc");   Contract.Assume(rhs != null);
+            var rhs_  = query2(1);      Contract.Assume(rhs_  != null);
+            var rhs = rhs_("abc");
             Assert.Equal(lhs, rhs.Invoke()); // Execution.
 
             Assert.True(isExecuted5);

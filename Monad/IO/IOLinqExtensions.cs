@@ -53,12 +53,12 @@ namespace PGSolutions.Utilities.Monads {
         /// </remarks>
         [Pure]
         public IO<TResult> Select<TResult>(
-            Func<TSource, TResult> selector
+            Func<TSource, TResult> projector
         ) {
-            selector.ContractedNotNull("selector");
+            projector.ContractedNotNull("projector");
 
             var functor = _functor;
-            return new IO<TResult>(() => selector(functor()));
+            return new IO<TResult>(() => projector(functor()));
         }
 
         /// <summary>LINQ-compatible implementation of the monadic bind operator.</summary>
@@ -82,15 +82,15 @@ namespace PGSolutions.Utilities.Monads {
         [Pure]
         public IO<TResult> SelectMany<T, TResult>(
             Func<TSource, IO<T>> selector,
-            Func<TSource, T, TResult> resultSelector
+            Func<TSource, T, TResult> projector
         ) {
             selector.ContractedNotNull("selector");
-            resultSelector.ContractedNotNull("resultSelector");
+            projector.ContractedNotNull("projector");
 
             var functor = _functor;
             return new IO<TResult>(() => {
                 var source = functor();
-                return selector(source).Select(t => resultSelector(source, t)).Invoke();
+                return selector(source).Select(t => projector(source, t)).Invoke();
             } );
         }
 

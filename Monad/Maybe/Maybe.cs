@@ -130,11 +130,6 @@ namespace PGSolutions.Utilities.Monads {
             Contract.Invariant((_value != null)  ||  ! _valueIsStruct);
         }
 
-        /// <inheritdoc/>
-        [Pure]public override string ToString() {
-            Contract.Ensures(Contract.Result<string>() != null);
-            return SelectMany<string>(v => v.ToString()) | "";
-        }
         #region Non-Core
         ///<summary>Wraps a T as a Maybe&lt;T>.</summary>
         [Pure]
@@ -171,6 +166,7 @@ namespace PGSolutions.Utilities.Monads {
                     return typeof(T);}
         }
         #endregion
+
         #region Value Equality with IEquatable<T> and "excluded middle" present w/ either side has no value.
         #region implicit static constructor
         static readonly bool             _valueIsStruct = typeof(ValueType).IsAssignableFrom(typeof(T))
@@ -207,12 +203,23 @@ namespace PGSolutions.Utilities.Monads {
 
         ///<summary>Tests value-equality, returning <b>Nothing</b> if either value doesn't exist.</summary>
         public Maybe<bool> AreNonNullEqual(Maybe<T> rhs) =>
-            from lv in this from rv in rhs select lv.Equals(rv);
+            from lv in this
+            from rv in rhs
+            select lv.Equals(rv);
 
         ///<summary>Tests value-inequality, returning <b>Nothing</b> if either value doesn't exist.</summary>
         public Maybe<bool> AreNonNullUnequal(Maybe<T> rhs) =>
-            from lv in this from rv in rhs select !lv.Equals(rv);
+            from lv in this
+            from rv in rhs
+            select ! lv.Equals(rv);
         #endregion
+
+        /// <inheritdoc/>
+        [Pure]
+        public override string ToString() {
+            Contract.Ensures(Contract.Result<string>() != null);
+            return SelectMany<string>(v => v.ToString()) | "";
+        }
     }
 
     public static class Maybe {
@@ -221,7 +228,7 @@ namespace PGSolutions.Utilities.Monads {
         ///<summary>Amplifies a reference-type T to a MaybeX&lt;T>.</summary>
         ///<remarks>The monad <i>unit</i> function.</remarks>
         public static Maybe<TValue> ToMaybe<TValue>(this TValue @this) =>
-            @this==null ? Maybe<TValue>.Nothing : new Maybe<TValue>(@this); 
+            @this==null ? Maybe<TValue>.Nothing : new Maybe<TValue>(@this);
 
         ///<summary>Extract value of the Maybe&lt;T>, substituting <paramref name="defaultValue"/> as needed.</summary>
         [Pure]
