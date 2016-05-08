@@ -32,60 +32,63 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
-namespace PGSolutions.Utilities.Monads {
-    /// <summary>TODO</summary>
-    /// <remarks>
-    /// Adapted from Dixin's Blog:
-    ///     https://weblogs.asp.net/dixin/category-theory-via-c-sharp-18-more-monad-io-monad
-    /// by the addition of Contract verification and some code reformatting.
-    /// </remarks>
-    [Pure]
-    public static class IOLinqExtensions {
-        /// <summary>TODO</summary>
-        /// <remarks>
-        /// Select: (TSource -> TResult) -> (IO<TSource> -> IO<TResult>)
-        /// </remarks>
-        public static IO<TResult> Select<TSource, TResult>(this
-            IO<TSource> source,
-            Func<TSource, TResult> selector
-        ) {
-            source.ContractedNotNull("source");
-            selector.ContractedNotNull("selector");
-            Contract.Ensures(Contract.Result<IO<TResult>>() != null);
+#if Undefined
+//namespace PGSolutions.Utilities.Monads {
+//    /// <summary>TODO</summary>
+//    /// <remarks>
+//    /// Adapted from Dixin's Blog:
+//    ///     https://weblogs.asp.net/dixin/category-theory-via-c-sharp-18-more-monad-io-monad
+//    /// by the addition of Contract verification and some code reformatting.
+//    /// </remarks>
+//    [Pure]
+//    public static class IOLinqExtensions {
+//        /// <summary>TODO</summary>
+//        /// <remarks>
+//        /// Select: (TSource -> TResult) -> (IO<TSource> -> IO<TResult>)
+//        /// </remarks>
+//        public static IO<TResult> Select<TSource, TResult>(this
+//            IO<TSource> source,
+//            Func<TSource, TResult> selector
+//        ) {
+//            source.ContractedNotNull("source");
+//            selector.ContractedNotNull("selector");
+//            Contract.Ensures(Contract.Result<IO<TResult>>() != null);
 
-            return () => selector(source());
-        }
+//            return () => selector(source());
+//        }
 
-        /// <summary>TODO</summary>
-        public static IO<TResult> SelectMany<TSource, TResult>(this
-            IO<TSource> source,
-            Func<TSource, IO<TResult>> selector
-        ) {
-            source.ContractedNotNull("source");
-            selector.ContractedNotNull("selector");
-            Contract.Ensures(Contract.Result<IO<TResult>>() != null);
+//        /// <summary>TODO</summary>
+//        public static IO<TResult> SelectMany<TSource, TResult>(this
+//            IO<TSource> source,
+//            Func<TSource, IO<TResult>> selector
+//        ) {
+//            source.ContractedNotNull("source");
+//            selector.ContractedNotNull("selector");
+//            Contract.Ensures(Contract.Result<IO<TResult>>() != null);
 
-            return () => selector(source())();
-        }
+//            return () => selector(source())();
+//        }
 
-        /// <summary>TODO</summary>
-        public static IO<TResult> SelectMany<TSource, TSelector, TResult>(this
-            IO<TSource> source,
-            Func<TSource, IO<TSelector>> selector,
-            Func<TSource, TSelector, TResult> resultSelector
-        ) {
-            source.ContractedNotNull("source");
-            selector.ContractedNotNull("selector");
-            resultSelector.ContractedNotNull("resultSelector");
-            Contract.Ensures(Contract.Result<IO<TResult>>() != null);
+//        /// <summary>TODO</summary>
+//        public static IO<TResult> SelectMany<TSource, TSelector, TResult>(this
+//            IO<TSource> source,
+//            Func<TSource, IO<TSelector>> selector,
+//            Func<TSource, TSelector, TResult> resultSelector
+//        ) {
+//            source.ContractedNotNull("source");
+//            selector.ContractedNotNull("selector");
+//            resultSelector.ContractedNotNull("resultSelector");
+//            Contract.Ensures(Contract.Result<IO<TResult>>() != null);
 
-            return () => {
-                var item = source();
-                return resultSelector(item, selector(item)());
-            };
-        }
-    }
-}
+//            return () => {
+//                var item = source();
+//                return resultSelector(item, selector(item)());
+//            };
+//        }
+//    }
+//}
+#endif
+
 namespace PGSolutions.Utilities.Monads.IO2 {
 
     [ContractClass(typeof(IMonadContract<>))]
@@ -103,7 +106,7 @@ namespace PGSolutions.Utilities.Monads.IO2 {
             Func<TSource, T, TResult> resultSelector
         );
 
-        TSource Result();
+        TSource Invoke();
     }
 
     [ContractClassFor(typeof(IMonad<>))]
@@ -138,18 +141,18 @@ namespace PGSolutions.Utilities.Monads.IO2 {
             Contract.Ensures(Contract.Result<IMonad<TResult>>() != null);
             return null;
         }
-        public TSource Result() { return default(TSource); }
+        public TSource Invoke() { return default(TSource); }
     }
 
     public struct IO<TSource> : IMonad<TSource> {
-        public IO(Func<TSource> source) : this() {
-            source.ContractedNotNull("source");
-            Contract.Ensures(_source != null);
-            _source = source;
+        public IO(Func<TSource> functor) : this() {
+            functor.ContractedNotNull("source");
+            Contract.Ensures(_functor != null);
+            _functor = functor;
         }
 
-        private Func<TSource> _source;
-        public TSource Result() { return _source(); }
+        private Func<TSource> _functor;
+        public TSource Invoke() { return _functor(); }
 
         public static IO<TSource> ToIO2(Func<TSource> source) {
             return new IO<TSource>(source);
@@ -164,7 +167,7 @@ namespace PGSolutions.Utilities.Monads.IO2 {
         [ContractInvariantMethod]
         [Pure]
         private void ObjectInvariant() {
-            Contract.Invariant(_source != null);
+            Contract.Invariant(_functor != null);
         }
 
         /// <inheritdoc/>
@@ -172,8 +175,8 @@ namespace PGSolutions.Utilities.Monads.IO2 {
         public IMonad<TResult> Select<TResult>(
             Func<TSource, TResult> selector
         ) {
-            var source = _source();
-            return new IO<TResult>(() => selector(source));
+            var functor = _functor;
+            return new IO<TResult>(() => selector(functor()));
         }
 
         /// <inheritdoc/>
@@ -181,9 +184,12 @@ namespace PGSolutions.Utilities.Monads.IO2 {
         public IMonad<TResult> SelectMany<TResult>(
             Func<TSource, IMonad<TResult>> selector
         ) {
-            var result = selector(_source.Invoke());
-            Contract.Assume(result != null);
-            return result;
+            var functor = _functor;
+            return new IO<TResult>(() => {
+                var result = selector(functor.Invoke());
+                Contract.Assume(result != null);
+                return result.Invoke();
+            });
         }
 
         /// <inheritdoc/>
@@ -192,11 +198,15 @@ namespace PGSolutions.Utilities.Monads.IO2 {
             Func<TSource, IMonad<T>> selector, 
             Func<TSource, T, TResult> resultSelector
         ) {
-            var source = _source();
-            var result = selector(source)?.Select(t => resultSelector(source, t));
-            Contract.Assume(result != null);
-            Contract.Assume(Contract.Result<IMonad<TResult>>() != null);
-            return result;
+            var functor = _functor;
+            return new IO<TResult>(() => {
+                var source = functor();
+                var result = selector(source)?.Select(t => resultSelector(source, t));
+                Contract.Assume(result != null);
+                Contract.Assume(Contract.Result<IMonad<TResult>>() != null);
+                return result.Invoke();
+            });
         }
     }
 }
+

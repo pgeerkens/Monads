@@ -4,6 +4,7 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 
+#if Undefined
 namespace PGSolutions.Utilities.Monads {
   /// <summary>TODO</summary>
   /// <remarks>
@@ -179,6 +180,7 @@ namespace PGSolutions.Utilities.Monads {
     }
   }
 }
+#endif
 
 namespace PGSolutions.Utilities.Monads.IO2 {
     /// <summary>TODO</summary>

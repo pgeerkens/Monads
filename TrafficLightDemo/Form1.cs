@@ -27,11 +27,9 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Drawing;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -131,7 +129,11 @@ namespace TrafficLightDemo {
           _pictureBox = pictureBox;
         }
 
-        IO<Unit> ISettableLight.SetColour(Image image) { _pictureBox.Image = image; return Unit._.ToIO(); }
+            PGSolutions.Utilities.Monads.IO2.IO<Unit> ISettableLight.SetColour(Image image) {
+                _pictureBox.Image = image;
+               // return Unit._.ToIO();
+                return PGSolutions.Utilities.Monads.IO2.IO.ToIO(Unit._);
+            }
         readonly PictureBox _pictureBox;
 
       /// <summary>The invariants enforced by this struct type.</summary>

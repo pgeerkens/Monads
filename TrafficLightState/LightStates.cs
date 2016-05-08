@@ -54,7 +54,7 @@ namespace TrafficLightDemo {
     internal static Reader<ITrafficLight<T>, Task<LightStates<T>.TrafficLightState>> GetState<T>(
       this LightStates<T>.Transition transition,
       int delayTenthsSeconds,
-      IO<Unit> action
+      PGSolutions.Utilities.Monads.IO2.IMonad<Unit> action
     ) {
         transition.ContractedNotNull("transition");
         action.ContractedNotNull("action");
@@ -63,7 +63,7 @@ namespace TrafficLightDemo {
         return e => from _ in ( from _ in action
                                 select Task<Unit>.Delay(TimeSpan.FromMilliseconds(100*delayTenthsSeconds)
                                                        ,e.CancellationToken)
-                              ) ()
+                              ).Invoke()
                     select new LightStates<T>.TrafficLightState(() => transition(e));
     }
   }

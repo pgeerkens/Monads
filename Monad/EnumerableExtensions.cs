@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
+#if Undefined
 namespace PGSolutions.Utilities.Monads {
   /// <summary>TODO</summary>
   public static class EnumerableExtensions {
@@ -51,6 +52,8 @@ namespace PGSolutions.Utilities.Monads {
     }
   }
 }
+#endif
+
 namespace PGSolutions.Utilities.Monads.IO2 {
     /// <summary>TODO</summary>
     public static class EnumerableExtensions {

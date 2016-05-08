@@ -113,7 +113,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
                                  ).Last()
                      from ___ in IO2.IO.ConsoleWriteLine(@"Elapsed Time: {0:ss\.ff} secs", elapsed())
                      select IO2.IO.ConsoleWriteLine()
-                   ).Result()
+                   ).Invoke()
         ).LastOrDefault(); //Unit();
       }
 #endif

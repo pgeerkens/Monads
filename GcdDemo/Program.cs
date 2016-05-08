@@ -50,7 +50,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
                           from c in IO2.IO.ConsoleReadKey()
                           from D in IO2.IO.ConsoleWriteLine()
                           select Char.ToUpper(c.KeyChar) == 'Q' 
-                        ).Result()
+                        ).Invoke()
                   select 0
                 ).FirstOrDefault(); // Doesn't assume result list non-empty, which is assumed by: ).First();
         }
@@ -68,7 +68,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
                         .SelectMany(_ => IO2.IO.ConsoleWrite(prompt),(_,__) => new {_,__})
                         .SelectMany(_ => IO2.IO.ConsoleReadKey(),    (_,__) => new {_,c=__})
                         .SelectMany(_ => IO2.IO.ConsoleWriteLine(),  (_,__) => Char.ToUpper(_.c.KeyChar) == 'Q')
-                   ).Result()
+                   ).Invoke()
                 ).Select(list => 0
                 ).FirstOrDefault(); // Doesn't assume result list non-empty, unlike: ).First();
         }

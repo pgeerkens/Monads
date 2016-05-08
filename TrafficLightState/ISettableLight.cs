@@ -27,25 +27,25 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Linq;
-using System.Threading;
 
 using PGSolutions.Utilities.Monads;
 
 namespace TrafficLightDemo {
-  /// <summary>TODO</summary>
-  [ContractClass(typeof(ISettableLightContract<>))]
-  public interface ISettableLight<T> { IO<Unit> SetColour(T colour); }
-
-  /// <summary>TODO</summary>
-  [ContractClassFor(typeof(ISettableLight<>))]
-  public abstract class ISettableLightContract<T> : ISettableLight<T> {
-    public IO<Unit> SetColour(T colour) {
-      colour.ContractedNotNull("colour");
-      Contract.Ensures(Contract.Result<IO<Unit>>() != null);
-      return Unit._.ToIO(); 
+    /// <summary>TODO</summary>
+    [ContractClass(typeof(ISettableLightContract<>))]
+    public interface ISettableLight<T> {
+        PGSolutions.Utilities.Monads.IO2.IO<Unit> SetColour(T colour);
     }
-  }
+
+    /// <summary>TODO</summary>
+    [ContractClassFor(typeof(ISettableLight<>))]
+    public abstract class ISettableLightContract<T> : ISettableLight<T> {
+        public PGSolutions.Utilities.Monads.IO2.IO<Unit> SetColour(T colour) {
+            colour.ContractedNotNull("colour");
+            // Contract.Ensures(Contract.Result<IO2.IO<Unit>>() != null);
+            //return Unit._.ToIO();
+            return PGSolutions.Utilities.Monads.IO2.IO.ToIO(Unit._);
+        }
+    }
 }

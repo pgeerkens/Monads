@@ -33,6 +33,7 @@ using System.IO;
 using static System.Diagnostics.Contracts.Contract;
 using static System.Console;
 
+#if Undefined
 namespace PGSolutions.Utilities.Monads {
     /// <summary>TODO</summary>
     /// <typeparam name="T"></typeparam>
@@ -180,6 +181,7 @@ namespace PGSolutions.Utilities.Monads {
         public static readonly Func<string, string, IO<Unit>> FileWriteAllText  = new Action<string, string>(File.WriteAllText).AsIO();
     }
 }
+#endif
 
 namespace PGSolutions.Utilities.Monads.IO2 {
     /// <summary>TODO</summary>
@@ -189,12 +191,13 @@ namespace PGSolutions.Utilities.Monads.IO2 {
     /// by the addition of Contract verification and some code reformatting.
     /// </remarks>
     public static partial class IO {
-        //// η: T -> IO<T>
-        ///// <summary>TODO</summary>
-        //public static IO<T> ToIO<T>(this T value) {
-        //    Ensures(Contract.Result<IO<T>>() != null);
-        //    return () => value;
-        //}
+        private const string nullFormat = "format is null";
+
+        // η: T -> IO<T>
+        /// <summary>TODO</summary>
+        public static IO<T> ToIO<T>(this T value) {
+            return new IO2.IO<T>(() => value);
+        }
 
         /// <summary>TODO</summary>
         public static readonly IO<int> ConsoleRead = new Func<int>(Console.Read).AsIO();
@@ -203,117 +206,74 @@ namespace PGSolutions.Utilities.Monads.IO2 {
 
         /// <summary>TODO</summary>
         public static IO<ConsoleKeyInfo> ConsoleReadKey() {
-            //     Ensures(Contract.Result<IO<ConsoleKeyInfo>>() != null);
             return new IO<ConsoleKeyInfo>(() => Console.ReadKey());
         }
 
         /// <summary>TODO</summary>
-        public static IO<Unit> ConsoleWrite(string value) {
-        //    Ensures(Contract.Result<IO<Unit>>() != null);
+        public static IO<Unit> ConsoleWrite(string value) =>
+            ReturnIoUnit(() => Write(value));
 
-            Write(value);
+        /// <summary>TODO</summary>
+        public static IO<Unit> ConsoleWrite(object arg) =>
+            ReturnIoUnit(() => Write(arg));
+
+        /// <summary>TODO</summary>
+        public static IO<Unit> ConsoleWrite<T>(string format, T arg) =>
+             ReturnIoUnit(() => Write(format ?? nullFormat, arg));
+
+        /// <summary>TODO</summary>
+        public static IO<Unit> ConsoleWrite(string format, object arg1, object arg2) =>
+             ReturnIoUnit(() => Write(format ?? nullFormat, arg1, arg2));
+
+        /// <summary>TODO</summary>
+        public static IO<Unit> ConsoleWrite(string format, object arg1, object arg2, object arg3) =>
+             ReturnIoUnit(() => Write(format ?? nullFormat, arg1, arg2, arg3));
+
+        /// <summary>TODO</summary>
+        public static IO<Unit> ConsoleWrite(string format, params object[] arg) =>
+            ReturnIoUnit(() => Write(format ?? nullFormat, arg));
+
+        /// <summary>TODO</summary>
+        public static IO<Unit> ConsoleWriteLine() =>
+            ReturnIoUnit(() => WriteLine());
+
+        /// <summary>TODO</summary>
+        public static IO<Unit> ConsoleWriteLine(string value) =>
+            ReturnIoUnit(() => WriteLine(value));
+
+        /// <summary>TODO</summary>
+        public static IO<Unit> ConsoleWriteLine<T>(string format, T arg) =>
+            ReturnIoUnit(() => WriteLine(format ?? nullFormat, arg));
+
+        /// <summary>TODO</summary>
+        public static IO<Unit> ConsoleWriteLine(string format, object arg1, object arg2) =>
+             ReturnIoUnit(() => WriteLine(format ?? nullFormat, arg1, arg2));
+
+        /// <summary>TODO</summary>
+        public static IO<Unit> ConsoleWriteLine(string format, object arg1, object arg2, object arg3) =>
+             ReturnIoUnit(() => WriteLine(format ?? nullFormat, arg1, arg2, arg3));
+
+        /// <summary>TODO</summary>
+        public static IO<Unit> ConsoleWriteLine(string format, params object[] arg) =>
+            ReturnIoUnit(() => WriteLine(format ?? nullFormat, arg));
+
+        /// <summary>TODO</summary>
+        public static readonly Func<string, IO<bool>> FileExists =
+            new Func<string, bool>(File.Exists).AsIO();
+
+        /// <summary>TODO</summary>
+        public static readonly Func<string, IO<string>> FileReadAllText =
+            new Func<string, string>(File.ReadAllText).AsIO();
+
+        /// <summary>TODO</summary>
+        public static readonly Func<string, string, IO<Unit>> FileWriteAllText =
+            new Action<string, string>(File.WriteAllText).AsIO();
+
+        private static IO<Unit> ReturnIoUnit(Action action) {
+            action.ContractedNotNull("action");
+
+            action();
             return new IO<Unit>(() => Unit._);
         }
-        /// <summary>TODO</summary>
-        public static IO<Unit> ConsoleWrite(object arg) {
-        //    Ensures(Contract.Result<IO<Unit>>() != null);
-
-            Write(arg);
-            return new IO<Unit>(() => Unit._);
-        }
-        /// <summary>TODO</summary>
-        public static IO<Unit> ConsoleWrite<T>(string format, T arg) {
-            format.ContractedNotNull("format");
-        //    Ensures(Contract.Result<IO<Unit>>() != null);
-
-            Write(arg);
-            return new IO<Unit>(() => Unit._);
-        }
-        /// <summary>TODO</summary>
-        public static IO<Unit> ConsoleWrite(string format, object arg1, object arg2) {
-            format.ContractedNotNull("format");
-        //    Ensures(Contract.Result<IO<Unit>>() != null);
-
-            Write(format, arg1, arg2);
-            return new IO<Unit>(() => Unit._);
-        }
-        /// <summary>TODO</summary>
-        public static IO<Unit> ConsoleWrite
-            (string format, object arg1, object arg2, object arg3) {
-            format.ContractedNotNull("format");
-        //    Ensures(Contract.Result<IO<Unit>>() != null);
-
-            Write(format, arg1, arg2, arg3);
-            return new IO<Unit>(() => Unit._);
-        }
-        /// <summary>TODO</summary>
-        public static IO<Unit> ConsoleWrite(string format, params object[] arg) {
-            format.ContractedNotNull("format");
-            arg.ContractedNotNull("arg");
-        //    Ensures(Contract.Result<IO<Unit>>() != null);
-
-            Write(format, arg);
-            return new IO<Unit>(() => Unit._);
-        }
-
-        /// <summary>TODO</summary>
-        public static IO<Unit> ConsoleWriteLine() {
-        //    Ensures(Contract.Result<IO<Unit>>() != null);
-
-            WriteLine();
-            return new IO<Unit>(() => Unit._);
-        }
-        /// <summary>TODO</summary>
-        public static IO<Unit> ConsoleWriteLine
-            (string value) {
-        //    Ensures(Contract.Result<IO<Unit>>() != null);
-
-            WriteLine(value);
-            return new IO<Unit>(() => Unit._);
-        }
-        /// <summary>TODO</summary>
-        public static IO<Unit> ConsoleWriteLine<T>
-            (string format, T arg) {
-            format.ContractedNotNull("format");
-        //    Ensures(Contract.Result<IO<Unit>>() != null);
-
-            WriteLine(arg);
-            return new IO<Unit>(() => Unit._);
-        }
-        /// <summary>TODO</summary>
-        public static IO<Unit> ConsoleWriteLine
-            (string format, object arg1, object arg2) {
-            format.ContractedNotNull("format");
-        //    Ensures(Contract.Result<IO<Unit>>() != null);
-
-            WriteLine(format, arg1, arg2);
-            return new IO<Unit>(() => Unit._);
-        }
-        /// <summary>TODO</summary>
-        public static IO<Unit> ConsoleWriteLine
-            (string format, object arg1, object arg2, object arg3) {
-            format.ContractedNotNull("format");
-        //    Ensures(Contract.Result<IO<Unit>>() != null);
-
-            WriteLine(format, arg1, arg2, arg3);
-            return new IO<Unit>(() => Unit._);
-        }
-        /// <summary>TODO</summary>
-        public static IO<Unit> ConsoleWriteLine
-            (string format, params object[] arg) {
-            format.ContractedNotNull("format");
-            arg.ContractedNotNull("arg");
-        //    Ensures(Contract.Result<IO<Unit>>() != null);
-
-            WriteLine(format, arg);
-            return new IO<Unit>(() => Unit._);
-        }
-
-        /// <summary>TODO</summary>
-        public static readonly Func<string, IO<bool>> FileExists = new Func<string, bool>(File.Exists).AsIO();
-        /// <summary>TODO</summary>
-        public static readonly Func<string, IO<string>> FileReadAllText = new Func<string, string>(File.ReadAllText).AsIO();
-        /// <summary>TODO</summary>
-        public static readonly Func<string, string, IO<Unit>> FileWriteAllText = new Action<string, string>(File.WriteAllText).AsIO();
     }
 }
