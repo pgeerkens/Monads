@@ -201,7 +201,7 @@ namespace PGSolutions.Utilities.Monads {
         [Pure]
         public static bool operator == (Maybe<T> lhs, Maybe<T> rhs) { return lhs.Equals(rhs); }
 
-        /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
+        /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]
         public static bool operator != (Maybe<T> lhs, Maybe<T> rhs) { return ! lhs.Equals(rhs); }
 

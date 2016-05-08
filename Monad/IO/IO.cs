@@ -27,10 +27,10 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
 
-using static System.Diagnostics.Contracts.Contract;
 using static System.Console;
 
 namespace PGSolutions.Utilities.Monads {
@@ -45,8 +45,14 @@ namespace PGSolutions.Utilities.Monads {
 
         // η: T -> IO<T>
         /// <summary>TODO</summary>
-        public static IO<T> ToIO<T>(this T value) {
-            return new IO<T>(() => value);
+        public static IO<T> ToIO<T>(this T value) => new IO<T>(() => value);
+
+        /// <summary>TODO</summary>
+        public static IO<Unit> ReturnIOUnit(Action action) {
+            action.ContractedNotNull("action");
+
+            action();
+            return Unit._.ToIO();
         }
 
         /// <summary>TODO</summary>
@@ -55,57 +61,63 @@ namespace PGSolutions.Utilities.Monads {
         public static readonly IO<string> ConsoleReadLine = new Func<string>(ReadLine).AsIO();
 
         /// <summary>TODO</summary>
-        public static IO<ConsoleKeyInfo> ConsoleReadKey() {
-            return new IO<ConsoleKeyInfo>(() => ReadKey());
-        }
+        public static IO<ConsoleKeyInfo> ConsoleReadKey() => new IO<ConsoleKeyInfo>(() => ReadKey());
 
         /// <summary>TODO</summary>
         public static IO<Unit> ConsoleWrite(string value) =>
-            ReturnIoUnit(() => Write(value));
+            ReturnIOUnit(() => Write(value));
 
         /// <summary>TODO</summary>
         public static IO<Unit> ConsoleWrite(object arg) =>
-            ReturnIoUnit(() => Write(arg));
+            ReturnIOUnit(() => Write(arg));
 
         /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.Write(System.String,System.Object)")]
         public static IO<Unit> ConsoleWrite<T>(string format, T arg) =>
-             ReturnIoUnit(() => Write(format ?? nullFormat, arg));
+             ReturnIOUnit(() => Write(format ?? nullFormat, arg));
 
         /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.Write(System.String,System.Object,System.Object)")]
         public static IO<Unit> ConsoleWrite(string format, object arg1, object arg2) =>
-             ReturnIoUnit(() => Write(format ?? nullFormat, arg1, arg2));
+             ReturnIOUnit(() => Write(format ?? nullFormat, arg1, arg2));
 
         /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.Write(System.String,System.Object,System.Object,System.Object)")]
         public static IO<Unit> ConsoleWrite(string format, object arg1, object arg2, object arg3) =>
-             ReturnIoUnit(() => Write(format ?? nullFormat, arg1, arg2, arg3));
+             ReturnIOUnit(() => Write(format ?? nullFormat, arg1, arg2, arg3));
 
         /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.Write(System.String,System.Object[])")]
         public static IO<Unit> ConsoleWrite(string format, params object[] arg) =>
-            ReturnIoUnit(() => Write(format ?? nullFormat, arg));
+            ReturnIOUnit(() => Write(format ?? nullFormat, arg));
 
         /// <summary>TODO</summary>
         public static IO<Unit> ConsoleWriteLine() =>
-            ReturnIoUnit(() => WriteLine());
+            ReturnIOUnit(() => WriteLine());
 
         /// <summary>TODO</summary>
         public static IO<Unit> ConsoleWriteLine(string value) =>
-            ReturnIoUnit(() => WriteLine(value));
+            ReturnIOUnit(() => WriteLine(value));
 
         /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String,System.Object)")]
         public static IO<Unit> ConsoleWriteLine<T>(string format, T arg) =>
-            ReturnIoUnit(() => WriteLine(format ?? nullFormat, arg));
+            ReturnIOUnit(() => WriteLine(format ?? nullFormat, arg));
 
         /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String,System.Object,System.Object)")]
         public static IO<Unit> ConsoleWriteLine(string format, object arg1, object arg2) =>
-             ReturnIoUnit(() => WriteLine(format ?? nullFormat, arg1, arg2));
+             ReturnIOUnit(() => WriteLine(format ?? nullFormat, arg1, arg2));
 
         /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String,System.Object,System.Object,System.Object)")]
         public static IO<Unit> ConsoleWriteLine(string format, object arg1, object arg2, object arg3) =>
-             ReturnIoUnit(() => WriteLine(format ?? nullFormat, arg1, arg2, arg3));
+             ReturnIOUnit(() => WriteLine(format ?? nullFormat, arg1, arg2, arg3));
 
         /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String,System.Object[])")]
         public static IO<Unit> ConsoleWriteLine(string format, params object[] arg) =>
-            ReturnIoUnit(() => WriteLine(format ?? nullFormat, arg));
+            ReturnIOUnit(() => WriteLine(format ?? nullFormat, arg));
 
         /// <summary>TODO</summary>
         public static readonly Func<string, IO<bool>> FileExists =
@@ -118,13 +130,5 @@ namespace PGSolutions.Utilities.Monads {
         /// <summary>TODO</summary>
         public static readonly Func<string, string, IO<Unit>> FileWriteAllText =
             new Action<string, string>(File.WriteAllText).AsIO();
-
-        /// <summary>TODO</summary>
-        public static IO<Unit> ReturnIoUnit(Action action) {
-            action.ContractedNotNull("action");
-
-            action();
-            return Unit._.ToIO();
-        }
     }
 }
