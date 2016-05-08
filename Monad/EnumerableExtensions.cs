@@ -54,11 +54,11 @@ namespace PGSolutions.Utilities.Monads {
 }
 #endif
 
-namespace PGSolutions.Utilities.Monads.IO2 {
+namespace PGSolutions.Utilities.Monads {
     /// <summary>TODO</summary>
     public static class EnumerableExtensions {
         /// <summary>TODO</summary>
-        public static IO2.IO<Unit> FirstUnit(this IEnumerable<IO2.IO<Unit>> @this) {
+        public static IO<Unit> FirstUnit(this IEnumerable<IO<Unit>> @this) {
             @this.ContractedNotNull("this");
         //    Contract.Ensures(Contract.Result<IO2.IO<Unit>>() != null);
 
@@ -66,7 +66,7 @@ namespace PGSolutions.Utilities.Monads.IO2 {
         }
 
         /// <summary>TODO</summary>
-        public static IO2.IO<Unit> LastUnit(this IEnumerable<IO2.IO<Unit>> @this) {
+        public static IO<Unit> LastUnit(this IEnumerable<IO<Unit>> @this) {
             @this.ContractedNotNull("this");
         //    Contract.Ensures(Contract.Result<IO2.IO<Unit>>() != null);
 

@@ -35,17 +35,15 @@ namespace TrafficLightDemo {
     /// <summary>TODO</summary>
     [ContractClass(typeof(ISettableLightContract<>))]
     public interface ISettableLight<T> {
-        PGSolutions.Utilities.Monads.IO2.IO<Unit> SetColour(T colour);
+        IO<Unit> SetColour(T colour);
     }
 
     /// <summary>TODO</summary>
     [ContractClassFor(typeof(ISettableLight<>))]
     public abstract class ISettableLightContract<T> : ISettableLight<T> {
-        public PGSolutions.Utilities.Monads.IO2.IO<Unit> SetColour(T colour) {
+        public IO<Unit> SetColour(T colour) {
             colour.ContractedNotNull("colour");
-            // Contract.Ensures(Contract.Result<IO2.IO<Unit>>() != null);
-            //return Unit._.ToIO();
-            return PGSolutions.Utilities.Monads.IO2.IO.ToIO(Unit._);
+            return Unit._.ToIO();
         }
     }
 }

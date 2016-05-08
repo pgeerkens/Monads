@@ -182,7 +182,7 @@ namespace PGSolutions.Utilities.Monads {
 }
 #endif
 
-namespace PGSolutions.Utilities.Monads.IO2 {
+namespace PGSolutions.Utilities.Monads {
     /// <summary>TODO</summary>
     /// <remarks>
     /// This pretty much comes straight from Dixin's Blog:

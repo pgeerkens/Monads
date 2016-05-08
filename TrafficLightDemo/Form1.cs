@@ -129,12 +129,11 @@ namespace TrafficLightDemo {
           _pictureBox = pictureBox;
         }
 
-            PGSolutions.Utilities.Monads.IO2.IO<Unit> ISettableLight.SetColour(Image image) {
+            IO<Unit> ISettableLight.SetColour(Image image) {
                 _pictureBox.Image = image;
-               // return Unit._.ToIO();
-                return PGSolutions.Utilities.Monads.IO2.IO.ToIO(Unit._);
+                return Unit._.ToIO();
             }
-        readonly PictureBox _pictureBox;
+            readonly PictureBox _pictureBox;
 
       /// <summary>The invariants enforced by this struct type.</summary>
       [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]

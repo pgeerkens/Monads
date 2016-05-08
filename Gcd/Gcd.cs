@@ -84,7 +84,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
 #else // ComprehensionStyle
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
-        public static IO2.IO<Unit> Run(IEnumerable<GcdStart> states) {          
+        public static IO<Unit> Run(IEnumerable<GcdStart> states) {          
         states.ContractedNotNull("states");
      //   Contract.Ensures(Contract.Result<IO2.IO<Unit>>() != null);
 
@@ -99,9 +99,9 @@ namespace PGSolutions.Utilities.Monads.Demos {
                                        select test.Transform(validated).Value
                           }
             
-            select ( from _   in IO2.IO.ConsoleWriteLine("{0}", test.Title)
+            select ( from _   in IO.ConsoleWriteLine("{0}", test.Title)
                      from __  in ( from item in results
-                                   select IO2.IO.ConsoleWriteLine(
+                                   select IO.ConsoleWriteLine(
                                        @"    GCD = {0,14} for {1}: Elapsed = {2:ss\.fff} secs; {3}",
                                        ( from r in item.Result
                                          select String.Format(_culture,"{0,14:N0}", r.Gcd)
@@ -111,8 +111,8 @@ namespace PGSolutions.Utilities.Monads.Demos {
                                        isThird() ? "I'm third!" : ""
                                    )
                                  ).Last()
-                     from ___ in IO2.IO.ConsoleWriteLine(@"Elapsed Time: {0:ss\.ff} secs", elapsed())
-                     select IO2.IO.ConsoleWriteLine()
+                     from ___ in IO.ConsoleWriteLine(@"Elapsed Time: {0:ss\.ff} secs", elapsed())
+                     select IO.ConsoleWriteLine()
                    ).Invoke()
         ).LastOrDefault(); //Unit();
       }

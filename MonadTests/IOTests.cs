@@ -82,7 +82,8 @@ namespace PGSolutions.Utilities.Monads.IO2.UnitTests {
                                                                          from y in length(b).ToIO().Invoke()
                                                                          from z in 0.ToIO()
                                                                          select f7 (x) (y)
-                                                                       ).Invoke();
+            
+                                                                         ).Invoke();
 
             Assert.False(isExecuted5); // Laziness.
             Assert.False(isExecuted6); // Laziness.
@@ -93,7 +94,8 @@ namespace PGSolutions.Utilities.Monads.IO2.UnitTests {
             var rhs_  = query2(1);      Contract.Assume(rhs_  != null);
             var rhs_1 = rhs_("abc");    Contract.Assume(rhs_1 != null);
             var rhs   = rhs_1;          //Contract.Assume(rhs   != null);
-            Assert.Equal(lhs, rhs.Invoke()); // Execution.
+            rhs = query2(1)?.Invoke("abc");
+            Assert.Equal(lhs, rhs?.Invoke()); // Execution.
 
             Assert.True(isExecuted5);
             Assert.True(isExecuted6);
