@@ -99,9 +99,9 @@ namespace PGSolutions.Utilities.Monads.Demos {
                                        select test.Transform(validated).Value
                           }
             
-            select ( from _   in IO.ConsoleWriteLine("{0}", test.Title)
+            select ( from _   in IOMonad.ConsoleWriteLine("{0}", test.Title)
                      from __  in ( from item in results
-                                   select IO.ConsoleWriteLine(
+                                   select IOMonad.ConsoleWriteLine(
                                        @"    GCD = {0,14} for {1}: Elapsed = {2:ss\.fff} secs; {3}",
                                        ( from r in item.Result
                                          select String.Format(_culture,"{0,14:N0}", r.Gcd)
@@ -111,8 +111,8 @@ namespace PGSolutions.Utilities.Monads.Demos {
                                        isThird() ? "I'm third!" : ""
                                    )
                                  ).Last()
-                     from ___ in IO.ConsoleWriteLine(@"Elapsed Time: {0:ss\.ff} secs", elapsed())
-                     select IO.ConsoleWriteLine()
+                     from ___ in IOMonad.ConsoleWriteLine(@"Elapsed Time: {0:ss\.ff} secs", elapsed())
+                     select IOMonad.ConsoleWriteLine()
                    ).Invoke()
         ).LastOrDefault(); //Unit();
       }

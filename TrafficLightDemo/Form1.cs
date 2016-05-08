@@ -75,6 +75,7 @@ namespace TrafficLightDemo {
     private async Task<Unit> StartLights() {
         return await LightStates.ExecuteTrafficLight<Image>(_trafficLight);
     }
+
     #region Implementation
     [Pure]
     static Bitmap SetTransparent(Bitmap bitmap) {

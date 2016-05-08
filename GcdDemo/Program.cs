@@ -28,49 +28,49 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace PGSolutions.Utilities.Monads.Demos {
+    using static IOMonad;
+    using static Char;
+
     class Program {
         const string prompt = "Type 'Q' to quit; <Enter> to repeat ... ";
 
-        //static int Main() { return true ? ComprehensionSyntax() : FluentSyntax(); }
         static int Main() { return ComprehensionSyntax(); }
-        private static int ComprehensionSyntax() {
-            return
-                ( from list in  ( from pass in Enumerable.Range(0,int.MaxValue)
-                                  let counter = Readers.Counter(0)
-                                  select from state in gcdStates
-                                         where predicate(pass,counter())
-                                         select state
-                                )
-                  where ( from A in Gcd.Run(list.ToList())
-                          from B in IO.ConsoleWrite(prompt)
-                          from c in IO.ConsoleReadKey()
-                          from D in IO.ConsoleWriteLine()
-                          select Char.ToUpper(c.KeyChar) == 'Q' 
-                        ).Invoke()
-                  select 0
-                ).FirstOrDefault(); // Doesn't assume result list non-empty, which is assumed by: ).First();
+//        static int Main() { return FluentSyntax(); }
+
+        static int ComprehensionSyntax() { return
+            ( from list in  ( from pass in Enumerable.Range(0,int.MaxValue)
+                              let counter = Readers.Counter(0)
+                              select from state in gcdStates
+                                     where predicate(pass,counter())
+                                     select state
+                            )
+              where ( from _   in Gcd.Run(list.ToList())
+                      from __  in ConsoleWrite(prompt)
+                      from c   in ConsoleReadKey()
+                      from ___ in ConsoleWriteLine()
+                      select ToUpper(c.KeyChar) == 'Q' 
+                    ).Invoke()
+              select 0
+            ).FirstOrDefault(); // Doesn't assume result list non-empty, unlike: ).First();
         }
 
-
-        private static int FluentSyntax() {
-            return
-                ( Enumerable.Range(0,int.MaxValue)
-                            .Select(pass => new {pass, counter = Readers.Counter(0)})
-                            .Select(_    => gcdStates.Where(state => predicate(_.pass,_.counter()))
-                                                     .Select(state => state)
-                                   )
-                ).Where(list => 
-                   ( Gcd.Run(list.ToList())
-                        .SelectMany(_ => IO.ConsoleWrite(prompt),(_,__) => new {_,__})
-                        .SelectMany(_ => IO.ConsoleReadKey(),    (_,__) => new {_,c=__})
-                        .SelectMany(_ => IO.ConsoleWriteLine(),  (_,__) => Char.ToUpper(_.c.KeyChar) == 'Q')
-                   ).Invoke()
-                ).Select(list => 0
-                ).FirstOrDefault(); // Doesn't assume result list non-empty, unlike: ).First();
+        static int FluentSyntax() { return
+            ( Enumerable.Range(0,int.MaxValue)
+                        .Select(pass => new {pass, counter = Readers.Counter(0)})
+                        .Select(_    => gcdStates.Where(state => predicate(_.pass,_.counter()))
+                                                 .Select(state => state)
+                               )
+            ).Where(list => 
+               ( Gcd.Run(list.ToList())
+                    .SelectMany(_ => ConsoleWrite(prompt),(_,__) => new {_,__})
+                    .SelectMany(_ => ConsoleReadKey(),    (_,__) => new {_,c=__})
+                    .SelectMany(_ => ConsoleWriteLine(),  (_,__) => ToUpper(_.c.KeyChar) == 'Q')
+               ).Invoke()
+            ).Select(list => 0
+            ).FirstOrDefault(); // Doesn't assume result list non-empty, unlike: ).First();
         }
 
         static readonly Func<int, int, bool> predicate =

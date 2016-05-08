@@ -195,15 +195,15 @@ namespace PGSolutions.Utilities.Monads {
 
         /// <inheritdoc/>
         [Pure]
-        public override int GetHashCode() { return HasValue ? _value.GetHashCode() : 0; }
+        public override int GetHashCode() => HasValue ? _value.GetHashCode() : 0;
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]
-        public static bool operator == (Maybe<T> lhs, Maybe<T> rhs) { return lhs.Equals(rhs); }
+        public static bool operator == (Maybe<T> lhs, Maybe<T> rhs) => lhs.Equals(rhs);
 
         /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]
-        public static bool operator != (Maybe<T> lhs, Maybe<T> rhs) { return ! lhs.Equals(rhs); }
+        public static bool operator != (Maybe<T> lhs, Maybe<T> rhs) => ! lhs.Equals(rhs);
 
         ///<summary>Tests value-equality, returning <b>Nothing</b> if either value doesn't exist.</summary>
         public Maybe<bool> AreNonNullEqual(Maybe<T> rhs) =>

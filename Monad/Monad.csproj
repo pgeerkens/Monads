@@ -158,7 +158,6 @@
     <Compile Include="ContractExtensions.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="IMonad.cs" />
     <Compile Include="IO\IO.cs" />
     <Compile Include="IO\IOExtensions.cs" />
     <Compile Include="IO\IOLinqExtensions.cs" />

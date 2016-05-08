@@ -32,7 +32,7 @@ using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Utilities.Monads {
     /// <summary>TODO</summary>
-    public struct IO<TSource> : IMonad<TSource>, IEquatable<IO<TSource>> {
+    public struct IO<TSource> : IEquatable<IO<TSource>> {
         /// <summary>Create a new instance of the class.</summary>
         public IO(Func<TSource> functor) : this() {
             functor.ContractedNotNull("source");
@@ -47,41 +47,51 @@ namespace PGSolutions.Utilities.Monads {
         [SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
         public static IO<TSource> ToIO(Func<TSource> source) => new IO<TSource>(source);
 
-        /// <inheritdoc/>
+        /// <summary>LINQ-compatible implementation of the monadic map operator.</summary>
+        /// <remarks>
+        /// Used to implement the LINQ <i>let</i> clause.
+        /// </remarks>
         [Pure]
-        public IMonad<TResult> Select<TResult>(
+        public IO<TResult> Select<TResult>(
             Func<TSource, TResult> selector
         ) {
-            Contract.Ensures(Contract.Result<IMonad<TResult>>() != null);
+            selector.ContractedNotNull("selector");
 
             var functor = _functor;
             return new IO<TResult>(() => selector(functor()));
         }
 
-        /// <inheritdoc/>
+        /// <summary>LINQ-compatible implementation of the monadic bind operator.</summary>
+        /// <remarks>
+        /// Used for LINQ queries with a single <i>from</i> clause.
+        /// </remarks>
         [Pure]
-        public IMonad<TResult> SelectMany<TResult>(
-            Func<TSource, IMonad<TResult>> selector
+        public IO<TResult> SelectMany<TResult>(
+            Func<TSource, IO<TResult>> selector
         ) {
-            Contract.Ensures(Contract.Result<IMonad<TResult>>() != null);
+            selector.ContractedNotNull("selector");
 
             var functor = _functor;
-            return new IO<TResult>(() => selector(functor.Invoke()).Invoke());
+            return new IO<TResult>(selector(functor.Invoke()).Invoke);
         }
 
-        /// <inheritdoc/>
+        /// <summary>LINQ-compatible implementation of the monadic join operator.</summary>
+        /// <remarks>
+        /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
+        /// </remarks>
         [Pure]
-        public IMonad<TResult> SelectMany<T, TResult>(
-            Func<TSource, IMonad<T>> selector, 
+        public IO<TResult> SelectMany<T, TResult>(
+            Func<TSource, IO<T>> selector,
             Func<TSource, T, TResult> resultSelector
         ) {
-            Contract.Ensures(Contract.Result<IMonad<TResult>>() != null);
+            selector.ContractedNotNull("selector");
+            resultSelector.ContractedNotNull("resultSelector");
 
             var functor = _functor;
             return new IO<TResult>(() => {
                 var source = functor();
                 return selector(source).Select(t => resultSelector(source, t)).Invoke();
-            });
+            } );
         }
 
         ///<summary>The invariants enforced by this struct type.</summary>
