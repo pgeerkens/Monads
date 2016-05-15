@@ -27,10 +27,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Linq;
 
 namespace PGSolutions.Utilities.Monads {
 
@@ -146,17 +144,11 @@ namespace PGSolutions.Utilities.Monads {
             return result;
         }
 
-        ///<summary>Amplifies a reference-type T to a Maybe{T}.</summary>
-        ///<remarks>The monad <i>unit</i> function.</remarks>
-        public Maybe<TValue>       ToMaybe<TValue>(Maybe<TValue> maybe) =>
-            ! maybe.HasValue ? Maybe<TValue>.Nothing : maybe._value;
-
         /// <summary>Re-wraps a <typeparamref name="TValue"/> from a Maybe to a MaybeX.</summary>
-        public MaybeX<TValue>      ToMaybeX<TValue>(Maybe<TValue> maybe)
-        where TValue : class =>
+        public MaybeX<TValue>      ToMaybeX<TValue>(Maybe<TValue> maybe) where TValue : class =>
             ! maybe.HasValue ? MaybeX<TValue>.Nothing : maybe._value;
 
-        private readonly   T  _value;
+        private readonly T  _value;
 
         ///<summary>Returns the type of the underlying type &lt.TValue>.</summary>
         [Pure]
@@ -200,16 +192,14 @@ namespace PGSolutions.Utilities.Monads {
         public static bool operator != (Maybe<T> lhs, Maybe<T> rhs) => ! lhs.Equals(rhs);
 
         ///<summary>Tests value-equality, returning <b>Nothing</b> if either value doesn't exist.</summary>
-        public Maybe<bool> AreNonNullEqual(Maybe<T> rhs) =>
-            from lv in this
-            from rv in rhs
-            select lv.Equals(rv);
+        public bool? AreNonNullEqual(Maybe<T> rhs) =>
+            this.HasValue && rhs.HasValue ? this._value.Equals(rhs._value)
+                                          : null as bool?;
 
         ///<summary>Tests value-inequality, returning <b>Nothing</b> if either value doesn't exist.</summary>
-        public Maybe<bool> AreNonNullUnequal(Maybe<T> rhs) =>
-            from lv in this
-            from rv in rhs
-            select ! lv.Equals(rv);
+        public bool? AreNonNullUnequal(Maybe<T> rhs) =>
+            this.HasValue && rhs.HasValue ? !this._value.Equals(rhs._value)
+                                          : null as bool?;
         #endregion
 
         /// <inheritdoc/>

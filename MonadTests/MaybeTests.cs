@@ -156,7 +156,7 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
         public void ExcludedMiddleTest1() {
             Assert.Equal("George/",
                     string.Join("/", from e in data
-                                     where e.AreNonNullEqual("George") | false
+                                     where e.AreNonNullEqual("George") ?? false
                                      select e.ToNothingString()
                                ) + "/");
         }
@@ -165,7 +165,7 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
         public void ExcludedMiddleTest2() {
             Assert.Equal("Fred/Ron/Ginny/",
                     string.Join("/", from e in data
-                                     where e.AreNonNullUnequal("George") | false
+                                     where e.AreNonNullUnequal("George") ?? false
                                      select e.ToNothingString()
                                ) + "/");
         }

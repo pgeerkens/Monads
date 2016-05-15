@@ -27,10 +27,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Linq;
 
 namespace PGSolutions.Utilities.Monads {
 
@@ -48,7 +46,7 @@ namespace PGSolutions.Utilities.Monads {
     /// </remarks>
     public struct MaybeX<T> : IEquatable<MaybeX<T>> where T:class {
         private const string _ccCheckFailuare = 
-            "ccCheck failure - struct's never null, and 'MaybeX<TResult>.Nothing.AssumeInvariant()' inadequate!";
+            "ccCheck failure - struct's never null, and 'XYZ.AssumeInvariant()' is inadequate!";
 
         /// <summary>The Invalid Data value.</summary>
         [Pure]
@@ -151,15 +149,9 @@ namespace PGSolutions.Utilities.Monads {
 
             var result = new MaybeX<T>(value);
 
-            Contract.Assume(result != null, _ccCheckFailuare);
-            //result.AssumeInvariant();
+            Contract.Assume(result != null, _ccCheckFailuare);  //result.AssumeInvariant();
             return result;
         }
-
-        ///<summary>Amplifies a reference-type T to a MaybeX{T}.</summary>
-        ///<remarks>The monad <i>unit</i> function.</remarks>
-        public Maybe<T> ToMaybe() =>
-            _value == null ? Maybe<T>.Nothing : new Maybe<T>(_value);
 
         readonly T _value;
 
@@ -194,29 +186,25 @@ namespace PGSolutions.Utilities.Monads {
         [Pure]
         public override int GetHashCode() => (_value == null) ? 0 : _value.GetHashCode();
 
-        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
+        /// <summary>Tests value-equality, returning false if either value doesn't exist.</summary>
         [Pure]
         public static bool operator == (MaybeX<T> lhs, MaybeX<T> rhs) => lhs.Equals(rhs);
 
-        /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
+        /// <summary>Tests value-inequality, returning false if either value doesn't exist..</summary>
         [Pure]
         public static bool operator != (MaybeX<T> lhs, MaybeX<T> rhs) => ! lhs.Equals(rhs);
 
-        ///<summary>Tests value-equality, returning <b>Nothing</b> if either value doesn't exist.</summary>
+        ///<summary>Tests value-equality, returning <see cref="null"/> if either value doesn't exist.</summary>
         [Pure]
-        public Maybe<bool> AreNonNullEqual(MaybeX<T> rhs) =>
-            from t in ( from lv in this
-                        from rv in rhs
-                        select new { lv, rv }).ToMaybe()
-            select t.lv.Equals(t.rv);
+        public bool? AreNonNullEqual(MaybeX<T> rhs) =>
+            this.HasValue && rhs.HasValue ? this._value.Equals(rhs._value)
+                                          : null as bool?;
 
-        ///<summary>Tests value-equality, returning <b>Nothing</b> if either value doesn't exist.</summary>
+        ///<summary>Tests value-equality, returning <see cref="null"/> if either value doesn't exist.</summary>
         [Pure]
-        public Maybe<bool> AreNonNullUnequal(MaybeX<T> rhs) =>
-            from t in ( from lv in this
-                        from rv in rhs
-                        select new { lv, rv }).ToMaybe()
-            select ! t.lv.Equals(t.rv);
+        public bool? AreNonNullUnequal(MaybeX<T> rhs) =>
+            this.HasValue && rhs.HasValue ? ! this._value.Equals(rhs._value)
+                                          : null as bool?;
         #endregion
 
         /// <inheritdoc/>
