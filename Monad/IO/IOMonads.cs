@@ -73,7 +73,7 @@ namespace PGSolutions.Utilities.Monads {
             ReturnIOUnit(() => Write(arg));
 
         /// <summary>TODO</summary>
-    //    [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.Write(System.String,System.Object)")]
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.Write(System.String,System.Object)")]
         public static IO<Unit> ConsoleWrite<T>(string format, T arg) =>
              ReturnIOUnit(() => Write(format ?? nullFormat, arg));
 

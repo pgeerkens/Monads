@@ -33,7 +33,8 @@ using System.Diagnostics.Contracts;
 namespace PGSolutions.Utilities.Monads {
     /// <summary>TODO</summary>
     public struct IO<TSource> : IEquatable<IO<TSource>> {
-         public static IO<TSource> Empty { get { return _empty; } } readonly static IO<TSource> _empty = new IO<TSource>();
+        [SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
+        public static IO<TSource> Empty { get { return _empty; } } readonly static IO<TSource> _empty = new IO<TSource>();
 
        /// <summary>Create a new instance of the class.</summary>
         public IO(Func<TSource> functor) : this() {
