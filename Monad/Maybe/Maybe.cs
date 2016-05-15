@@ -178,8 +178,6 @@ namespace PGSolutions.Utilities.Monads {
         public bool Equals(Maybe<T> other) =>
             HasValue ? other.HasValue && _equals(_value, other._value)
                      : ! other.HasValue;
-            //   ( ! HasValue  &&  ! other.HasValue )
-            //|| ( HasValue  &&  other.HasValue  &&  _equals(_value, other._value) );
 
         /// <inheritdoc/>
         [Pure]
