@@ -37,10 +37,9 @@ namespace PGSolutions.Utilities.Monads.Demos {
     class Program {
         const string prompt = "Type 'Q' to quit; <Enter> to repeat ... ";
 
-        static int Main() { return ComprehensionSyntax(); }
-//        static int Main() { return FluentSyntax(); }
+        static int Main() => false ? ComprehensionSyntax() : FluentSyntax();
 
-        static int ComprehensionSyntax() { return
+        static int ComprehensionSyntax() =>
             ( from list in  ( from pass in Enumerable.Range(0,int.MaxValue)
                               let counter = Readers.Counter(0)
                               select from state in gcdStates
@@ -55,9 +54,8 @@ namespace PGSolutions.Utilities.Monads.Demos {
                     ).Invoke()
               select 0
             ).FirstOrDefault(); // Doesn't assume result list non-empty, unlike: ).First();
-        }
 
-        static int FluentSyntax() { return
+        static int FluentSyntax() =>
             ( Enumerable.Range(0,int.MaxValue)
                         .Select(pass => new {pass, counter = Readers.Counter(0)})
                         .Select(_    => gcdStates.Where(state => predicate(_.pass,_.counter()))
@@ -66,12 +64,11 @@ namespace PGSolutions.Utilities.Monads.Demos {
             ).Where(list => 
                ( Gcd.Run(list.ToList())
                     .SelectMany(_ => ConsoleWrite(prompt),(_,__) => new {_,__})
-                    .SelectMany(_ => ConsoleReadKey(),    (_,__) => new {_,c=__})
+                    .SelectMany(_ => ConsoleReadKey(),    (_, c) => new {_, c})
                     .SelectMany(_ => ConsoleWriteLine(),  (_,__) => ToUpper(_.c.KeyChar) == 'Q')
                ).Invoke()
             ).Select(list => 0
             ).FirstOrDefault(); // Doesn't assume result list non-empty, unlike: ).First();
-        }
 
         static readonly Func<int, int, bool> predicate =
                             (passNo, i) => passNo == 0  ?  i < 13
