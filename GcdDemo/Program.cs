@@ -37,84 +37,8 @@ namespace PGSolutions.Utilities.Monads.Demos {
     class Program {
         static string Prompt(string mode) => 
             String.Format("{0}: Type 'Q' to quit; <Enter> to repeat ... ",mode);
-
-        static int i = 0;
-        static int Main() => i==0 ? ImperativeSyntax("Imperative")
-                           : i==1 ? FluentSyntax("Fluent")
-                           : i==2 ? ComprehensionSyntax("Comprehension")
-                                  : ComprehensionSyntax2("Comprehension2");
-        #region Imperative syntax
-        static int ImperativeSyntax(string mode) {
-            for(int pass=0; pass < int.MaxValue; pass++) {
-                var counter = 0;
-                var list = gcdStates.Where(state => predicate(pass, counter++));
-
-                Gcd.Run(list.ToList());
-                Console.Write(Prompt(mode));
-                var c = Console.ReadKey();
-                Console.WriteLine();
-
-                if (ToUpper(c.KeyChar) == 'Q') break;
-            }
-            return 0;
-        }
-        #endregion
-        #region Fluent syntax
-        static int FluentSyntax(string mode) =>
-            ( Enumerable.Range(0,int.MaxValue)
-                        .Select(pass => new {pass, counter = Readers.Counter(0)})
-                        .Select(_    => gcdStates.Where(state => predicate(_.pass,_.counter()))
-                                                 .Select(state => state)
-                               )
-            ).Where(list => 
-               ( Gcd.Run(list.ToList())
-                    .SelectMany(_ => ConsoleWrite(Prompt(mode)),(_,__) => new {_,__})
-                    .SelectMany(_ => ConsoleReadKey(),    (_, c) => new {_, c})
-                    .SelectMany(_ => ConsoleWriteLine(),  (_,__) => ToUpper(_.c.KeyChar) == 'Q')
-               ).Invoke()
-            ).Select(list => 0
-            ).FirstOrDefault(); // Doesn't assume result list non-empty, unlike: ).First();
-        #endregion
-        #region Comprehension syntax
-        static int ComprehensionSyntax(string mode) =>
-            ( from list in  ( from pass in Enumerable.Range(0,int.MaxValue)
-                              let counter = Readers.Counter(0)
-                              select from state in gcdStates
-                                     where predicate(pass,counter())
-                                     select state
-                            )
-              where ( from _   in Gcd.Run(list.ToList())
-                      from __  in ConsoleWrite(Prompt(mode))
-                      from c   in ConsoleReadKey()
-                      from ___ in ConsoleWriteLine()
-                      select ToUpper(c.KeyChar) == 'Q' 
-                    ).Invoke()
-              select 0
-            ).FirstOrDefault(); // Doesn't assume result list non-empty, unlike: ).First();
-        #endregion
-        #region Comprehension syntax w/ Maybe<T>
-        static int ComprehensionSyntax2(string mode) =>
-            ( from list in ( from pass in Enumerable.Range(0, int.MaxValue)
-                             let counter = Readers.Counter(0)
-                             select from state in gcdStates
-                                    where predicate(pass, counter())
-                                    select state
-                           )
-              where ( from _   in Gcd.Run2(list.ToList()) | IO<Unit>.Empty
-                      from __  in ConsoleWrite(Prompt(mode))
-                      from c   in ConsoleReadKey()
-                      from ___ in ConsoleWriteLine()
-                      select ToUpper(c.KeyChar) == 'Q'
-                    ).Invoke()
-              select 0
-            ).FirstOrDefault(); // Doesn't assume result list non-empty, unlike: ).First();
-        #endregion
-
-        static bool predicate(int passNo, int i) =>
-                                           passNo == 0  ?  i < 13
-                                                        :  i < 2 || 11 < i;
         #region GCD States
-        static readonly IList<GcdStart> gcdStates = new List<GcdStart>() {
+        static readonly IList<GcdStart> gcdStarts = new List<GcdStart>() {
             new GcdStart(         40,            40),           //  0
             new GcdStart(        1024,           40),           //  1
 
@@ -132,6 +56,82 @@ namespace PGSolutions.Utilities.Monads.Demos {
             new GcdStart(      -32767, int.MaxValue-1),         // 12
             new GcdStart(           2, short.MaxValue*1000 - 1) // 13
         };
+        #endregion
+
+        static bool predicate(int passNo, int i) =>
+                                           passNo == 0  ?  i < 13
+                                                        :  i < 2 || 11 < i;
+
+        static int i = 1;
+        static int Main() => i==0 ? ImperativeSyntax("Imperative")
+                           : i==1 ? FluentSyntax("Fluent")
+                           : i==2 ? ComprehensionSyntax("Comprehension")
+                                  : ComprehensionSyntax2("Comprehension2");
+        #region Imperative syntax
+        static int ImperativeSyntax(string mode) {
+            for(int pass=0; pass < int.MaxValue; pass++) {
+                var counter = 0;
+                var list = gcdStarts.Where(state => predicate(pass, counter++));
+
+                Gcd.Run(list.ToList());
+                Console.Write(Prompt(mode));
+                var c = Console.ReadKey();
+                Console.WriteLine();
+
+                if (ToUpper(c.KeyChar) == 'Q') break;
+            }
+            return 0;
+        }
+        #endregion
+        #region Fluent syntax
+        static int FluentSyntax(string mode) =>
+            ( Enumerable.Range(0,int.MaxValue)
+                        .Select(pass => new {pass, counter = Readers.Counter(0)})
+                        .Select(_    => gcdStarts.Where(state => predicate(_.pass,_.counter()))
+                                                 .Select(state => state)
+                               )
+            ).Where(list => 
+               ( Gcd.Run(list.ToList())
+                    .SelectMany(_ => ConsoleWrite(Prompt(mode)),(_,__) => new {})
+                    .SelectMany(_ => ConsoleReadKey(),          (_, c) => new {c})
+                    .SelectMany(_ => ConsoleWriteLine(),        (_,__) => ToUpper(_.c.KeyChar) == 'Q')
+               ).Invoke()
+            ).Select(list => 0
+            ).FirstOrDefault(); // Doesn't assume result list non-empty, unlike: ).First();
+        #endregion
+        #region Comprehension syntax
+        static int ComprehensionSyntax(string mode) =>
+            ( from list in  ( from pass in Enumerable.Range(0,int.MaxValue)
+                              let counter = Readers.Counter(0)
+                              select from state in gcdStarts
+                                     where predicate(pass,counter())
+                                     select state
+                            )
+              where ( from _   in Gcd.Run(list.ToList())
+                      from __  in ConsoleWrite(Prompt(mode))
+                      from c   in ConsoleReadKey()
+                      from ___ in ConsoleWriteLine()
+                      select ToUpper(c.KeyChar) == 'Q' 
+                    ).Invoke()
+              select 0
+            ).FirstOrDefault(); // Doesn't assume result list non-empty, unlike: ).First();
+        #endregion
+        #region Comprehension syntax w/ Maybe<T>
+        static int ComprehensionSyntax2(string mode) =>
+            ( from list in ( from pass in Enumerable.Range(0, int.MaxValue)
+                             let counter = Readers.Counter(0)
+                             select from state in gcdStarts
+                                    where predicate(pass, counter())
+                                    select state
+                           )
+              where ( from _   in Gcd.Run2(list.ToList()) | IO<Unit>.Empty
+                      from __  in ConsoleWrite(Prompt(mode))
+                      from c   in ConsoleReadKey()
+                      from ___ in ConsoleWriteLine()
+                      select ToUpper(c.KeyChar) == 'Q'
+                    ).Invoke()
+              select 0
+            ).FirstOrDefault(); // Doesn't assume result list non-empty, unlike: ).First();
         #endregion
     }
 }
