@@ -29,110 +29,104 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.IO;
-
-using static System.Console;
 
 namespace PGSolutions.Utilities.Monads {
     /// <summary>TODO</summary>
-    /// <remarks>
-    /// Adapted from Dixin's Blog:
-    ///     https://weblogs.asp.net/dixin/category-theory-via-c-sharp-18-more-monad-io-monad
-    /// by the addition of Contract verification and some code reformatting.
-    /// </remarks>
-    public static partial class IOMonad {
-        private const string nullFormat = "format is null";
-
-        // η: T -> IO<T>
-        /// <summary>TODO</summary>
-        public static IO<T> ToIO<T>(this T value) => new IO<T>(() => value);
-
-        /// <summary>TODO</summary>
-        public static IO<Unit> ReturnIOUnit(Action action) {
-            action.ContractedNotNull("action");
-
-            action();
-            return Unit._.ToIO();
+    public struct IO<TSource> : IEquatable<IO<TSource>> {
+        /// <summary>Create a new instance of the class.</summary>
+        public IO(Func<TSource> functor) : this() {
+            functor.ContractedNotNull("source");
+            Contract.Ensures(_functor != null);
+            _functor = functor;
         }
 
-        /// <summary>TODO</summary>
-        public static readonly IO<int> ConsoleRead = new Func<int>(Read).AsIO();
+        /// <summary>Invokes the internal functor, returning the result.</summary>
+        public TSource Invoke() => _functor();  readonly Func<TSource> _functor;
 
         /// <summary>TODO</summary>
-        public static readonly IO<string> ConsoleReadLine = new Func<string>(ReadLine).AsIO();
+        [SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
+        public static IO<TSource> ToIO(Func<TSource> source) => new IO<TSource>(source);
 
-        /// <summary>TODO</summary>
-        public static IO<ConsoleKeyInfo> ConsoleReadKey() => new IO<ConsoleKeyInfo>(() => ReadKey());
+        /// <summary>LINQ-compatible implementation of the monadic map operator.</summary>
+        /// <remarks>
+        /// Used to implement the LINQ <i>let</i> clause.
+        /// </remarks>
+        [Pure]
+        public IO<TResult> Select<TResult>(
+            Func<TSource, TResult> projector
+        ) {
+            projector.ContractedNotNull("projector");
 
-        /// <summary>TODO</summary>
-        public static IO<Unit> ConsoleWrite(string value) =>
-            ReturnIOUnit(() => Write(value));
+            var functor = _functor;
+            return new IO<TResult>(() => projector(functor()));
+        }
 
-        /// <summary>TODO</summary>
-        public static IO<Unit> ConsoleWrite(object arg) =>
-            ReturnIOUnit(() => Write(arg));
+        /// <summary>LINQ-compatible implementation of the monadic bind operator.</summary>
+        /// <remarks>
+        /// Used for LINQ queries with a single <i>from</i> clause.
+        /// </remarks>
+        [Pure]
+        public IO<TResult> SelectMany<TResult>(
+            Func<TSource, IO<TResult>> selector
+        ) {
+            selector.ContractedNotNull("selector");
 
-        /// <summary>TODO</summary>
-    //    [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.Write(System.String,System.Object)")]
-        public static IO<Unit> ConsoleWrite<T>(string format, T arg) =>
-             ReturnIOUnit(() => Write(format ?? nullFormat, arg));
+            var functor = _functor;
+            return new IO<TResult>(selector(functor.Invoke()).Invoke);
+        }
 
-        /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.Write(System.String,System.Object,System.Object)")]
-        public static IO<Unit> ConsoleWrite(string format, object arg1, object arg2) =>
-             ReturnIOUnit(() => Write(format ?? nullFormat, arg1, arg2));
+        /// <summary>LINQ-compatible implementation of the monadic join operator.</summary>
+        /// <remarks>
+        /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
+        /// </remarks>
+        [Pure]
+        public IO<TResult> SelectMany<T, TResult>(
+            Func<TSource, IO<T>> selector,
+            Func<TSource, T, TResult> projector
+        ) {
+            selector.ContractedNotNull("selector");
+            projector.ContractedNotNull("projector");
 
-        /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.Write(System.String,System.Object,System.Object,System.Object)")]
-        public static IO<Unit> ConsoleWrite(string format, object arg1, object arg2, object arg3) =>
-             ReturnIOUnit(() => Write(format ?? nullFormat, arg1, arg2, arg3));
+            var functor = _functor;
+            return new IO<TResult>(() => {
+                var source = functor();
+                return selector(source).Select(t => projector(source, t)).Invoke();
+            } );
+        }
 
-        /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.Write(System.String,System.Object[])")]
-        public static IO<Unit> ConsoleWrite(string format, params object[] arg) =>
-            ReturnIOUnit(() => Write(format ?? nullFormat, arg));
+        ///<summary>The invariants enforced by this struct type.</summary>
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
+        [ContractInvariantMethod]
+        [Pure]
+        private void ObjectInvariant() {
+            Contract.Invariant(_functor != null);
+        }
 
-        /// <summary>TODO</summary>
-        public static IO<Unit> ConsoleWriteLine() =>
-            ReturnIOUnit(() => WriteLine());
+        #region Value Equality with IEquatable<T>.
+        /// <inheritdoc/>
+        [Pure]
+        public override bool Equals(object obj) {
+            var other = obj as IO<TSource>?;
+            return other != null && Equals(other.Value);
+        }
 
-        /// <summary>TODO</summary>
-        public static IO<Unit> ConsoleWriteLine(string value) =>
-            ReturnIOUnit(() => WriteLine(value));
+        /// <summary>Tests value-equality.</summary>
+        [Pure]
+        public bool Equals(IO<TSource> other) => _functor.Equals(other._functor);
 
-        /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String,System.Object)")]
-        public static IO<Unit> ConsoleWriteLine<T>(string format, T arg) =>
-            ReturnIOUnit(() => WriteLine(format ?? nullFormat, arg));
+        /// <inheritdoc/>
+        [Pure]
+        public override int GetHashCode() => _functor.GetHashCode();
 
-        /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String,System.Object,System.Object)")]
-        public static IO<Unit> ConsoleWriteLine(string format, object arg1, object arg2) =>
-             ReturnIOUnit(() => WriteLine(format ?? nullFormat, arg1, arg2));
+        /// <summary>Tests value-equality.</summary>
+        [Pure]
+        public static bool operator ==(IO<TSource> lhs, IO<TSource> rhs) => lhs.Equals(rhs);
 
-        /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String,System.Object,System.Object,System.Object)")]
-        public static IO<Unit> ConsoleWriteLine(string format, object arg1, object arg2, object arg3) =>
-             ReturnIOUnit(() => WriteLine(format ?? nullFormat, arg1, arg2, arg3));
-
-        /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String,System.Object[])")]
-        public static IO<Unit> ConsoleWriteLine(string format, params object[] arg) =>
-            ReturnIOUnit(() => WriteLine(format ?? nullFormat, arg));
-
-        /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification ="Delegates ARE immutable.")]
-        public static readonly Func<string, IO<bool>> FileExists =
-            new Func<string, bool>(File.Exists).AsIO();
-
-        /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Delegates ARE immutable.")]
-        public static readonly Func<string, IO<string>> FileReadAllText =
-            new Func<string, string>(File.ReadAllText).AsIO();
-
-        /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Delegates ARE immutable.")]
-        public static readonly Func<string, string, IO<Unit>> FileWriteAllText =
-            new Action<string, string>(File.WriteAllText).AsIO();
+        /// <summary>Tests value-inequality.</summary>
+        [Pure]
+        public static bool operator !=(IO<TSource> lhs, IO<TSource> rhs) => ! lhs.Equals(rhs);
+        #endregion
     }
 }
+

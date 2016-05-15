@@ -158,9 +158,9 @@
     <Compile Include="ContractExtensions.cs" />
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="IO\IO.cs" />
+    <Compile Include="IO\IOMonads.cs" />
     <Compile Include="IO\IOExtensions.cs" />
-    <Compile Include="IO\IOLinqExtensions.cs" />
+    <Compile Include="IO\IO.cs" />
     <Compile Include="Maybe\IntExtensions.cs" />
     <Compile Include="Maybe\Maybe.cs" />
     <Compile Include="Maybe\MaybeX.cs" />
