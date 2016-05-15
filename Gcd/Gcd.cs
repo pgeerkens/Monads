@@ -38,85 +38,52 @@ using System.Linq;
 using PGSolutions.Utilities.Monads;
 
 namespace PGSolutions.Utilities.Monads.Demos {
-  using PayloadMaybe  = StatePayload<Maybe<GcdStart>, Unit>;
+    using PayloadMaybe  = StatePayload<Maybe<GcdStart>, Unit>;
+    using static IOMonads;
 
-  /// <summary>Greatest Common DIvisor demo using State Monad.</summary>
-  /// <remarks>
-  /// Example based on http://mvanier.livejournal.com/5846.html
-  /// </remarks>
-  public static class Gcd {
-      static readonly CultureInfo _culture = CultureInfo.CurrentUICulture;
+    /// <summary>Greatest Common DIvisor demo using State Monad.</summary>
+    /// <remarks>
+    /// Example based on http://mvanier.livejournal.com/5846.html
+    /// </remarks>
+    public static class Gcd {
+        static readonly CultureInfo _culture = CultureInfo.CurrentUICulture;
 
-#if !FluentStyle
-      /// <summary>TODO</summary>
-      public static IO<Unit> Run(IEnumerable<GcdStart> states) {          
-        states.ContractedNotNull("states");
-        Contract.Ensures(Contract.Result<IO<Unit>>() != null);
-
-        return (
-            from test in Gcd_S4.GetTests(false)
-            let elapsed = Readers.Timer()
-            let isThird = Readers.MatchCounter(i => i==3, 1)
-            let results = from start in states 
-                          select new {
-                              Start  = start, 
-                              Result = from validated in ValidateState(start.ToMaybe()).State
-                                       select test.Transform(validated).Value
-                          }
-            
-            select ( from _   in IO.ConsoleWriteLine("{0}", test.Title)
-                     from __  in ( from item in results
-                                   select IO.ConsoleWriteLine(
-                                       @"    GCD = {0,14} for {1}; {3,-11}; Elapsed = {2:ss\.fff} secs",
-                                       item.Result.Select(
-                                           r => String.Format(_culture,"{0,14:N0}", r.Gcd)
-                                       ).Extract("incalculable"),
-                                       item.Start,
-                                       elapsed(),
-                                       isThird() ? "I'm third!" : ""
-                                   )
-                                 ).Last()
-                     from ___ in IO.ConsoleWriteLine(@"Elapsed Time: {0:ss\.ff} secs", elapsed())
-                     select IO.ConsoleWriteLine()
-                   )()
-        ).LastUnit();
-      }
-#else // ComprehensionStyle
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
-        public static IO<Unit> Run(IEnumerable<GcdStart> states) {          
-        states.ContractedNotNull("states");
-     //   Contract.Ensures(Contract.Result<IO2.IO<Unit>>() != null);
+        public static Maybe<IO<Unit>> Run2(Maybe<IReadOnlyList<GcdStart>> maybeStates) =>
+            from states in maybeStates select Run(states);
 
-        return (
-            from test in Gcd_S4.GetTests(false)
-            let elapsed = Readers.Timer()
-            let isThird = Readers.MatchCounter(i => i==3, 1)
-            let results = from start in states 
-                          select new {
-                              Start  = start, 
-                              Result = from validated in ValidateState(start.ToMaybe()).State
-                                       select test.Transform(validated).Value
-                          }
+        /// <summary>TODO</summary>
+        public static IO<Unit> Run(IReadOnlyList<GcdStart> states) {
+            states.ContractedNotNull("states");
+
+            return (
+                from test in Gcd_S4.GetTests(false)
+                let elapsed = Readers.Timer()
+                let isThird = Readers.MatchCounter(i => i==3, 1)
+                let results = from start in states 
+                              select new {
+                                  Start  = start, 
+                                  Result = from validated in ValidateState(start.ToMaybe()).State
+                                           select test.Transform(validated).Value
+                              }
             
-            select ( from _   in IOMonad.ConsoleWriteLine("{0}", test.Title)
-                     from __  in ( from item in results
-                                   select IOMonad.ConsoleWriteLine(
-                                       @"    GCD = {0,14} for {1}: Elapsed = {2:ss\.fff} secs; {3}",
-                                       ( from r in item.Result
-                                         select String.Format(_culture,"{0,14:N0}", r.Gcd)
-                                       ).Extract("incalculable"),
-                                       item.Start,
-                                       elapsed(),
-                                       isThird() ? "I'm third!" : ""
-                                   )
-                                 ).Last()
-                     from ___ in IOMonad.ConsoleWriteLine(@"Elapsed Time: {0:ss\.ff} secs", elapsed())
-                     select IOMonad.ConsoleWriteLine()
-                   ).Invoke()
-        ).LastOrDefault(); //Unit();
-      }
-#endif
+                select ( from _   in ConsoleWriteLine("{0}", test.Title)
+                         from __  in ( from item in results
+                                       select ConsoleWriteLine(
+                                           @"    GCD = {0,14} for {1}: Elapsed = {2:ss\.fff} secs; {3}",
+                                           ( from r in item.Result
+                                             select String.Format(_culture,"{0,14:N0}", r.Gcd)
+                                           ) | "incalculable",
+                                           item.Start,
+                                           elapsed(),
+                                           isThird() ? "I'm third!" : ""
+                                       )
+                                     ).Last()
+                         from ___ in ConsoleWriteLine(@"Elapsed Time: {0:ss\.ff} secs", elapsed())
+                         select ConsoleWriteLine()
+                       ).Invoke()
+            ).LastOrDefault();
+          }
 
         /// <summary>TODO</summary>
         private static PayloadMaybe ValidateState(Maybe<GcdStart> start) {

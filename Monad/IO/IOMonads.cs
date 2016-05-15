@@ -40,7 +40,7 @@ namespace PGSolutions.Utilities.Monads {
     ///     https://weblogs.asp.net/dixin/category-theory-via-c-sharp-18-more-monad-io-monad
     /// by the addition of Contract verification and some code reformatting.
     /// </remarks>
-    public static partial class IOMonad {
+    public static partial class IOMonads {
         private const string nullFormat = "format is null";
 
         // η: T -> IO<T>

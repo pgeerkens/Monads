@@ -31,46 +31,13 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
-#if Undefined
-namespace PGSolutions.Utilities.Monads {
-  /// <summary>TODO</summary>
-  public static class EnumerableExtensions {
-    /// <summary>TODO</summary>
-    public static IO<Unit> FirstUnit(this IEnumerable<IO<Unit>> @this) {
-      @this.ContractedNotNull("this");
-      Contract.Ensures(Contract.Result<IO<Unit>>() != null);
-
-      return @this.FirstOrDefault() ?? (()=>Unit._);
-    }
-
-    /// <summary>TODO</summary>
-    public static IO<Unit> LastUnit(this IEnumerable<IO<Unit>> @this) {
-      @this.ContractedNotNull("this");
-      Contract.Ensures(Contract.Result<IO<Unit>>() != null);
-
-      return @this.LastOrDefault() ?? (()=>Unit._);
-    }
-  }
-}
-#endif
-
 namespace PGSolutions.Utilities.Monads {
     /// <summary>TODO</summary>
     public static class EnumerableExtensions {
         /// <summary>TODO</summary>
         public static IO<Unit> FirstUnit(this IEnumerable<IO<Unit>> @this) {
             @this.ContractedNotNull("this");
-        //    Contract.Ensures(Contract.Result<IO2.IO<Unit>>() != null);
-
-            return @this.FirstOrDefault();// ?? (() => Unit._);
-        }
-
-        /// <summary>TODO</summary>
-        public static IO<Unit> LastUnit(this IEnumerable<IO<Unit>> @this) {
-            @this.ContractedNotNull("this");
-        //    Contract.Ensures(Contract.Result<IO2.IO<Unit>>() != null);
-
-            return @this.LastOrDefault();// ?? (() => Unit._);
+            return @this.FirstOrDefault();
         }
     }
 }
