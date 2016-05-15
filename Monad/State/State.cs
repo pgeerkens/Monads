@@ -178,7 +178,7 @@ namespace PGSolutions.Utilities.Monads {
             state.ContractedNotNull("state");
             Contract.Ensures(Contract.Result< State<TState,Unit> >() != null);
 
-            return new StatePayload<TState,Unit>(state, Unit._);
+            return (State<TState,Unit>) new StatePayload<TState,Unit>(state, Unit._);
         }
 
         /// <summary>Get's the current state as both State and Value.</summary>
@@ -186,7 +186,7 @@ namespace PGSolutions.Utilities.Monads {
             state.ContractedNotNull("state");
             Contract.Ensures(Contract.Result<State<TState, TState>>() != null);
 
-            return new StatePayload<TState, TState>(state, state);
+            return (State<TState,TState>) new StatePayload<TState, TState>(state, state);
         }
     }
 }

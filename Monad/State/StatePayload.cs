@@ -68,7 +68,7 @@ namespace PGSolutions.Utilities.Monads {
             } } readonly TValue _value;
 
         [Pure]
-        public static implicit operator State<TState,TValue>(StatePayload<TState, TValue> payload) {
+        public static explicit operator State<TState,TValue>(StatePayload<TState, TValue> payload) {
     #if PayloadAsClass
             payload.ContractedNotNull("payload");
     #endif
