@@ -34,7 +34,7 @@ using System.Linq;
 
 namespace PGSolutions.Utilities.Monads {
 
-    /// <summary>An immutable value-type MaybeX&lt;T> monad.</summary>
+    /// <summary>An immutable value-type MaybeX{T} monad.</summary>
     /// <typeparam name="TValue">The base type, which can be either a class or struct type,
     /// and will have the Equality definition track the default for the base-type:
     /// Value-equality for structs and string, reference equality for other classes.
@@ -51,13 +51,12 @@ namespace PGSolutions.Utilities.Monads {
             "ccCheck failure - struct's never null, and 'MaybeX<TResult>.Nothing.AssumeInvariant()' inadequate!";
 
         /// <summary>The Invalid Data value.</summary>
-        [SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
         [Pure]
         public static MaybeX<T> Nothing {
             get { return _nothing; }
         } static readonly MaybeX<T> _nothing = new MaybeX<T>();
 
-        ///<summary>Create a new MaybeX&lt;T>.</summary>
+        ///<summary>Create a new MaybeX{T}.</summary>
         public MaybeX(T value) : this() {
             Contract.Ensures(HasValue == (_value != null));
             Contract.Ensures( (_value == null)  == (value==null) );
@@ -77,7 +76,6 @@ namespace PGSolutions.Utilities.Monads {
             Func<T, TResult> projector
         ) where TResult : class {
             projector.ContractedNotNull("projector");
-            Contract.Ensures(Contract.Result<MaybeX<TResult>>() != null);
 
             return (_value == null) ? MaybeX<TResult>.Nothing : projector(_value);
         }
@@ -91,12 +89,8 @@ namespace PGSolutions.Utilities.Monads {
             Func<T, MaybeX<TResult>> selector
         ) where TResult:class {
             selector.ContractedNotNull("selector");
-            Contract.Ensures(Contract.Result<MaybeX<TResult>>() != null);
 
-            var result = (_value == null) ?  MaybeX<TResult>.Nothing  :  selector(_value);
-        
-            Contract.Assume(result != null, _ccCheckFailuare);
-            return result;
+            return (_value == null) ? MaybeX<TResult>.Nothing : selector(_value);
         }
 
         /// <summary>LINQ-compatible implementation of the monadic join operator.</summary>
@@ -109,14 +103,16 @@ namespace PGSolutions.Utilities.Monads {
         ) where TIntermediate:class where TResult:class {
             selector.ContractedNotNull("selector");
             projector.ContractedNotNull("projector");
-            Contract.Ensures(Contract.Result<MaybeX<TResult>>() != null);
 
             var @this = this;
             return (_value == null) ? MaybeX<TResult>.Nothing
                                     : selector(_value).Select(e => projector(@this._value, e));
         }
 
-        ///<summary>Extract value of the MaybeX&lt;T>, substituting <paramref name="defaultValue"/> as needed.</summary>
+        ///<summary>Returns whether this MaybeX{T} has a value.</summary>
+        public bool HasValue { [Pure]get { return _value != null; } }
+
+        ///<summary>Extract value of the MaybeX{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
         [Pure]
         public T Extract(T defaultValue) {
             defaultValue.ContractedNotNull("defaultValue");
@@ -124,7 +120,7 @@ namespace PGSolutions.Utilities.Monads {
 
             return _value ?? defaultValue;
         }
-        ///<summary>Extract value of the MaybeX&lt;T>, substituting <paramref name="defaultValue"/> as needed.</summary>
+        ///<summary>Extract value of the MaybeX{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
         [Pure]
         public static T operator | (MaybeX<T> value, T defaultValue) {
             defaultValue.ContractedNotNull("defaultValue");
@@ -133,13 +129,17 @@ namespace PGSolutions.Utilities.Monads {
             return value.Extract(defaultValue);
         }
 
-        ///<summary>Returns whether this MaybeX&lt;T> has a value.</summary>
-        public bool    HasValue { [Pure]get { return _value != null;} }
+        ///<summary>The invariants enforced by this struct type.</summary>
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
+        [ContractInvariantMethod]
+        [Pure]
+        private void ObjectInvariant() {
+            Contract.Invariant(HasValue == (_value != null));
+            Contract.Invariant(Nothing != null);
+        }
 
-        /////<summary>If this MaybeX&lt;T> has a value, returns it.</summary>
-        readonly T _value;
-
-        ///<summary>Wraps a T as a MaybeX&lt;T>.</summary>
+        ///<summary>Wraps a T as a MaybeX{T}.</summary>
         [Pure]
         public static implicit operator MaybeX<T>(T value) {
             Contract.Ensures(Contract.Result<MaybeX<T>>() != null);
@@ -150,22 +150,20 @@ namespace PGSolutions.Utilities.Monads {
             return result;
         }
 
-        ///<summary>The invariants enforced by this struct type.</summary>
-        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
-        [ContractInvariantMethod]
-        [Pure]private void ObjectInvariant() {
-            Contract.Invariant( HasValue == (_value != null) );
-            Contract.Invariant( Nothing != null );
-        }
+        ///<summary>Amplifies a reference-type T to a MaybeX{T}.</summary>
+        ///<remarks>The monad <i>unit</i> function.</remarks>
+        public Maybe<T> ToMaybe() =>
+            _value == null ? Maybe<T>.Nothing : new Maybe<T>(_value);
+
+        readonly T _value;
 
         ///<summary>Returns the type of the underlying type &lt.TValue>.</summary>
-        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
         [Pure]
-        public Type GetUnderlyingType() {
-            Contract.Ensures(Contract.Result<Type>() != null);
-
-            return typeof(T);
+        public Type GetUnderlyingType {
+            get {
+                Contract.Ensures(Contract.Result<System.Type>() != null);
+                return typeof(T);
+            }
         }
 
         #region Value Equality with IEquatable<T>.
@@ -215,11 +213,6 @@ namespace PGSolutions.Utilities.Monads {
             select ! t.lv.Equals(t.rv);
         #endregion
 
-        ///<summary>Amplifies a reference-type T to a MaybeX&lt;T>.</summary>
-        ///<remarks>The monad <i>unit</i> function.</remarks>
-        public Maybe<T> ToMaybe()  =>
-            _value == null ? Maybe<T>.Nothing : new Maybe<T>(_value);
-
         /// <inheritdoc/>
         [Pure]
         public override string ToString() {
@@ -229,7 +222,7 @@ namespace PGSolutions.Utilities.Monads {
     }
     [Pure]
     public static class MaybeX {
-        ///<summary>Amplifies a reference-type T to a MaybeX&lt;T>.</summary>
+        ///<summary>Amplifies a reference-type T to a MaybeX{T}.</summary>
         ///<remarks>The monad <i>unit</i> function.</remarks>
         public static MaybeX<TValue> ToMaybeX<TValue>(this TValue @this)
         where TValue:class => new MaybeX<TValue>(@this); 
