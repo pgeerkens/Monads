@@ -176,8 +176,10 @@ namespace PGSolutions.Utilities.Monads {
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]
         public bool Equals(Maybe<T> other) =>
-               ( ! HasValue  &&  ! other.HasValue )
-            || ( HasValue  &&  other.HasValue  &&  _equals(_value, other._value) );
+            HasValue ? other.HasValue && _equals(_value, other._value)
+                     : ! other.HasValue;
+            //   ( ! HasValue  &&  ! other.HasValue )
+            //|| ( HasValue  &&  other.HasValue  &&  _equals(_value, other._value) );
 
         /// <inheritdoc/>
         [Pure]

@@ -78,9 +78,9 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
             string george = string.Copy("George");
             Assert.Equal("George/",
                     string.Join("/",  from e in data
-                                        let s = from item in e select item
-                                        where s == george
-                                        select e.ToNothingString()
+                                      let s = from item in e select item
+                                      where s == george
+                                      select e.ToNothingString()
                                 ) + "/" );
         }
         [Fact][MsTest.TestMethod]
@@ -88,9 +88,9 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
             string george = string.Copy("George");
                 Assert.Equal("Fred/Nothing/Ron/Ginny/",
                     string.Join("/",  from e in data
-                                        let s = from item in e select item
-                                        where s != george
-                                        select e.ToNothingString()
+                                      let s = from item in e select item
+                                      where s != george
+                                      select e.ToNothingString()
                                 ) + "/" );
         }
 

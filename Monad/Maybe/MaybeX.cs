@@ -165,8 +165,6 @@ namespace PGSolutions.Utilities.Monads {
         }
 
         #region Value Equality with IEquatable<T>.
-        static readonly bool _valueIsString = typeof(string).IsAssignableFrom(typeof(T));
-
         /// <inheritdoc/>
         [Pure]
         public override bool Equals(object obj) { 
@@ -177,10 +175,8 @@ namespace PGSolutions.Utilities.Monads {
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]
         public bool Equals(MaybeX<T> other)  =>
-               ( (_value == null) && (other._value == null))
-            || ( (_value != null) && (other._value != null)
-              && (_value == other._value || (_valueIsString && _value.Equals(other._value)))
-               );
+            _value != null ? other._value != null && (_value == other._value || _value.Equals(other._value))
+                           : other._value == null;
 
         ///<summary>Retrieves the hash code of the object returned by the <see cref="_value"/> property.</summary>
         [Pure]
