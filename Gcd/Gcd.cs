@@ -53,6 +53,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
             from states in maybeStates select Run(states);
 
         /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         public static IO<Unit> Run(IReadOnlyList<GcdStart> states) {
             states.ContractedNotNull("states");
 
