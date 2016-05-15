@@ -51,8 +51,6 @@ namespace PGSolutions.Utilities.Monads.Demos {
 
         ExternalStateTest();
 
-        //StateMaybeTest();
-
         GcdTest1(new List<int>() {24,60,42,48,9}.AsReadOnly());
 
         var start = new GcdStart(40,1024);
