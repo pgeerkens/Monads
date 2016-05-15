@@ -35,23 +35,20 @@ using System.Linq;
 namespace PGSolutions.Utilities.Monads {
   public static class IntExtensions {
     public static Maybe<int> DoSomeDivision(this int @this, int denominator) {
-      return from a in @this.Div(denominator)
-             from b in a.Div(2)
+      return from a in @this.Divide(denominator)
+             from b in a.Divide(2)
              select b;
     }
-    [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "1",
-      Justification="Limitation of Code Analysis - verification done by Code Contracts.")]
     public static Maybe<int> DoSomeDivision(this int @this, params int[] denominators) {
       denominators.ContractedNotNull("denominators");
 
       var intermediate = @this.ToMaybe();
-      foreach (var d in denominators) intermediate = intermediate.SelectMany(v => v.Div(d));
+      foreach (var d in denominators) intermediate = intermediate.SelectMany(v => v.Divide(d));
       return intermediate;
     }
 
-    [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Div")]
-    public static Maybe<int> Div(this Maybe<int> numerator, Maybe<int> denominator) {
-      return numerator.SelectMany(n => denominator.SelectMany(d => n.Div(d)));
+    public static Maybe<int> Divide(this Maybe<int> numerator, Maybe<int> denominator) {
+      return numerator.SelectMany(n => denominator.SelectMany(d => n.Divide(d)));
     }
     public static Maybe<int> Add(this Maybe<int> numerator, Maybe<int> denominator) {
       return numerator.SelectMany(n => denominator.SelectMany(d => n.Add(d)));
@@ -60,8 +57,7 @@ namespace PGSolutions.Utilities.Monads {
       return numerator.SelectMany(n => denominator.SelectMany(d => n.Sub(d)));
     }
 
-    [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Div")]
-    public static Maybe<int> Div(this int numerator, int denominator) {
+    public static Maybe<int> Divide(this int numerator, int denominator) {
       return denominator == 0 || (numerator == Int32.MinValue && denominator == -1)
           ? Maybe<int>.Nothing
           : numerator / denominator;

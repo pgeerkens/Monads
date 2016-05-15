@@ -73,7 +73,7 @@ namespace PGSolutions.Utilities.Monads {
             ReturnIOUnit(() => Write(arg));
 
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.Write(System.String,System.Object)")]
+    //    [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.Write(System.String,System.Object)")]
         public static IO<Unit> ConsoleWrite<T>(string format, T arg) =>
              ReturnIOUnit(() => Write(format ?? nullFormat, arg));
 
@@ -121,14 +121,17 @@ namespace PGSolutions.Utilities.Monads {
             ReturnIOUnit(() => WriteLine(format ?? nullFormat, arg));
 
         /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification ="Delegates ARE immutable.")]
         public static readonly Func<string, IO<bool>> FileExists =
             new Func<string, bool>(File.Exists).AsIO();
 
         /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Delegates ARE immutable.")]
         public static readonly Func<string, IO<string>> FileReadAllText =
             new Func<string, string>(File.ReadAllText).AsIO();
 
         /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Delegates ARE immutable.")]
         public static readonly Func<string, string, IO<Unit>> FileWriteAllText =
             new Action<string, string>(File.WriteAllText).AsIO();
     }
