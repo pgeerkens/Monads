@@ -26,7 +26,6 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
-//#define IncludeAdvanced
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -122,23 +121,6 @@ namespace PGSolutions.Utilities.Monads {
             };
     }
 
-#if IncludeAdvanced
-    /// <summary>μ: Reader<TEnvironment, Reader<TEnvironment, T>> => Reader<TEnvironment, T></summary>
-    /// <typeparam name="TEnvironment"></typeparam>
-    /// <typeparam name="TResult"></typeparam>
-    /// <param name="source"></param>
-    public static Reader<TEnvironment,TResult>    Flatten<TEnvironment, TResult>(
-      Reader<TEnvironment, Reader<TEnvironment, TResult>> source
-    ) {
-        source.ContractedNotNull("source");
-        Contract.Ensures(Contract.Result<Reader<TEnvironment,TResult> >() != null);
-
-        //return source.SelectMany(Functions.Id);
-        //return environment => Functions.Id(source(environment))(environment);
-        return environment => Functions.Id(source(environment))(environment);
-    }
-#endif
-
     //// φ: Lazy<Reader<TEnvironment, T1>, Reader<TEnvironment, T2>> => Reader<TEnvironment, Lazy<T1, T2>>
     //public static Reader<TEnvironment, Lazy<T1, T2>> Binary<TEnvironment, T1, T2>
     //    (this Lazy<Reader<TEnvironment, T1>, Reader<TEnvironment, T2>> binaryFunctor) {
@@ -177,83 +159,5 @@ namespace PGSolutions.Utilities.Monads {
 
           return second;
       }
-
-#if IncludeAdvanced
-      // Id is alias of DotNet.Category.Id().Invoke
-      public static T Id<T>(T value) {
-          value.ContractedNotNull("value");
-          Contract.Ensures(Contract.Result<T>() != null);
-          
-          Contract.Assume(Contract.Result<T>() != null, "Advanced only - not vetted yet");
-          return DotNet.Category.Id<T>().Invoke(value);
-      }
-  }
-
-    public interface ICategory<TCategory> where TCategory : ICategory<TCategory> {
-      // o = (m2, m1) -> composition
-      [Pure]
-      IMorphism<TSource, TResult, TCategory> o<TSource, TMiddle, TResult>(
-          IMorphism<TMiddle, TResult, TCategory> m2, IMorphism<TSource, TMiddle, TCategory> m1);
-
-      [Pure]
-      IMorphism<TObject, TObject, TCategory> Id<TObject>();
-  }
-
-  public interface IMorphism<in TSource, out TResult, out TCategory>
-    where TCategory : ICategory<TCategory>
-  {
-      [Pure]
-      TCategory Category { get; }
-
-      [Pure]
-      TResult Invoke(TSource source);
-  }
-
-  public class DotNet : ICategory<DotNet> {
-      [Pure]
-      public IMorphism<TObject, TObject, DotNet> Id<TObject> () {
-        Contract.Ensures(Contract.Result<IMorphism<TObject, TObject, DotNet>>() != null);
-        return new DotNetMorphism<TObject, TObject>(@object => @object);
-      }
-
-      [Pure]
-      public IMorphism<TSource, TResult, DotNet> o<TSource, TMiddle, TResult>
-          (IMorphism<TMiddle, TResult, DotNet> m2, IMorphism<TSource, TMiddle, DotNet> m1) {
-        return
-              new DotNetMorphism<TSource, TResult>(@object => m2.Invoke(m1.Invoke(@object)));
-      }
-
-      private DotNet() { }
-
-      //public static DotNet Category {[Pure] get; } = new DotNet();
-      public static DotNet Category { [Pure]get {
-        Contract.Ensures(Contract.Result<DotNet>() != null);
-        return new DotNet();}
-      }
-  }
-
-  public class DotNetMorphism<TSource, TResult> : IMorphism<TSource, TResult, DotNet> {
-      private readonly Func<TSource, TResult> _function;
-
-      public DotNetMorphism(Func<TSource, TResult> function) {
-          function.ContractedNotNull("function");
-          this._function = function;
-      }
-
-      public DotNet Category {
-          [Pure]get {return DotNet.Category;}
-      }
-
-      [Pure]
-      public TResult Invoke(TSource source) { return this._function(source); }
-
-    /// <summary>The invariants enforced by this type.</summary>
-    [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-    [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
-    [ContractInvariantMethod]
-    [Pure]private void ObjectInvariant() {
-      Contract.Invariant( _function != null );
-    }
-#endif
   }
 }
