@@ -58,11 +58,10 @@ namespace PGSolutions.Utilities.Monads {
 
         ///<summary>Create a new MaybeX{T}.</summary>
         public MaybeX(T value) : this() {
-            Contract.Ensures(HasValue == (_value != null));
             Contract.Ensures( (_value == null)  == (value==null) );
 
+            Nothing.AssumeInvariant();
             _value    = value;
-            Contract.Assert(HasValue == (_value != null), "ccCheck failure - necessary for ObjectInvariant but trivial to prove.");
         }
 
         /// <summary>LINQ-compatible implementation of the monadic map operator.</summary>
@@ -110,7 +109,13 @@ namespace PGSolutions.Utilities.Monads {
         }
 
         ///<summary>Returns whether this MaybeX{T} has a value.</summary>
-        public bool HasValue { [Pure]get { return _value != null; } }
+        [Pure]
+        public bool HasValue {
+            get {
+                Contract.Ensures((_value != null) == HasValue);
+                return _value != null;
+            }
+        }
 
         ///<summary>Extract value of the MaybeX{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
         [Pure]
@@ -147,6 +152,7 @@ namespace PGSolutions.Utilities.Monads {
             var result = new MaybeX<T>(value);
 
             Contract.Assume(result != null, _ccCheckFailuare);
+            //result.AssumeInvariant();
             return result;
         }
 

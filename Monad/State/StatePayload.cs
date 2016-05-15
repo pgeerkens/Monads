@@ -48,17 +48,24 @@ namespace PGSolutions.Utilities.Monads {
 #endif
             state.ContractedNotNull("state");
             value.ContractedNotNull("value");
-            Contract.Ensures(State != null);
-            Contract.Ensures(Value != null);
+            Contract.Ensures(_state != null);
+            Contract.Ensures(_value != null);
 
             _state = state;  _value = value;
-
-            Contract.Assert( (State != null), "ccCheck failure - necessary for ObjectInvariant but trivial to prove.");
-            Contract.Assert( (Value != null), "ccCheck failure - necessary for ObjectInvariant but trivial to prove.");
         }
 
-        public TState State { [Pure]get {return _state; } } readonly TState _state;
-        public TValue Value { [Pure]get {return _value; } } readonly TValue _value;
+        [Pure]
+        public TState State {
+            get {
+                Contract.Ensures((_state != null) == (State != null));
+                return _state;
+            } } readonly TState _state;
+        [Pure]
+        public TValue Value {
+            get {
+                Contract.Ensures((_value != null) == (Value != null));
+                return _value;
+            } } readonly TValue _value;
 
         [Pure]
         public static implicit operator State<TState,TValue>(StatePayload<TState, TValue> payload) {
@@ -94,6 +101,8 @@ namespace PGSolutions.Utilities.Monads {
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         [ContractInvariantMethod]
         [Pure]private void ObjectInvariant() {
+            Contract.Invariant(_state != null);  Contract.Invariant((_state != null) == (State != null));
+            Contract.Invariant(_value != null);  Contract.Invariant((_value != null) == (Value!=null));
             Contract.Invariant( State != null );
             Contract.Invariant( Value != null );
         }
