@@ -167,10 +167,7 @@ namespace PGSolutions.Utilities.Monads {
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
         [Pure]
-        public override bool Equals(object obj) { 
-            var other = obj as MaybeX<T>?;
-            return other.HasValue  &&  Equals(other.Value);
-        }
+        public override bool Equals(object obj) => (obj as MaybeX<T>?)?.Equals(this) ?? false;
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]
