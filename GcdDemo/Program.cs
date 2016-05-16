@@ -38,7 +38,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
         static string Prompt(string mode) => 
             String.Format("{0}: Type 'Q' to quit; <Enter> to repeat ... ",mode);
         #region GCD States
-        static readonly IList<GcdStart> gcdStarts = new List<GcdStart>() {
+        static readonly IList<GcdStart> gcdStartStates = new List<GcdStart>() {
             new GcdStart(         40,            40),           //  0
             new GcdStart(        1024,           40),           //  1
 
@@ -59,19 +59,18 @@ namespace PGSolutions.Utilities.Monads.Demos {
         #endregion
 
         static bool predicate(int passNo, int i) =>
-                                           passNo == 0  ?  i < 13
-                                                        :  i < 2 || 11 < i;
+                    passNo == 0  ?  i < 13
+                                 :  i < 2 || 11 < i;
 
         static int i = 1;
         static int Main() => i==0 ? ImperativeSyntax("Imperative")
                            : i==1 ? FluentSyntax("Fluent")
                            : i==2 ? ComprehensionSyntax("Comprehension")
                                   : ComprehensionSyntax2("Comprehension2");
-        #region Imperative syntax
         static int ImperativeSyntax(string mode) {
             for(int pass=0; pass < int.MaxValue; pass++) {
                 var counter = 0;
-                var list = gcdStarts.Where(state => predicate(pass, counter++));
+                var list = gcdStartStates.Where(state => predicate(pass, counter++));
 
                 Gcd.Run(list.ToList());
                 Console.Write(Prompt(mode));
@@ -82,13 +81,12 @@ namespace PGSolutions.Utilities.Monads.Demos {
             }
             return 0;
         }
-        #endregion
         #region Fluent syntax
         static int FluentSyntax(string mode) =>
             ( Enumerable.Range(0,int.MaxValue)
                         .Select(pass => new {pass, counter = Readers.Counter(0)})
-                        .Select(_    => gcdStarts.Where(state => predicate(_.pass,_.counter()))
-                                                 .Select(state => state)
+                        .Select(_    => gcdStartStates.Where(state => predicate(_.pass,_.counter()))
+                                                      .Select(state => state)
                                )
             ).Where(list => 
                ( Gcd.Run(list.ToList())
@@ -103,7 +101,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
         static int ComprehensionSyntax(string mode) =>
             ( from list in  ( from pass in Enumerable.Range(0,int.MaxValue)
                               let counter = Readers.Counter(0)
-                              select from state in gcdStarts
+                              select from state in gcdStartStates
                                      where predicate(pass,counter())
                                      select state
                             )
@@ -120,7 +118,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
         static int ComprehensionSyntax2(string mode) =>
             ( from list in ( from pass in Enumerable.Range(0, int.MaxValue)
                              let counter = Readers.Counter(0)
-                             select from state in gcdStarts
+                             select from state in gcdStartStates
                                     where predicate(pass, counter())
                                     select state
                            )

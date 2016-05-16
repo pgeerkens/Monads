@@ -124,6 +124,18 @@ namespace PGSolutions.Utilities.Monads.Demos {
                                     };
         /// <summary>Extract either member from state as the exposed int value.</summary>
         private static readonly StateInt GcdExtract = s => new PayloadInt(s, s.A);
+
+        /// <summary>TODO</summary>
+        private struct Test : ITest {
+            /// <summary>TODO</summary>
+            public Test(StateRes transform, string title) { _transform = transform; _title = title; }
+            /// <summary>TODO</summary>
+            public StateRes Transform { get { return _transform; } }
+            readonly StateRes _transform;
+            /// <summary>TODO</summary>
+            public string Title { get { return _title; } }
+            readonly string _title;
+        }
         #endregion
 
         /// <summary>TODO</summary>
@@ -212,16 +224,6 @@ namespace PGSolutions.Utilities.Monads.Demos {
             /// <summary>TODO</summary>
             [Description("Best LINQ w/ Enumerate(Transform<TState>, TState) and w/o using 'let'.")]
             public static readonly StateRes Run3 = ToStateRes(_run3);
-        }
-
-        /// <summary>TODO</summary>
-        private struct Test : ITest {
-            /// <summary>TODO</summary>
-            public Test(StateRes transform, string title) { _transform = transform; _title = title; }
-            /// <summary>TODO</summary>
-            public StateRes       Transform  { get { return _transform;} } readonly StateRes _transform;
-            /// <summary>TODO</summary>
-            public string         Title      { get { return _title;    } } readonly string   _title;
         }
 
         /// <summary>TODO</summary>
