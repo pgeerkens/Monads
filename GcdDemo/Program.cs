@@ -62,7 +62,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
                     passNo == 0  ?  i < 13
                                  :  i < 2 || 11 < i;
 
-        static int i = 1;
+        static int i = 2;
         static int Main() => i==0 ? ImperativeSyntax("Imperative")
                            : i==1 ? FluentSyntax("Fluent")
                            : i==2 ? ComprehensionSyntax("Comprehension")
