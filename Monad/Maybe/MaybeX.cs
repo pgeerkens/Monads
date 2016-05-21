@@ -78,7 +78,7 @@ namespace PGSolutions.Utilities.Monads {
             return (_value == null) ? MaybeX<TResult>.Nothing : projector(_value);
         }
 
-        ///<summary>The monadic Bind operation of type T to type MaybeX&lt;TResult>.</summary>
+        ///<summary>The monadic Bind operation of type T to type MaybeX{TResult}.</summary>
         /// <remarks>
         /// Used for LINQ queries with a single <i>from</i> clause.
         /// </remarks>
