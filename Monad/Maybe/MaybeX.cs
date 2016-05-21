@@ -31,6 +31,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Utilities.Monads {
+    using static Contract;
 
     /// <summary>An immutable value-type MaybeX{T} monad.</summary>
     /// <typeparam name="TValue">The base type, which can be either a class or struct type,
@@ -49,16 +50,16 @@ namespace PGSolutions.Utilities.Monads {
             "ccCheck failure - struct's never null, and 'XYZ.AssumeInvariant()' is inadequate!";
 
         /// <summary>The Invalid Data value.</summary>
+        [SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
         [Pure]
         public static MaybeX<T> Nothing {
             get { return _nothing; }
         } static readonly MaybeX<T> _nothing = new MaybeX<T>();
 
         ///<summary>Create a new MaybeX{T}.</summary>
-        public MaybeX(T value) : this() {
-            Contract.Ensures( (_value == null)  == (value==null) );
+        private MaybeX(T value) : this() {
+            Ensures( (_value == null)  == (value==null) );
 
-            Nothing.AssumeInvariant();
             _value    = value;
         }
 
@@ -81,6 +82,7 @@ namespace PGSolutions.Utilities.Monads {
         /// <remarks>
         /// Used for LINQ queries with a single <i>from</i> clause.
         /// </remarks>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         [Pure]
         public  MaybeX<TResult> SelectMany<TResult>(
             Func<T, MaybeX<TResult>> selector
@@ -94,6 +96,7 @@ namespace PGSolutions.Utilities.Monads {
         /// <remarks>
         /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
         /// </remarks>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public MaybeX<TResult> SelectMany<TIntermediate, TResult>(
             Func<T, MaybeX<TIntermediate>> selector,
             Func<T,TIntermediate,TResult> projector
@@ -110,16 +113,16 @@ namespace PGSolutions.Utilities.Monads {
         [Pure]
         public bool HasValue {
             get {
-                Contract.Ensures((_value != null) == HasValue);
+                Ensures((_value != null) == HasValue);
                 return _value != null;
             }
         }
 
         ///<summary>Extract value of the MaybeX{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
         [Pure]
-        public T Extract(T defaultValue) {
+        public T BitwiseOr(T defaultValue) {
             defaultValue.ContractedNotNull("defaultValue");
-            Contract.Ensures(Contract.Result<T>() != null);
+            Ensures(Result<T>() != null);
 
             return _value ?? defaultValue;
         }
@@ -127,9 +130,9 @@ namespace PGSolutions.Utilities.Monads {
         [Pure]
         public static T operator | (MaybeX<T> value, T defaultValue) {
             defaultValue.ContractedNotNull("defaultValue");
-            Contract.Ensures(Contract.Result<T>() != null);
+            Ensures(Result<T>() != null);
 
-            return value.Extract(defaultValue);
+            return value.BitwiseOr(defaultValue);
         }
 
         ///<summary>The invariants enforced by this struct type.</summary>
@@ -138,20 +141,12 @@ namespace PGSolutions.Utilities.Monads {
         [ContractInvariantMethod]
         [Pure]
         private void ObjectInvariant() {
-            Contract.Invariant(HasValue == (_value != null));
-            Contract.Invariant(Nothing != null);
+            Invariant(HasValue == (_value != null));
         }
 
         ///<summary>Wraps a T as a MaybeX{T}.</summary>
         [Pure]
-        public static implicit operator MaybeX<T>(T value) {
-            Contract.Ensures(Contract.Result<MaybeX<T>>() != null);
-
-            var result = new MaybeX<T>(value);
-
-            Contract.Assume(result != null, _ccCheckFailuare);  //result.AssumeInvariant();
-            return result;
-        }
+        public static implicit operator MaybeX<T>(T value) => new MaybeX<T>(value);
 
         readonly T _value;
 
@@ -159,7 +154,7 @@ namespace PGSolutions.Utilities.Monads {
         [Pure]
         public Type GetUnderlyingType {
             get {
-                Contract.Ensures(Contract.Result<System.Type>() != null);
+                Ensures(Result<System.Type>() != null);
                 return typeof(T);
             }
         }
@@ -203,7 +198,7 @@ namespace PGSolutions.Utilities.Monads {
         /// <inheritdoc/>
         [Pure]
         public override string ToString() {
-            Contract.Ensures(Contract.Result<string>() != null);
+            Ensures(Result<string>() != null);
             return SelectMany<string>(v => v.ToString()) | "";
         }
     }
@@ -212,6 +207,6 @@ namespace PGSolutions.Utilities.Monads {
         ///<summary>Amplifies a reference-type T to a MaybeX{T}.</summary>
         ///<remarks>The monad <i>unit</i> function.</remarks>
         public static MaybeX<TValue> ToMaybeX<TValue>(this TValue @this)
-        where TValue:class => new MaybeX<TValue>(@this); 
+        where TValue:class => @this; 
     }
 }

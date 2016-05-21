@@ -50,7 +50,7 @@ namespace PGSolutions.Utilities.Monads {
         } static readonly Maybe<T> _nothing = new Maybe<T>();
 
         ///<summary>Create a new Maybe{T}.</summary>
-        public Maybe(T value) : this() {
+        private Maybe(T value) : this() {
             value.ContractedNotNull("value");
             Contract.Ensures((_value==null) == (value==null));
             Contract.Ensures(HasValue == (value!=null));
@@ -109,7 +109,7 @@ namespace PGSolutions.Utilities.Monads {
 
         ///<summary>Extract value of the Maybe{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
         [Pure]
-        public T Extract(T defaultValue) {
+        public T BitwiseOr(T defaultValue) {
             defaultValue.ContractedNotNull("defaultValue");
             Contract.Ensures(Contract.Result<T>() != null);
 
@@ -121,7 +121,7 @@ namespace PGSolutions.Utilities.Monads {
             defaultValue.ContractedNotNull("defaultValue");
             Contract.Ensures(Contract.Result<T>() != null);
 
-            return value.Extract(defaultValue);
+            return value.BitwiseOr(defaultValue);
         }
 
         /// <summary>The invariants enforced by this struct type.</summary>
@@ -137,12 +137,8 @@ namespace PGSolutions.Utilities.Monads {
 
         ///<summary>Wraps a T as a Maybe{T}.</summary>
         [Pure]
-        public static implicit operator Maybe<T>(T value) { 
-            Maybe<T>.Nothing.AssumeInvariant();
-            var result = value == null ? Maybe<T>.Nothing : new Maybe<T>(value);
-
-            return result;
-        }
+        public static implicit operator Maybe<T>(T value) =>
+            value == null ? Maybe<T>.Nothing : new Maybe<T>(value);
 
         /// <summary>Re-wraps a <typeparamref name="TValue"/> from a Maybe to a MaybeX.</summary>
         public MaybeX<TValue>      ToMaybeX<TValue>(Maybe<TValue> maybe) where TValue : class =>
@@ -213,7 +209,7 @@ namespace PGSolutions.Utilities.Monads {
         ///<summary>Amplifies a reference-type T to a Maybe{T}.</summary>
         ///<remarks>The monad <i>unit</i> function.</remarks>
         public static Maybe<TValue> ToMaybe<TValue>(this TValue @this) =>
-            @this==null ? Maybe<TValue>.Nothing : new Maybe<TValue>(@this);
+            @this==null ? Maybe<TValue>.Nothing : @this;
 
         ///<summary>Extract value of the Maybe{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
         [Pure]

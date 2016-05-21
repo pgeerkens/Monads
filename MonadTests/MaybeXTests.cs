@@ -44,9 +44,13 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
 
         [Fact][MsTest.TestMethod]
         public void BasicTest1() {
-            Assert.Equal("Fred/George//Ron/Ginny/",
-                    string.Join("/", from e in data
-                                    select e.ToString()) + "/");
+            var expected = "Fred/George//Ron/Ginny/";
+            var actual   = string.Join("/", from e in data
+                                            select e.ToString()) + "/";
+            Assert.Equal(expected, actual);
+            //Assert.Equal("Fred/George//Ron/Ginny/",
+            //        string.Join("/", from e in data
+            //                         select e.ToString()) + "/");
         }
         [Fact][MsTest.TestMethod]
         public void BasicTest2() {
@@ -148,7 +152,7 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
         [Fact][MsTest.TestMethod]
         public void LazyTest() {
             var state = new ExternalState();
-            var x = ( from a in new MaybeX<Func<int>>(state.GetState)
+            var x = ( from a in (MaybeX<Func<int>>)state.GetState
                     select a
                     ) | (()=>0);
             var y = x();

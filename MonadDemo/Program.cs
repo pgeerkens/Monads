@@ -150,7 +150,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
         private static void ExternalStateTest() {
       Console.WriteLine();
       var state = new ExternalState();
-      var x = ( from a in new Maybe<Func<int>>(state.GetState)
+      var x = ( from a in (Maybe<Func<int>>)(state.GetState)
                 select a
               ).Extract();
       var y = x();
