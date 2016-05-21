@@ -30,55 +30,55 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace System.Diagnostics.Contracts {
-  /// <summary>Extension methods to enhance Code Contracts and integration with Code Analysis.</summary>
-  [Pure]
-  public static class ContractExtensions {
+    /// <summary>Extension methods to enhance Code Contracts and integration with Code Analysis.</summary>
+    [Pure]
+    public static class ContractExtensions {
 #if RUNTIME_NULL_CHECKS
-    /// <summary>Throws <c>ArgumentNullException{name}</c> if <c>value</c> is null.</summary>
-    /// <param name="value">Value to be tested.</param>
-    /// <param name="name">Name of the parameter being tested, for use in the exception thrown.</param>
-    [ContractArgumentValidator]  // Requires Assemble Mode = Custom Parameter Validation
-    public static void ContractedNotNull<T>([ValidatedNotNull]this T value, string name) where T : class {
-      if (value == null) throw new ArgumentNullException(name);
-      Contract.EndContractBlock();
-    }
+        /// <summary>Throws <c>ArgumentNullException{name}</c> if <c>value</c> is null.</summary>
+        /// <param name="value">Value to be tested.</param>
+        /// <param name="name">Name of the parameter being tested, for use in the exception thrown.</param>
+        [ContractArgumentValidator]  // Requires Assemble Mode = Custom Parameter Validation
+        public static void ContractedNotNull<T>([ValidatedNotNull]this T value, string name) {
+              if (value == null) throw new ArgumentNullException(name);
+              Contract.EndContractBlock();
+        }
 #else
-    /// <summary>Throws <c>ContractException{name}</c> if <c>value</c> is null.</summary>
-    /// <param name="value">Value to be tested.</param>
-    /// <param name="name">Name of the parameter being tested, for use in the exception thrown.</param>
-    [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "value")]
-    [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "name")]
-    [ContractAbbreviator] // Requires Assemble Mode = Standard Contract Requires
-    public static void ContractedNotNull<T>([ValidatedNotNull]this T value, string name) {
-        Contract.Requires(value != null, name);
-    }
+        /// <summary>Throws <c>ContractException{name}</c> if <c>value</c> is null.</summary>
+        /// <param name="value">Value to be tested.</param>
+        /// <param name="name">Name of the parameter being tested, for use in the exception thrown.</param>
+        [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "value")]
+        [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "name")]
+        [ContractAbbreviator] // Requires Assemble Mode = Standard Contract Requires
+        public static void ContractedNotNull<T>([ValidatedNotNull]this T value, string name) {
+            Contract.Requires(value != null, name);
+        }
 #endif
 
-    /// <summary>Decorator for an object which is to have it's object invariants assumed.</summary>
-    [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "t")]
-    public static void AssumeInvariant<T>(this T t) { }
+        /// <summary>Decorator for an object which is to have it's object invariants assumed.</summary>
+        [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "t")]
+        public static void AssumeInvariant<T>(this T t) { }
 
-    /// <summary>Asserts the 'truth' of the logical implication <paramref name="condition"/> => <paramref name="contract"/>.</summary>
-    /// <remarks>
-    /// Doesn't work anymore in VS 2015 and CC 1.10.10126.4.
-    /// Unfortunate, bt not critical.
-    /// </remarks>
-    public static bool Implies(this bool condition, bool contract) {
-        Contract.Ensures((! condition || contract)  ==  Contract.Result<bool>() );
-        return ! condition || contract;
+        /// <summary>Asserts the 'truth' of the logical implication <paramref name="condition"/> => <paramref name="contract"/>.</summary>
+        /// <remarks>
+        /// Doesn't work anymore in VS 2015 and CC 1.10.10126.4.
+        /// Unfortunate, but not critical.
+        /// </remarks>
+        public static bool Implies(this bool condition, bool contract) {
+            Contract.Ensures((! condition || contract)  ==  Contract.Result<bool>() );
+            return ! condition || contract;
+        }
+
+        /// <summary>Returns true exactly if lower &lt;= value &lt; lower+height</summary>
+        /// <param name="value">Vlaue being tested.</param>
+        /// <param name="lower">Inclusive lower bound for the range.</param>
+        /// <param name="height">Height of the range.</param>
+        public static bool InRange(this int value, int lower, int height) {
+            Contract.Ensures( (lower <= value && value < lower+height)  ==  Contract.Result<bool>() );
+            return lower <= value && value < lower+height;
+        }
     }
 
-    /// <summary>Returns true exactly if lower &lt;= value &lt; lower+height</summary>
-    /// <param name="value">Vlaue being tested.</param>
-    /// <param name="lower">Inclusive lower bound for the range.</param>
-    /// <param name="height">Height of the range.</param>
-    public static bool InRange(this int value, int lower, int height) {
-        Contract.Ensures( (lower <= value && value < lower+height)  ==  Contract.Result<bool>() );
-        return lower <= value && value < lower+height;
-    }
-  }
-
-  /// <summary>Decorator for an incoming parameter that is contractually enforced as NotNull.</summary>
-  [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
-  public sealed class ValidatedNotNullAttribute : global::System.Attribute {}
+    /// <summary>Decorator for an incoming parameter that is contractually enforced as NotNull.</summary>
+    [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
+    public sealed class ValidatedNotNullAttribute : global::System.Attribute {}
 }
