@@ -62,12 +62,14 @@ namespace PGSolutions.Utilities.Monads.Demos {
                     passNo == 0  ?  i < 13
                                  :  i < 2 || 11 < i;
 
-        static int i = 2;
-        static int Main() => i==0 ? ImperativeSyntax("Imperative")
-                           : i==1 ? FluentSyntax("Fluent")
-                           : i==2 ? ComprehensionSyntax("Comprehension")
-                                  : ComprehensionSyntax2("Comprehension2");
-        static int ImperativeSyntax(string mode) {
+        static int i = 3;
+        static int Main() => ( i==0 ? ImperativeSyntax("Imperative")
+                             : i==1 ? FluentSyntax("Fluent")
+                             : i==2 ? ComprehensionSyntax("Comprehension")
+                                    : ComprehensionSyntax2("Comprehension2")
+                             ).FirstOrDefault(); // Doesn't assume result list non-empty, unlike: ).First();
+
+        static IEnumerable<int> ImperativeSyntax(string mode) {
             for(int pass=0; pass < int.MaxValue; pass++) {
                 var counter = 0;
                 var list = gcdStartStates.Where(state => predicate(pass, counter++));
@@ -77,12 +79,12 @@ namespace PGSolutions.Utilities.Monads.Demos {
                 var c = Console.ReadKey();
                 Console.WriteLine();
 
-                if (ToUpper(c.KeyChar) == 'Q') break;
+                if (ToUpper(c.KeyChar) == 'Q') yield return 0; //break;
             }
-            return 0;
+      //      return 0;
         }
         #region Fluent syntax
-        static int FluentSyntax(string mode) =>
+        static IEnumerable<int> FluentSyntax(string mode) =>
             ( Enumerable.Range(0,int.MaxValue)
                         .Select(pass => new {pass, counter = Readers.Counter(0)})
                         .Select(_    => gcdStartStates.Where(state => predicate(_.pass,_.counter()))
@@ -95,10 +97,10 @@ namespace PGSolutions.Utilities.Monads.Demos {
                     .SelectMany(_ => ConsoleWriteLine(),        (_,__) => ToUpper(_.c.KeyChar) == 'Q')
                ).Invoke()
             ).Select(list => 0
-            ).FirstOrDefault(); // Doesn't assume result list non-empty, unlike: ).First();
+            );
         #endregion
         #region Comprehension syntax
-        static int ComprehensionSyntax(string mode) =>
+        static IEnumerable<int> ComprehensionSyntax(string mode) =>
             ( from list in  ( from pass in Enumerable.Range(0,int.MaxValue)
                               let counter = Readers.Counter(0)
                               select from state in gcdStartStates
@@ -112,10 +114,10 @@ namespace PGSolutions.Utilities.Monads.Demos {
                       select ToUpper(c.KeyChar) == 'Q' 
                     ).Invoke()
               select 0
-            ).FirstOrDefault(); // Doesn't assume result list non-empty, unlike: ).First();
+            );
         #endregion
         #region Comprehension syntax w/ Maybe<T>
-        static int ComprehensionSyntax2(string mode) =>
+        static IEnumerable<int> ComprehensionSyntax2(string mode) =>
             ( from list in ( from pass in Enumerable.Range(0, int.MaxValue)
                              let counter = Readers.Counter(0)
                              select from state in gcdStartStates
@@ -129,7 +131,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
                       select ToUpper(c.KeyChar) == 'Q'
                     ).Invoke()
               select 0
-            ).FirstOrDefault(); // Doesn't assume result list non-empty, unlike: ).First();
+            );
         #endregion
     }
 }
