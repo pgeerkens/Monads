@@ -40,7 +40,7 @@ namespace PGSolutions.Utilities.Monads {
   /// <summary>TODO</summary>
   [Pure]public static class TransformExtensions {
       /// <summary>TODO</summary>
-      public static State<TState,Unit>                  DoWhile<TState>( this
+      public static State<TState,Unit>      DoWhile<TState>( this
           Transform<TState> @this,
           Func<TState,bool> predicate
       ) {
@@ -54,7 +54,7 @@ namespace PGSolutions.Utilities.Monads {
       }
 
       /// <summary>Generates an unending stream of successive TState objects.</summary>
-      public static IEnumerable<TState>                 Enumerate<TState>( this
+      public static IEnumerable<TState>     Enumerate<TState>( this
           Transform<TState> @this,
           TState startState
       ) {
@@ -66,7 +66,7 @@ namespace PGSolutions.Utilities.Monads {
       }
 
       /// <summary>Puts the transformed state and returns the original.</summary>
-      public static State<TState,TState>                Modify<TState>( this
+      public static State<TState,TState>    Modify<TState>( this
           Transform<TState> @this
       ) {
           @this.ContractedNotNull("this");
