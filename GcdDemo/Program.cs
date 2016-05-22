@@ -118,19 +118,19 @@ namespace PGSolutions.Utilities.Monads.Demos {
         #endregion
         #region Comprehension syntax w/ Maybe<T>
         static IEnumerable<int> ComprehensionSyntax2(string mode) =>
-            ( from list in ( from pass in Enumerable.Range(0, int.MaxValue)
-                             let counter = Readers.Counter(0)
-                             select from state in gcdStartStates
-                                    where predicate(pass, counter())
-                                    select state
-                           )
-              where ( from _   in Gcd.Run2(list.ToList()) | IO<Unit>.Empty
-                      from __  in ConsoleWrite(Prompt(mode))
-                      from c   in ConsoleReadKey()
-                      from ___ in ConsoleWriteLine()
-                      select ToUpper(c.KeyChar) == 'Q'
-                    ).Invoke()
-              select 0
+            (  from pass in Enumerable.Range(0, int.MaxValue)
+               let counter = Readers.Counter(0)
+               select ( from state in gcdStartStates
+                        where predicate(pass, counter())
+                        select state
+                      ) into list
+               where ( from _   in Gcd.Run2(list.ToList()) | IO<Unit>.Empty
+                       from __  in ConsoleWrite(Prompt(mode))
+                       from c   in ConsoleReadKey()
+                       from ___ in ConsoleWriteLine()
+                       select ToUpper(c.KeyChar) == 'Q'
+                     ).Invoke()
+               select 0
             );
         #endregion
     }

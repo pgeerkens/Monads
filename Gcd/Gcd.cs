@@ -61,15 +61,13 @@ namespace PGSolutions.Utilities.Monads.Demos {
                 from test in Gcd_S4.GetTests(false)
                 let elapsed = Readers.Timer()
                 let isThird = Readers.MatchCounter(i => i==3, 1)
-                let results = from start in states 
-                              select new {
-                                  Start  = start, 
-                                  Result = from validated in ValidateState(start.ToMaybe()).State
-                                           select test.Transform(validated).Value
-                              }
-            
                 select ( from _   in ConsoleWriteLine("{0}", test.Title)
-                         from __  in ( from item in results
+                         from __  in ( from start in states
+                                       select new {
+                                          Start = start,
+                                          Result = from validated in ValidateState(start.ToMaybe()).State
+                                                   select test.Transform(validated).Value
+                                       } into item
                                        select ConsoleWriteLine(
                                            @"    GCD = {0,14} for {1}: Elapsed = {2:ss\.fff} secs; {3}",
                                            ( from r in item.Result
@@ -86,23 +84,24 @@ namespace PGSolutions.Utilities.Monads.Demos {
             ).LastOrDefault();
           }
 
-        /// <summary>TODO</summary>
+        /// <summary>Return a pair of positive integers with the same GCD as the supplied parameters.</summary>
         private static PayloadMaybe ValidateState(Maybe<GcdStart> start) {
             return new PayloadMaybe(
-                    from state in start
-                    from x in state.A == 1 || state.B == 1 ? new GcdStart(1, 1)
-                            : state.A != int.MinValue
-                           && state.B != int.MinValue ? new GcdStart(Math.Abs(state.A), Math.Abs(state.B))
-                            : state.A == state.B      ? new GcdStart(state.A, state.B)
-                            : state.A == int.MinValue ? new GcdStart(Math.Abs(state.A + Math.Abs(state.B)),
-                                                                     Math.Abs(state.B))
+                from state in start
+                from x in state.A == 1
+                       || state.B == 1            ? new GcdStart(1, 1)
+                        : state.A != int.MinValue
+                       && state.B != int.MinValue ? new GcdStart(Math.Abs(state.A), Math.Abs(state.B))
+                        : state.A == state.B      ? new GcdStart(state.A, state.B)
+                        : state.A == int.MinValue ? new GcdStart(Math.Abs(state.A + Math.Abs(state.B)),
+                                                                 Math.Abs(state.B))
 #if PreventIncalculable
-                            : state.B == int.MinValue  ? new GcdStart(Math.Abs(state.A), 
-                                                                      Math.Abs(state.B + Math.Abs(state.A)))
+                        : state.B == int.MinValue ? new GcdStart(Math.Abs(state.A), 
+                                                                 Math.Abs(state.B + Math.Abs(state.A)))
 #endif
-                            : Maybe<GcdStart>.Nothing
-                    select x
-                , Unit._);
+                        : Maybe<GcdStart>.Nothing
+                select x,
+                Unit._);
         }
     }
 }
