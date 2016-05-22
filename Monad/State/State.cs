@@ -60,7 +60,7 @@ namespace PGSolutions.Utilities.Monads {
             };
         }
 
-        /// <summary>Generates an unending stream of successive StatePayload&amp;TState,T> objects.</summary>
+        /// <summary>Generates an unending stream of successive StatePayload{TState,T} objects.</summary>
         public static IEnumerable<StatePayload<TState,TValue>>  Enumerate<TState,TValue>( this
             State<TState,TValue> @this,
             TState startState

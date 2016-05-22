@@ -33,14 +33,24 @@ namespace System.Diagnostics.Contracts {
     /// <summary>Extension methods to enhance Code Contracts and integration with Code Analysis.</summary>
     [Pure]
     public static class ContractExtensions {
-#if RUNTIME_NULL_CHECKS
+#if CUSTOM_CONTRACT_VALIDATION
         /// <summary>Throws <c>ArgumentNullException{name}</c> if <c>value</c> is null.</summary>
         /// <param name="value">Value to be tested.</param>
         /// <param name="name">Name of the parameter being tested, for use in the exception thrown.</param>
         [ContractArgumentValidator]  // Requires Assemble Mode = Custom Parameter Validation
-        public static void ContractedNotNull<T>([ValidatedNotNull]this T value, string name) {
+        public static void ContractedNotNullEx<T>([ValidatedNotNull]this T value, string name) {
               if (value == null) throw new ArgumentNullException(name);
               Contract.EndContractBlock();
+        }
+        /// <summary>Throws <c>ArgumentNullException{name}</c> if <c>value</c> is null.</summary>
+        /// <param name="value">Value to be tested.</param>
+        /// <param name="name">Name of the parameter being tested, for use in the exception thrown.</param>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="E"></typeparam>
+        [ContractArgumentValidator]  // Requires Assemble Mode = Custom Parameter Validation
+        public static void ContractedNotNullEx<T,E>([ValidatedNotNull]this T value, string name)
+        where E:Exception {
+            Contract.Requires<E>(value != null, name);
         }
 #else
         /// <summary>Throws <c>ContractException{name}</c> if <c>value</c> is null.</summary>

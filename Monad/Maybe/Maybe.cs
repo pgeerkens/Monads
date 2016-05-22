@@ -31,6 +31,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Utilities.Monads {
+    using static Contract;
 
     /// <summary>An immutable value-type Maybe{T} monad.</summary>
     /// <typeparam name="T">The base type, which can be either a class or struct type,
@@ -46,38 +47,37 @@ namespace PGSolutions.Utilities.Monads {
     /// </remarks>
     public struct Maybe<T> : IEquatable<Maybe<T>> {
         /// <summary>The Invalid data value.</summary>
+        [Pure]
         public static Maybe<T> Nothing { get { return _nothing; }
         } static readonly Maybe<T> _nothing = new Maybe<T>();
 
         ///<summary>Create a new Maybe{T}.</summary>
         private Maybe(T value) : this() {
-            value.ContractedNotNull("value");
-            Contract.Ensures((_value==null) == (value==null));
-            Contract.Ensures(HasValue == (value!=null));
-            Contract.Ensures((_value != null) || !_valueIsStruct);
+            Ensures(!HasValue ||  _value != null);
 
             _value    = value;
-            _hasValue = true;
+            _hasValue = _value != null;
         }
 
         /// <summary>LINQ-compatible implementation of the monadic map operator.</summary>
         ///<remarks>
-        /// Used to implement the LINQ <i>let</i> clause.
+        /// Used to implement the LINQ <i>let</i> clause and queries with a single FROM clause.
         /// 
         /// Always available from Bind():
         ///         return @this.Bind(v => projector(v).ToMaybe());
         ///</remarks>
+        [Pure]
         public Maybe<TResult> Select<TResult>(
             Func<T, TResult> projector
         ) {
             projector.ContractedNotNull("projector");
 
-            return !HasValue ? Maybe<TResult>.Nothing : projector(_value);
+            return ! _hasValue ? Maybe<TResult>.Nothing : projector(_value);
         }
 
         ///<summary>The monadic Bind operation of type T to type MaybeX{TResult}.</summary>
         /// <remarks>
-        /// Used for LINQ queries with a single <i>from</i> clause.
+        /// Convenience method - not used by LINQ
         /// </remarks>
         [Pure]
         public Maybe<TResult> SelectMany<TResult>(
@@ -85,13 +85,14 @@ namespace PGSolutions.Utilities.Monads {
         ) {
             selector.ContractedNotNull("selector");
 
-            return ! HasValue  ?  Maybe<TResult>.Nothing  :  selector(_value);
+            return ! _hasValue  ?  Maybe<TResult>.Nothing  :  selector(_value);
         }
 
         /// <summary>LINQ-compatible implementation of the monadic join operator.</summary>
         /// <remarks>
         /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
         /// </remarks>
+        [Pure]
         public Maybe<TResult> SelectMany<TIntermediate, TResult>(
             Func<T, Maybe<TIntermediate>> selector,
             Func<T, TIntermediate, TResult> projector
@@ -100,26 +101,28 @@ namespace PGSolutions.Utilities.Monads {
             projector.ContractedNotNull("projector");
 
             var @this = this;
-            return !HasValue ? Maybe<TResult>.Nothing
-                             : selector(_value).Select(e => projector(@this._value, e));
+            return ! _hasValue ? Maybe<TResult>.Nothing
+                               : selector(_value).Select(e => projector(@this._value, e));
         }
 
         ///<summary>Returns whether this Maybe{T} has a value.</summary>
-        public bool HasValue { [Pure]get {return _hasValue;} } readonly bool _hasValue;
+        public bool HasValue { get { return _hasValue; } }
 
         ///<summary>Extract value of the Maybe{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
         [Pure]
         public T BitwiseOr(T defaultValue) {
             defaultValue.ContractedNotNull("defaultValue");
-            Contract.Ensures(Contract.Result<T>() != null);
+            Ensures(Result<T>() != null);
 
-            return ! HasValue  ?  defaultValue  : _value;
+            var result = !_hasValue ? defaultValue : _value;
+            Assume(result != null);
+            return result;
         }
         ///<summary>Extract value of the Maybe{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
         [Pure]
         public static T operator | (Maybe<T> value, T defaultValue) {
             defaultValue.ContractedNotNull("defaultValue");
-            Contract.Ensures(Contract.Result<T>() != null);
+            Ensures(Result<T>() != null);
 
             return value.BitwiseOr(defaultValue);
         }
@@ -130,26 +133,20 @@ namespace PGSolutions.Utilities.Monads {
         [ContractInvariantMethod]
         [Pure]
         private void ObjectInvariant() {
-            Contract.Invariant( HasValue == (_value != null) );
-            Contract.Invariant( this != null );
-            Contract.Invariant((_value != null)  ||  ! _valueIsStruct);
+            Invariant(!HasValue || _value != null);
         }
 
         ///<summary>Wraps a T as a Maybe{T}.</summary>
         [Pure]
-        public static implicit operator Maybe<T>(T value) =>
-            value == null ? Maybe<T>.Nothing : new Maybe<T>(value);
+        public static implicit operator Maybe<T>(T value) => new Maybe<T>(value);
 
-        /// <summary>Re-wraps a <typeparamref name="TValue"/> from a Maybe to a MaybeX.</summary>
-        public MaybeX<TValue>      ToMaybeX<TValue>(Maybe<TValue> maybe) where TValue : class =>
-            ! maybe.HasValue ? MaybeX<TValue>.Nothing : maybe._value;
+        readonly T    _value;
+        readonly bool _hasValue;
 
-        private readonly T  _value;
-
-        ///<summary>Returns the type of the underlying type &lt.TValue>.</summary>
+        ///<summary>Returns the type of the underlying type {TValue}.</summary>
         [Pure]
         public Type GetUnderlyingType {
-            get { Contract.Ensures(Contract.Result<System.Type>() != null);
+            get { Ensures(Result<System.Type>() != null);
                   return typeof(T);}
         }
 
@@ -185,20 +182,22 @@ namespace PGSolutions.Utilities.Monads {
         public static bool operator != (Maybe<T> lhs, Maybe<T> rhs) => ! lhs.Equals(rhs);
 
         ///<summary>Tests value-equality, returning <b>Nothing</b> if either value doesn't exist.</summary>
+        [Pure]
         public bool? AreNonNullEqual(Maybe<T> rhs) =>
-            this.HasValue && rhs.HasValue ? this._value.Equals(rhs._value)
-                                          : null as bool?;
+            HasValue && rhs.HasValue ? _value.Equals(rhs._value)
+                                     : null as bool?;
 
         ///<summary>Tests value-inequality, returning <b>Nothing</b> if either value doesn't exist.</summary>
+        [Pure]
         public bool? AreNonNullUnequal(Maybe<T> rhs) =>
-            this.HasValue && rhs.HasValue ? !this._value.Equals(rhs._value)
-                                          : null as bool?;
+            HasValue && rhs.HasValue ? !_value.Equals(rhs._value)
+                                     : null as bool?;
         #endregion
 
         /// <inheritdoc/>
         [Pure]
         public override string ToString() {
-            Contract.Ensures(Contract.Result<string>() != null);
+            Ensures(Result<string>() != null);
             return SelectMany<string>(v => v.ToString()) | "";
         }
     }
@@ -208,13 +207,14 @@ namespace PGSolutions.Utilities.Monads {
 
         ///<summary>Amplifies a reference-type T to a Maybe{T}.</summary>
         ///<remarks>The monad <i>unit</i> function.</remarks>
+        [Pure]
         public static Maybe<TValue> ToMaybe<TValue>(this TValue @this) =>
-            @this==null ? Maybe<TValue>.Nothing : @this;
+            @this == null ? Maybe<TValue>.Nothing : (Maybe<TValue>)@this;
 
         ///<summary>Extract value of the Maybe{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
         [Pure]
         public static  Func<TStruct>  Extract<TStruct>(this Maybe<Func<TStruct>> @this) where TStruct:struct {
-            Contract.Ensures(Contract.Result<Func<TStruct>>() != null);
+            Ensures(Result<Func<TStruct>>() != null);
             return @this | (()=>default(TStruct));
         }
     }

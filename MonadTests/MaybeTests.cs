@@ -154,11 +154,12 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
         [Fact]
         [MsTest.TestMethod]
         public void ExcludedMiddleTest1() {
-            Assert.Equal("George/",
-                    string.Join("/", from e in data
-                                     where e.AreNonNullEqual("George") ?? false
-                                     select e.ToNothingString()
-                               ) + "/");
+            var expected = "George/";
+            var actual   = string.Join("/", from e in data
+                                            where e.AreNonNullEqual("George") ?? false
+                                            select e.ToNothingString()
+                               ) + "/";
+            Assert.Equal(expected, actual);
         }
         [Fact]
         [MsTest.TestMethod]
@@ -197,11 +198,12 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
         /// </remarks>
         [Fact][MsTest.TestMethod]
         public void WesDyerTest2() {
-            Assert.Equal("Nothing",
-                    ( from x in 5.ToMaybe()
-                      from y in Maybe<int>.Nothing
-                      select x + y
-                    ).ToNothingString() );
+            var expected = "Nothing";
+            var actual   = (from x in 5.ToMaybe()
+                            from y in Maybe<int>.Nothing
+                            select x + y
+                    ).ToNothingString();
+            Assert.Equal(expected, actual);
         }
 
         /// <summary>Chaining with LINQ Fluent syntax: one invalid</summary>

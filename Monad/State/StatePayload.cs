@@ -34,7 +34,7 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 
 namespace PGSolutions.Utilities.Monads {
-    /// <summary>Class delivered by an instance of the <see cref="State&lt;TState,TValue>"/> monad.</summary>
+    /// <summary>Class delivered by an instance of the <see cref="State{TState,TValue}"/> monad.</summary>
     /// <typeparam name="TState">Type of the internal state.</typeparam>
     /// <typeparam name="TValue">Type of the delivered value.</typeparam>
     [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible",

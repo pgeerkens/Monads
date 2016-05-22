@@ -42,7 +42,7 @@ namespace TrafficLightDemo {
     [ContractClassFor(typeof(ISettableLight<>))]
     public abstract class ISettableLightContract<T> : ISettableLight<T> {
         public IO<Unit> SetColour(T colour) {
-            colour.ContractedNotNull("colour");
+            Contract.Requires(colour != null, "colour");
             return Unit._.ToIO();
         }
     }

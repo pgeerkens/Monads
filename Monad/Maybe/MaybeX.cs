@@ -46,9 +46,6 @@ namespace PGSolutions.Utilities.Monads {
     /// for both instances.
     /// </remarks>
     public struct MaybeX<T> : IEquatable<MaybeX<T>> where T:class {
-        private const string _ccCheckFailuare = 
-            "ccCheck failure - struct's never null, and 'XYZ.AssumeInvariant()' is inadequate!";
-
         /// <summary>The Invalid Data value.</summary>
         [SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
         [Pure]
@@ -58,14 +55,12 @@ namespace PGSolutions.Utilities.Monads {
 
         ///<summary>Create a new MaybeX{T}.</summary>
         private MaybeX(T value) : this() {
-            Ensures( (_value == null)  == (value==null) );
-
             _value    = value;
         }
 
         /// <summary>LINQ-compatible implementation of the monadic map operator.</summary>
         ///<remarks>
-        /// Used to implement the LINQ <i>let</i> clause.
+        /// Used to implement the LINQ <i>let</i> clause and queries with a single FROM clause.
         /// 
         /// Always available from Bind():
         ///         return @this.Bind(v => projector(v).ToMaybe());
@@ -80,7 +75,7 @@ namespace PGSolutions.Utilities.Monads {
 
         ///<summary>The monadic Bind operation of type T to type MaybeX{TResult}.</summary>
         /// <remarks>
-        /// Used for LINQ queries with a single <i>from</i> clause.
+        /// Convenience method - not used by LINQ
         /// </remarks>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         [Pure]
@@ -150,7 +145,7 @@ namespace PGSolutions.Utilities.Monads {
 
         readonly T _value;
 
-        ///<summary>Returns the type of the underlying type &lt.TValue>.</summary>
+        ///<summary>Returns the type of the underlying type {TValue}.</summary>
         [Pure]
         public Type GetUnderlyingType {
             get {

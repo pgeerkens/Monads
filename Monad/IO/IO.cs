@@ -46,10 +46,6 @@ namespace PGSolutions.Utilities.Monads {
         /// <summary>Invokes the internal functor, returning the result.</summary>
         public TSource Invoke() => _functor();  readonly Func<TSource> _functor;
 
-        /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
-        public static IO<TSource> ToIO(Func<TSource> source) => new IO<TSource>(source);
-
         /// <summary>LINQ-compatible implementation of the monadic map operator.</summary>
         /// <remarks>
         /// Used to implement the LINQ <i>let</i> clause.
@@ -130,6 +126,15 @@ namespace PGSolutions.Utilities.Monads {
         [Pure]
         public static bool operator !=(IO<TSource> lhs, IO<TSource> rhs) => ! lhs.Equals(rhs);
         #endregion
+    }
+
+    [Pure]
+    public static class IO {
+        /// <summary>TODO</summary>
+        public static IO<TSource> ToIO<TSource>( this Func<TSource> source) {
+            source.ContractedNotNull("source");
+            return new IO<TSource>(source);
+        }
     }
 }
 
