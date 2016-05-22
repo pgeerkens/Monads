@@ -171,7 +171,6 @@
     <Compile Include="Reader\Reader.cs" />
     <Compile Include="State\State.cs" />
     <Compile Include="State\StateExtensions.cs" />
-    <Compile Include="State\StateMaybe.cs" />
     <Compile Include="State\StatePayload.cs" />
     <Compile Include="State\Transform.cs" />
     <Compile Include="Unit.cs" />
