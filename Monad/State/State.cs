@@ -35,13 +35,18 @@ using System.Linq;
 namespace PGSolutions.Utilities.Monads {
 
     /// <summary>The State monad.</summary>
-    /// <typeparam name="TValue">Type of the calculated value exposed by this instance.</typeparam>
     /// <typeparam name="TState">Type of the internal state threaded by this instance.</typeparam>
+    /// <typeparam name="TValue">Type of the calculated value exposed by this instance.</typeparam>
     public delegate StatePayload<TState,TValue>   State<TState, TValue>(TState s);
 
     /// <summary>TODO</summary>
-    /// <typeparam name="TState">Type of the state which this delegate selects</typeparam>
+    /// <typeparam name="TState">Type of the state to and from which this delegate selects</typeparam>
+    /// <typeparam name="TValue">Type of the value which this delegate accepts</typeparam>
     public delegate State<TState,TValue>          Selector<TState,TValue>(TState s);
+    /// <summary>TODO</summary>
+    /// <typeparam name="TState">Type of the state to and from which this delegate selects</typeparam>
+    /// <typeparam name="TValue">Type of the value which this delegate accepts</typeparam>
+    /// <typeparam name="TResult">Type of the value which this delegate returns</typeparam>
     public delegate State<TState,TResult>         PayloadSelector<TState,TValue,TResult>(StatePayload<TState,TValue> p);
 
     /// <summary>Core Monadic functionality for State, as Extension methods</summary>
