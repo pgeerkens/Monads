@@ -42,6 +42,7 @@ namespace PGSolutions.Utilities.Monads {
     /// <summary>TODO</summary>
     /// <typeparam name="TState">Type of the state which this delegate selects</typeparam>
     public delegate State<TState,TValue>          Selector<TState,TValue>(TState s);
+    public delegate State<TState,TResult>         PayloadSelector<TState,TValue,TResult>(StatePayload<TState,TValue> p);
 
     /// <summary>Core Monadic functionality for State, as Extension methods</summary>
     [Pure]
@@ -91,8 +92,8 @@ namespace PGSolutions.Utilities.Monads {
         ///                        in runState (g y) st')
         /// </remarks>
         public static State<TState,TResult>       SelectMany<TState,TValue,TResult> ( this
-              State<TState,TValue> @this,
-          Func<StatePayload<TState,TValue>, State<TState,TResult>> selector
+            State<TState,TValue> @this,
+            PayloadSelector<TState, TValue, TResult> selector
         ) {
             selector.ContractedNotNull("selector");
             Contract.Ensures(Contract.Result<State<TState,TResult>>() != null);
@@ -112,7 +113,7 @@ namespace PGSolutions.Utilities.Monads {
         /// </remarks>
         public static State<TState,TResult>       SelectMany<TState,TValue,T,TResult> ( this
             State<TState,TValue> @this,
-            Func<StatePayload<TState,TValue>, State<TState,T>> selector,
+            PayloadSelector<TState, TValue, T> selector,
             Func<TValue, T, TResult> projector
         ) {
             selector.ContractedNotNull("selector");

@@ -31,8 +31,9 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace PGSolutions.Utilities.Monads.Demos {
-    using static IOMonads;
     using static Char;
+    using static Console;
+    using static IOMonads;
 
     class Program {
         static string Prompt(string mode) => 
@@ -58,7 +59,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
         };
         #endregion
 
-        static bool predicate(int passNo, int i) =>
+        static bool _predicate(int passNo, int i) =>
                     passNo == 0  ?  i < 13
                                  :  i < 2 || 11 < i;
 
@@ -72,12 +73,12 @@ namespace PGSolutions.Utilities.Monads.Demos {
         static IEnumerable<int> ImperativeSyntax(string mode) {
             for(int pass=0; pass < int.MaxValue; pass++) {
                 var counter = 0;
-                var list = gcdStartStates.Where(state => predicate(pass, counter++));
+                var list = gcdStartStates.Where(state => _predicate(pass, counter++));
 
-                Gcd.Run(list.ToList());
-                Console.Write(Prompt(mode));
-                var c = Console.ReadKey();
-                Console.WriteLine();
+                Gcd.Run2(list.ToList());
+                Write(Prompt(mode));
+                var c = ReadKey();
+                WriteLine();
 
                 if (ToUpper(c.KeyChar) == 'Q') yield return 0; //break;
             }
@@ -87,7 +88,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
         static IEnumerable<int> FluentSyntax(string mode) =>
             ( Enumerable.Range(0,int.MaxValue)
                         .Select(pass => new {pass, counter = Readers.Counter(0)})
-                        .Select(_    => gcdStartStates.Where(state => predicate(_.pass,_.counter()))
+                        .Select(_    => gcdStartStates.Where(state => _predicate(_.pass,_.counter()))
                                                       .Select(state => state)
                                )
             ).Where(list => 
@@ -104,7 +105,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
             ( from list in  ( from pass in Enumerable.Range(0,int.MaxValue)
                               let counter = Readers.Counter(0)
                               select from state in gcdStartStates
-                                     where predicate(pass,counter())
+                                     where _predicate(pass,counter())
                                      select state
                             )
               where ( from _   in Gcd.Run(list.ToList())
@@ -118,19 +119,19 @@ namespace PGSolutions.Utilities.Monads.Demos {
         #endregion
         #region Comprehension syntax w/ Maybe<T>
         static IEnumerable<int> ComprehensionSyntax2(string mode) =>
-            (  from pass in Enumerable.Range(0, int.MaxValue)
-               let counter = Readers.Counter(0)
-               select ( from state in gcdStartStates
-                        where predicate(pass, counter())
-                        select state
-                      ) into list
-               where ( from _   in Gcd.Run2(list.ToList()) | IO<Unit>.Empty
-                       from __  in ConsoleWrite(Prompt(mode))
-                       from c   in ConsoleReadKey()
-                       from ___ in ConsoleWriteLine()
-                       select ToUpper(c.KeyChar) == 'Q'
-                     ).Invoke()
-               select 0
+            ( from pass in Enumerable.Range(0, int.MaxValue)
+              let counter = Readers.Counter(0)
+              select ( from state in gcdStartStates
+                       where _predicate(pass, counter())
+                       select state
+                     ) into list
+              where ( from _   in Gcd.Run2(list.ToList()) | IO<Unit>.Empty
+                      from __  in ConsoleWrite(Prompt(mode))
+                      from c   in ConsoleReadKey()
+                      from ___ in ConsoleWriteLine()
+                      select ToUpper(c.KeyChar) == 'Q'
+                    ).Invoke()
+              select 0
             );
         #endregion
     }
