@@ -152,11 +152,11 @@ namespace PGSolutions.Utilities.Monads {
 
         #region Value Equality with IEquatable<T> and "excluded middle" present w/ either side has no value.
         #region implicit static constructor
-        static readonly bool             _valueIsStruct = typeof(ValueType).IsAssignableFrom(typeof(T))
-                                                       || typeof(string).IsAssignableFrom(typeof(T));
-        static readonly Func<T, T, bool> _valEquals     = (T lhs, T rhs) => lhs.Equals(rhs);
-        static readonly Func<T, T, bool> _refEquals     = (T lhs, T rhs) => ReferenceEquals(lhs, rhs);
-        static readonly Func<T,T,bool>   _equals        = _valueIsStruct ? _valEquals  : _refEquals;
+        static readonly bool           _valueIsStruct = typeof(ValueType).IsAssignableFrom(typeof(T))
+                                                     || typeof(string).IsAssignableFrom(typeof(T));
+        static readonly Func<T,T,bool> _valEquals     = (T lhs, T rhs) => lhs.Equals(rhs);
+        static readonly Func<T,T,bool> _refEquals     = (T lhs, T rhs) => ReferenceEquals(lhs, rhs);
+        static readonly Func<T,T,bool> _equals        = _valueIsStruct ? _valEquals  : _refEquals;
         #endregion
 
         /// <inheritdoc/>

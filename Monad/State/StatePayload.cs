@@ -26,62 +26,52 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
-//#define PayloadAsClass    //  minor observed performance penalty for small class vs small struct.
-
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 
 namespace PGSolutions.Utilities.Monads {
+    using static Contract;
+
     /// <summary>Class delivered by an instance of the <see cref="State{TState,TValue}"/> monad.</summary>
     /// <typeparam name="TState">Type of the internal state.</typeparam>
     /// <typeparam name="TValue">Type of the delivered value.</typeparam>
+    /// <remarks>
+    ///  Minor observed performance penalty for small class vs small struct.
+    /// </remarks>
     [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible",
         Justification = "This nested type shares the Generic Type parameters of its parent, and is structurally associated with it.")]
-#if PayloadAsClass
-    public sealed class StatePayload<TState, TValue> : IEquatable<StatePayload<TState, TValue>> {
-        public StatePayload(TState state, TValue value) {
-#else
     public struct StatePayload<TState, TValue> : IEquatable<StatePayload<TState, TValue>> {
         public StatePayload(TState state, TValue value) : this() {
-#endif
             state.ContractedNotNull("state");
             value.ContractedNotNull("value");
-            Contract.Ensures(_state != null);
-            Contract.Ensures(_value != null);
+            Ensures(_state != null);
+            Ensures(_value != null);
 
             _state = state;  _value = value;
         }
 
-        [Pure]
         public TState State {
             get {
-                Contract.Ensures((_state != null) == (State != null));
+                Ensures((_state != null) == (State != null));
                 return _state;
             } } readonly TState _state;
-        [Pure]
         public TValue Value {
             get {
-                Contract.Ensures((_value != null) == (Value != null));
+                Ensures((_value != null) == (Value != null));
                 return _value;
             } } readonly TValue _value;
 
         [Pure]
         public static explicit operator State<TState,TValue>(StatePayload<TState, TValue> payload) {
-    #if PayloadAsClass
-            payload.ContractedNotNull("payload");
-    #endif
-            Contract.Ensures(Contract.Result<State<TState,TValue>>() != null);
+            Ensures(Result<State<TState,TValue>>() != null);
 
             return s => payload;
         }
         [Pure]
         public static State<TState, TValue> ToState(StatePayload<TState, TValue> payload) {
-    #if PayloadAsClass
-            payload.ContractedNotNull("payload");
-    #endif
-            Contract.Ensures(Contract.Result<State<TState,TValue>>() != null);
+            Ensures(Result<State<TState,TValue>>() != null);
 
             return s => payload;
         }
@@ -101,21 +91,17 @@ namespace PGSolutions.Utilities.Monads {
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         [ContractInvariantMethod]
         [Pure]private void ObjectInvariant() {
-            Contract.Invariant(_state != null);  Contract.Invariant((_state != null) == (State != null));
-            Contract.Invariant(_value != null);  Contract.Invariant((_value != null) == (Value!=null));
-            Contract.Invariant( State != null );
-            Contract.Invariant( Value != null );
+            Invariant(_state != null);  Invariant((_state != null) == (State != null));
+            Invariant(_value != null);  Invariant((_value != null) == (Value!=null));
+            Invariant( State != null );
+            Invariant( Value != null );
         }
 
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
         [Pure]
         public override bool Equals(object obj) {
-    #if PayloadAsClass
-            var other = (obj as StatePayload<TState, TValue>).ToMaybe();
-    #else
             var other = (obj as StatePayload<TState, TValue>?).ToMaybe();
-    #endif
             var @this = this;
             return other.SelectMany<bool>(o => o.Equals(@this)) | false;
             //return other != null  &&  this.Equals(other);
@@ -124,14 +110,7 @@ namespace PGSolutions.Utilities.Monads {
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]
         public bool Equals(StatePayload<TState, TValue> other) {
-    #if PayloadAsClass
-            other.ContractedNotNull("other");
-    #endif
             return this.Value.Equals(other.Value) && this.State.Equals(other.State);
-        }
-
-        [Pure] bool IEquatable<StatePayload<TState, TValue>>.Equals(StatePayload<TState, TValue> other) {
-            return this.Equals(other);
         }
 
         /// <inheritdoc/>
@@ -141,27 +120,19 @@ namespace PGSolutions.Utilities.Monads {
         /// <inheritdoc/>
         [Pure]
         public override string ToString() {
-            Contract.Ensures(Contract.Result<string>() != null);
-                return String.Format(CultureInfo.InvariantCulture, "({0},{1})",Value, State);
-            }
+            Ensures(Result<string>() != null);
+            return String.Format(CultureInfo.InvariantCulture, "({0},{1})",Value, State);
+        }
 
-            /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-            [Pure]
+        /// <summary>Tests value-equality.</summary>
+        [Pure]
         public static bool operator ==(StatePayload<TState, TValue> lhs, StatePayload<TState, TValue> rhs) {
-    #if PayloadAsClass
-            lhs.ContractedNotNull("lhs");
-            rhs.ContractedNotNull("rhs");
-    #endif
           return lhs.Equals(rhs);
         }
 
-        /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
+        /// <summary>Tests value-inequality.</summary>
         [Pure]
         public static bool operator !=(StatePayload<TState, TValue> lhs, StatePayload<TState, TValue> rhs) {
-    #if PayloadAsClass
-            lhs.ContractedNotNull("lhs");
-            rhs.ContractedNotNull("rhs");
-    #endif
           return !lhs.Equals(rhs);
         }
         #endregion

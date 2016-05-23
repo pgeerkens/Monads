@@ -28,48 +28,84 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Linq;
-
-using PGSolutions.Utilities.Monads;
 
 namespace PGSolutions.Utilities.Monads {
 
-  /// <summary>LINQ-compatible extension methods for <see cref="StateTuple<TState,TValue>"/>.</summary>
-  [Pure]
-  public static class StateExtensions {
+    /// <summary>TODO</summary>
+    /// <typeparam name="TState">Type of the state which this delegate transforms.</typeparam>
+    public delegate TState Transform<TState>(TState s);
 
-    /// <summary>Implementation of <b>compose</b>: (>=>): f >=> g = \x -> (f x >>= g). </summary>
-    /// <remarks> Optimized implementation of:
-    ///         return this.Bind(t => follower(t.Item2));
-    /// </remarks>
-    public static State<TState,TResult>   Compose<TState,TValue,TResult> ( this
-        State<TState, TValue> @this,
-        Func<TState, State<TState,TResult>> follower
-    ) {
-        @this.ContractedNotNull("this");
-        follower.ContractedNotNull("follower");
-        Contract.Ensures(Contract.Result<State<TState,TResult>>() != null);
+    /// <summary>Extension methods for <see cref="StateTuple<TState,TValue>"/>.</summary>
+    [Pure]
+    public static class StateExtensions {
 
-        return new State<TState,TResult>( s => follower(s)(@this(s).State) );
+        /// <summary>Implementation of <b>compose</b>: (>=>): f >=> g = \x -> (f x >>= g). </summary>
+        /// <remarks> Optimized implementation of:
+        ///         return this.Bind(t => follower(t.Item2));
+        /// </remarks>
+        public static State<TState,TResult>   Compose<TState,TValue,TResult> ( this
+            State<TState, TValue> @this,
+            Func<TState, State<TState,TResult>> follower
+        ) {
+            @this.ContractedNotNull("this");
+            follower.ContractedNotNull("follower");
+            Contract.Ensures(Contract.Result<State<TState,TResult>>() != null);
+
+            return new State<TState,TResult>( s => follower(s)(@this(s).State) );
+        }
+
+        /// <summary>Implementation of <b>then</b>: (>>):  mv1 >> mv2  =  mv1 >>= (\_ -> mv2)</summary>
+        /// <remarks> Optimized implementation of:
+        ///         return @this.Bind(t => follower);
+        /// or
+        ///         return @this.Then(s => follower);
+        /// </remarks>
+        public static State<TState,TResult>   Then<TState,TValue,TResult>( this
+            State<TState, TValue> @this,
+            State<TState, TResult> follower
+        ) {
+            @this.ContractedNotNull("this");
+            follower.ContractedNotNull("follower");
+            Contract.Ensures(Contract.Result<State<TState,TResult>>() != null);
+
+            return new State<TState,TResult>( s => follower(@this(s).State) );
+        }
+
+        /// <summary>TODO</summary>
+        public static State<TState, Unit> DoWhile<TState>(this
+            Transform<TState> @this, 
+            Predicate<TState> predicate
+        ) {
+            @this.ContractedNotNull("this");
+            Contract.Ensures(Contract.Result<State<TState, Unit>>() != null);
+
+            return s => {
+                while (predicate(s)) { s = @this(s); }
+                return new StatePayload<TState, Unit>(s, Unit._);
+            };
+        }
+
+        /// <summary>Generates an unending stream of successive TState objects.</summary>
+        public static IEnumerable<TState> Enumerate<TState>(this
+            Transform<TState> @this,
+            TState startState
+        ) {
+            @this.ContractedNotNull("this");
+            startState.ContractedNotNull("startState");
+            Contract.Ensures(Contract.Result<IEnumerable<TState>>() != null);
+
+            while (true) yield return (startState = @this(startState));
+        }
+
+        /// <summary>Puts the transformed state and returns the original.</summary>
+        public static State<TState, TState> Modify<TState>(this
+            Transform<TState> @this
+        ) {
+            @this.ContractedNotNull("this");
+            Contract.Ensures(Contract.Result<State<TState, TState>>() != null);
+
+            return State.Modify(@this);
+        }
     }
-
-    /// <summary>Implementation of <b>then</b>: (>>):  mv1 >> mv2  =  mv1 >>= (\_ -> mv2)</summary>
-    /// <remarks> Optimized implementation of:
-    ///         return @this.Bind(t => follower);
-    /// or
-    ///         return @this.Then(s => follower);
-    /// </remarks>
-    public static State<TState,TResult>   Then<TState,TValue,TResult>( this
-        State<TState, TValue> @this,
-        State<TState, TResult> follower
-    ) {
-        @this.ContractedNotNull("this");
-        follower.ContractedNotNull("follower");
-        Contract.Ensures(Contract.Result<State<TState,TResult>>() != null);
-
-        return new State<TState,TResult>( s => follower(@this(s).State) );
-    }
-  }
 }
