@@ -5,9 +5,9 @@ using System.Diagnostics.Contracts;
 namespace PGSolutions.Utilities.Monads.StaticContracts {
     using static Contract;
 
-    public struct MaybeAssume<T> {
+    public struct Maybe<T> {
         ///<summary>Create a new Maybe{T}.</summary>
-        private MaybeAssume(T value) : this() {
+        private Maybe(T value) : this() {
             Ensures(!HasValue ||  _value != null);
 
             _value    = value;
@@ -23,7 +23,7 @@ namespace PGSolutions.Utilities.Monads.StaticContracts {
             defaultValue.ContractedNotNull("defaultValue");
             Ensures(Result<T>() != null);
 
-            var result = !_hasValue ? defaultValue : _value;
+            var result = ! HasValue ? defaultValue : _value;
             //        Assume(result != null);
             return result;
         }
