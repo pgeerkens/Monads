@@ -47,8 +47,9 @@ namespace PGSolutions.Utilities.Monads {
         /// <summary>TODO</summary>
         public static IO<T> ToIO<T>(this T value) => new IO<T>(() => value);
 
-        /// <summary>TODO</summary>
-        public static IO<Unit> ReturnIOUnit(Action action) {
+        /// <summary>Utility method to perform <paramref name="action"/> and then return IO{Unit}.</summary>
+        /// <remarks>This simplifies the writing of various Write instances of IOMonad.</remarks>
+        private static IO<Unit> ReturnIOUnit(Action action) {
             action.ContractedNotNull("action");
 
             action();

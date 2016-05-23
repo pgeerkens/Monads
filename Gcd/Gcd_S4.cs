@@ -57,6 +57,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
     public static class Gcd_S4 { // Beware! - These must be declared & initialized in this order
         /// <summary>TODO</summary>
         /// <param name="getAll">Specify true if old implementations desired to run as well as just nes ones.</param>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public static MaybeX<IEnumerable<ITest>> GetTests(bool getAll) =>
             ( from test2 in new List<StateRes>() {
                   Imperative.Run1, Imperative.Run2,

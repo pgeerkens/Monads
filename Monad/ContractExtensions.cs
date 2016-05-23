@@ -90,5 +90,5 @@ namespace System.Diagnostics.Contracts {
 
     /// <summary>Decorator for an incoming parameter that is contractually enforced as NotNull.</summary>
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
-    public sealed class ValidatedNotNullAttribute : global::System.Attribute {}
+    public sealed class ValidatedNotNullAttribute : Attribute {}
 }

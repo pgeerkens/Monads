@@ -48,10 +48,8 @@ namespace PGSolutions.Utilities.Monads {
     public struct MaybeX<T> : IEquatable<MaybeX<T>> where T:class {
         /// <summary>The Invalid Data value.</summary>
         [SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
-        [Pure]
-        public static MaybeX<T> Nothing {
-            get { return _nothing; }
-        } static readonly MaybeX<T> _nothing = new MaybeX<T>();
+        public static MaybeX<T> Nothing { get { return _nothing; } }
+        static readonly MaybeX<T> _nothing = new MaybeX<T>();
 
         ///<summary>Create a new MaybeX{T}.</summary>
         private MaybeX(T value) : this() {
@@ -105,7 +103,6 @@ namespace PGSolutions.Utilities.Monads {
         }
 
         ///<summary>Returns whether this MaybeX{T} has a value.</summary>
-        [Pure]
         public bool HasValue {
             get {
                 Ensures((_value != null) == HasValue);
@@ -144,15 +141,6 @@ namespace PGSolutions.Utilities.Monads {
         public static implicit operator MaybeX<T>(T value) => new MaybeX<T>(value);
 
         readonly T _value;
-
-        ///<summary>Returns the type of the underlying type {TValue}.</summary>
-        [Pure]
-        public Type GetUnderlyingType {
-            get {
-                Ensures(Result<System.Type>() != null);
-                return typeof(T);
-            }
-        }
 
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
@@ -197,11 +185,17 @@ namespace PGSolutions.Utilities.Monads {
             return SelectMany<string>(v => v.ToString()) | "";
         }
     }
+
     [Pure]
     public static class MaybeX {
         ///<summary>Amplifies a reference-type T to a MaybeX{T}.</summary>
         ///<remarks>The monad <i>unit</i> function.</remarks>
-        public static MaybeX<TValue> ToMaybeX<TValue>(this TValue @this)
-        where TValue:class => @this; 
+        public static MaybeX<T> ToMaybeX<T>(this T @this) where T:class => @this;
+
+        ///<summary>Returns the type of the underlying type {TValue}.</summary>
+        public static Type GetUnderlyingType<T>(this MaybeX<T> @this) where T:class {
+            Ensures(Result<System.Type>() != null);
+            return typeof(T);
+        }
     }
 }

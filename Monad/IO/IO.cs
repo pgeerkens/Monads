@@ -71,7 +71,7 @@ namespace PGSolutions.Utilities.Monads {
             selector.ContractedNotNull("selector");
 
             var functor = _functor;
-            return new IO<TResult>(selector(functor.Invoke()).Invoke);
+            return new IO<TResult>(selector(functor()).Invoke);
         }
 
         /// <summary>LINQ-compatible implementation of the monadic join operator.</summary>
@@ -90,7 +90,7 @@ namespace PGSolutions.Utilities.Monads {
             return new IO<TResult>(() => {
                 var source = functor();
                 return selector(source).Select(t => projector(source, t)).Invoke();
-            } );
+            });
         }
 
         ///<summary>The invariants enforced by this struct type.</summary>

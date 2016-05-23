@@ -30,14 +30,58 @@ namespace PGSolutions.Utilities.Monads.IO2.UnitTests {
             Assert.False(isExecuted3); // Laziness.
             Assert.False(isExecuted4); // Laziness.
 
-            var lhs = 1 + 2 + 1;
-            var rhs = query1.Invoke();
-            Assert.Equal(lhs, rhs.Invoke()); // Execution.
+            int lhs = 1 + 2 + 1;
+            int rhs = query1.Invoke().Invoke();
+            Assert.Equal(lhs, rhs); // Execution.
 
             Assert.True(isExecuted1);
             Assert.True(isExecuted2);
             Assert.True(isExecuted3);
             Assert.True(isExecuted4);
+        }
+
+        [MsTest.TestMethod()]
+        public void IOTestFunctional() {
+            bool isExecuted1 = false;
+            bool isExecuted2 = false;
+            bool isExecuted3 = false;
+            bool isExecuted4 = false;
+            bool isExecuted5 = false;
+            bool isExecuted6 = false;
+            IO<int> one = new IO<int>(() => { isExecuted1 = true; return 1; });
+            IO<int> two = new IO<int>(() => { isExecuted2 = true; return 2; });
+            Func<int, IO<int>> addOne = x => { isExecuted3 = true; return (x + 1).ToIO(); };
+            Func<int, Func<int, IO<int>>> add = x => y => { isExecuted4 = true; return (x + y).ToIO(); };
+
+            var query1 = one.SelectMany(x => two,          (x,y) => new { x, y })
+                            .SelectMany(X => addOne(X.y),  (X,z) => new { X.x, X.y, z })
+                            .SelectMany(X => "abc".ToIO(), (X,_) => new { X.x, X.y, X.z, _ })
+                            .SelectMany(X => add(X.x)(X.z),(X,_) => new { X.x,X.y,X.z,X._, addOne2 = _ })
+                            .Select(X => X.addOne2)
+                            ;
+
+            Func<int,IO<int>> Times2 = a => { isExecuted5=true; return new IO<int>(() => 2 * a); };
+            Func<int,IO<int>> Minus1 = a => { isExecuted6=true; return new IO<int>(() => a - 1); };
+
+            var query = query1.SelectMany(Times2).SelectMany(Minus1);
+
+            Assert.False(isExecuted1); // Laziness.
+            Assert.False(isExecuted2); // Laziness.
+            Assert.False(isExecuted3); // Laziness.
+            Assert.False(isExecuted4); // Laziness.
+            Assert.False(isExecuted5); // Laziness.
+            Assert.False(isExecuted6); // Laziness.
+
+            int lhs = 2 * (1 + 2 + 1) - 1;
+            int rhs = query.Invoke();
+            Assert.Equal(lhs, rhs); // Execution.
+
+            Assert.True(isExecuted1);
+            Assert.True(isExecuted2);
+            Assert.True(isExecuted3);
+            Assert.True(isExecuted4);
+            Assert.True(isExecuted5); // Laziness.
+            Assert.True(isExecuted6); // Laziness.
         }
 
         static Func<int, IO<int>> addOne3 = x => (x + 1).ToIO();
