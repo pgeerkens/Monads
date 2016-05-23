@@ -1,10 +1,17 @@
-﻿using System;
+﻿#define CompileStaticContractsTestsX
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 
+#if CompileStaticContractsTests
 namespace PGSolutions.Utilities.Monads.StaticContracts {
     using static Contract;
 
+    /// <summary>
+    /// <seealso cref="https://github.com/Microsoft/CodeContracts/issues/425">
+    /// CodeContracts Issue #425
+    /// </seealso>/>
+    /// </summary>
     public struct Maybe<T> {
         ///<summary>Create a new Maybe{T}.</summary>
         private Maybe(T value) : this() {
@@ -21,10 +28,11 @@ namespace PGSolutions.Utilities.Monads.StaticContracts {
         [Pure]
         public T BitwiseOr(T defaultValue) {
             defaultValue.ContractedNotNull("defaultValue");
+            //Contract.Requires(defaultValue != null,"defaultValue");
             Ensures(Result<T>() != null);
 
             var result = ! HasValue ? defaultValue : _value;
-            //        Assume(result != null);
+            //Assume(result != null);
             return result;
         }
 
@@ -41,3 +49,4 @@ namespace PGSolutions.Utilities.Monads.StaticContracts {
         readonly bool _hasValue;
     }
 }
+#endif
