@@ -56,28 +56,24 @@ namespace PGSolutions.Utilities.Monads.Demos {
     [Pure]
     public static class Gcd_S4 { // Beware! - These must be declared & initialized in this order
         /// <summary>TODO</summary>
-        public static IEnumerable<ITest> GetTests(bool getAll) {
-            Contract.Ensures(Contract.Result<IEnumerable<ITest>>() != null);
-
-            var list =  ( from test2 in new List<StateRes>() {
-                             Imperative.Run1, Imperative.Run2,
-                             Haskell.Run1,    Haskell.Run2,  Haskell.Run3,
-                             Linq.Run1,       Linq.Run2,     Linq.Run3,
-                             Best.Run
-                           }
-                          select new Test(test2,GetTitle(test2)) as ITest
-                        );
-
-            if ( ! getAll) 
-                list = ( from item in list
-                         where item.Transform != Haskell.Run1
-                            && item.Transform != Haskell.Run2
-                            && item.Transform != Linq.Run1
-                            && item.Transform != Linq.Run2
-                         select item);
-
-            return list.ToList().AsReadOnly();
-        }
+        /// <param name="getAll">Specify true if old implementations desired to run as well as just nes ones.</param>
+        public static MaybeX<IEnumerable<ITest>> GetTests(bool getAll) =>
+            ( from test2 in new List<StateRes>() {
+                  Imperative.Run1, Imperative.Run2,
+                  Haskell.Run1,    Haskell.Run2,  Haskell.Run3,
+                  Linq.Run1,       Linq.Run2,     Linq.Run3,
+                  Best.Run
+                }
+              select new Test(test2, GetTitle(test2)) as ITest
+              into item
+              where getAll
+                 || ( item.Transform != Haskell.Run1
+                   && item.Transform != Haskell.Run2
+                   && item.Transform != Linq.Run1
+                   && item.Transform != Linq.Run2
+                    )
+              select item
+            ).ToList().AsReadOnly();
 
         /// <summary>TODO</summary>
         public static string GetTitle(StateRes transform) {
@@ -101,11 +97,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly Func<StateInt, StateRes> ToStateRes = (transform) =>
-#if ! true
-            transform.Select( gcd => new GcdResult(gcd) );
-#else
             from gcd in transform select new GcdResult(gcd);
-#endif
         /// <summary>Functor to calculate GCD of two input integers.</summary>
         private static readonly Transform<GcdStart> AlgorithmTransform = s => {
                                       var x = s.A; var y = s.B;
@@ -128,7 +120,9 @@ namespace PGSolutions.Utilities.Monads.Demos {
         /// <summary>TODO</summary>
         private struct Test : ITest {
             /// <summary>TODO</summary>
-            public Test(StateRes transform, string title) { _transform = transform; _title = title; }
+            public Test(StateRes transform, string title) {
+                _transform = transform; _title = title;
+            }
             /// <summary>TODO</summary>
             public StateRes Transform { get { return _transform; } }
             readonly StateRes _transform;
@@ -141,43 +135,43 @@ namespace PGSolutions.Utilities.Monads.Demos {
         /// <summary>TODO</summary>
         [Pure]
         internal static class Haskell {
-        #region Older Haskell implementations
-      /* from http://mvanier.livejournal.com/5846.html
-              gcd_s3 :: State GCDState Int
-              gcd_s3 = 
-                do (x, y) <- get
-                   case compare x y of
-                     GT -> do put (x-y,  y )
-                              gcd_s3
-                     LT -> do put ( x,  y-x)
-                              gcd_s3
-                     EQ -> return x
+            #region Older Haskell implementations
+              /* from http://mvanier.livejournal.com/5846.html
+                  gcd_s3 :: State GCDState Int
+                  gcd_s3 = 
+                    do (x, y) <- get
+                       case compare x y of
+                         GT -> do put (x-y,  y )
+                                  gcd_s3
+                         LT -> do put ( x,  y-x)
+                                  gcd_s3
+                         EQ -> return x
 
-              run_gcd_s3 :: Int -> Int -> Int
-              run_gcd_s3 x y = fst (runState gcd_s3 (x, y))
-          */
+                  run_gcd_s3 :: Int -> Int -> Int
+                  run_gcd_s3 x y = fst (runState gcd_s3 (x, y))
+              */
 
-          // ~ 4.1 sec
-        private static readonly StateBool GcdBody = s => new PayloadBool(s, s.A != s.B);
-        private static readonly StateInt _run1 =
-            State.GetCompose<GcdStart>(s =>
-                          s.A > s.B ? State.Put(new GcdStart(s.A - s.B, s.B))
-                        : s.A < s.B ? State.Put(new GcdStart(s.A, s.B - s.A))
-                                    : State.Put(s)).Then(GcdBody)
-                                                   .DoWhile().Then(GcdExtract);
-        /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
-        [Description("Straight Haskel (iterative).")]
-        public static readonly StateRes Run1 = ToStateRes(_run1);
+              // ~ 4.1 sec
+            private static readonly StateBool GcdBody = s => new PayloadBool(s, s.A != s.B);
+            private static readonly StateInt _run1 =
+                State.GetCompose<GcdStart>(s =>
+                              s.A > s.B ? State.Put(new GcdStart(s.A - s.B, s.B))
+                            : s.A < s.B ? State.Put(new GcdStart(s.A, s.B - s.A))
+                                        : State.Put(s)).Then(GcdBody)
+                                                       .DoWhile().Then(GcdExtract);
+            /// <summary>TODO</summary>
+            [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
+            [Description("Straight Haskel (iterative).")]
+            public static readonly StateRes Run1 = ToStateRes(_run1);
 
-          // ~ 2.6 sec
-        private static readonly StateInt _run2 = AlgorithmTransform.Modify().Then(GcdBody)
-                                                                   .DoWhile().Then(GcdExtract);
-        /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
-        [Description("Straight Haskel w/ Modify() instead of Get.Compose(s => Put(transform(s))).")]
-        public static readonly StateRes Run2 = ToStateRes(_run2);
-        #endregion
+              // ~ 2.6 sec
+            private static readonly StateInt _run2 = AlgorithmTransform.Modify().Then(GcdBody)
+                                                                       .DoWhile().Then(GcdExtract);
+            /// <summary>TODO</summary>
+            [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
+            [Description("Straight Haskel w/ Modify() instead of Get.Compose(s => Put(transform(s))).")]
+            public static readonly StateRes Run2 = ToStateRes(_run2);
+            #endregion
 
               // ~ 1.5 sec
             private static readonly StateInt _run3 = AlgorithmState.DoWhile().Then(GcdExtract);
@@ -268,9 +262,9 @@ namespace PGSolutions.Utilities.Monads.Demos {
               // ~ 1.0 sec
             private static readonly StateInt _run = AlgorithmTransform.DoWhile(s => s.A != s.B)
                                                                       .Then(GcdExtract);
-                /// <summary>TODO</summary>
-                [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-                [Description("Optimized DoWhile().")]
+            /// <summary>TODO</summary>
+            [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
+            [Description("Optimized DoWhile().")]
             public static readonly StateRes Run = ToStateRes(_run);
         }
     }

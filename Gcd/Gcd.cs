@@ -58,7 +58,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
             states.ContractedNotNull("states");
 
             return (
-                from test in Gcd_S4.GetTests(false)
+                from test in Gcd_S4.GetTests(false) | new List<ITest>()
                 let elapsed = Readers.Timer()
                 let isThird = Readers.MatchCounter(i => i==3, 1)
                 select ( from _   in ConsoleWriteLine("{0}", test.Title)
