@@ -65,15 +65,19 @@ namespace PGSolutions.Utilities.Monads {
 
         [Pure]
         public static explicit operator State<TState,TValue>(StatePayload<TState, TValue> payload) {
-            Ensures(Result<State<TState,TValue>>() != null);
+            //Ensures(Result<State<TState,TValue>>() != null);
 
-            return s => payload;
+            return new State<TState,TValue>(
+                s => payload
+            );
         }
         [Pure]
         public static State<TState, TValue> ToState(StatePayload<TState, TValue> payload) {
-            Ensures(Result<State<TState,TValue>>() != null);
+            //Ensures(Result<State<TState,TValue>>() != null);
 
-            return s => payload;
+            return new State<TState, TValue>(
+                s => payload
+            );
         }
 
         /// <summary>Implementation of <i>Bind</i> for an Identity monad.</summary>

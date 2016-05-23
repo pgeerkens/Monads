@@ -66,7 +66,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
                                        select new {
                                           Start = start,
                                           Result = from validated in ValidateState(start.ToMaybe()).State
-                                                   select test.Transform(validated).Value
+                                                   select test.Transform.Invoke(validated).Value
                                        } into item
                                        select ConsoleWriteLine(
                                            @"    GCD = {0,14} for {1}: Elapsed = {2:ss\.fff} secs; {3}",

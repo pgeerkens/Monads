@@ -26,16 +26,91 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
+#define StateAsStruct
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 
 namespace PGSolutions.Utilities.Monads {
+    using static Contract;
 
     /// <summary>The State monad.</summary>
     /// <typeparam name="TState">Type of the internal state threaded by this instance.</typeparam>
     /// <typeparam name="TValue">Type of the calculated value exposed by this instance.</typeparam>
-    public delegate StatePayload<TState,TValue>   State<TState, TValue>(TState s);
+#if StateAsStruct
+    public struct State<TState,TValue> : IEquatable<State<TState,TValue>> {
+        public delegate StatePayload<TState, TValue> StateTransform(TState s);
+        /// <summary>TODO</summary>
+        /// <param name="functor"></param>
+        public State(StateTransform functor) : this() {
+            functor.ContractedNotNull("func");
+            Ensures(_functor != null);
+
+            _functor = functor;
+        }
+
+        /// <summary>TODO</summary>
+        public StatePayload<TState,TValue> Invoke(TState state) => _functor(state);
+
+        readonly StateTransform _functor;
+
+        /// <summary>TODO</summary>
+        /// <param name="functor"></param>
+        [Pure]
+        public static explicit operator State<TState,TValue>(StateTransform functor) =>
+            new State<TState,TValue>(s=>functor(s));
+        /// <summary>TODO</summary>
+        /// <param name="functor"></param>
+        [Pure]
+        public static State<TState,TValue> ToState(StateTransform functor) => (State<TState,TValue>)functor;
+
+        /// <summary>The invariants enforced by this struct type.</summary>
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
+        [ContractInvariantMethod]
+        [Pure]
+        private void ObjectInvariant() {
+            Invariant(_functor != null);
+        }
+
+        #region Value Equality with IEquatable<T>.
+        /// <inheritdoc/>
+        [Pure]
+        public override bool Equals(object obj) {
+            var other = (obj as StatePayload<TState, TValue>?).ToMaybe();
+            var @this = this;
+            return other.SelectMany<bool>(o => o.Equals(@this)) | false;
+        }
+
+        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
+        [Pure]
+        public bool Equals(State<TState,TValue> other) => _functor.Equals(other._functor);
+
+        /// <inheritdoc/>
+        [Pure]
+        public override int GetHashCode() => _functor.GetHashCode();
+
+        /// <inheritdoc/>
+        [Pure]
+        public override string ToString() {
+            Ensures(Result<string>() != null);
+            return String.Format(CultureInfo.InvariantCulture, "({0})", _functor);
+        }
+
+        /// <summary>Tests reference-equality of the contained functor.</summary>
+        [Pure]
+        public static bool operator ==(State<TState,TValue> lhs, State<TState,TValue> rhs) => lhs.Equals(rhs);
+
+        /// <summary>Tests value-inequality of the contained functor</summary>
+        [Pure]
+        public static bool operator !=(State<TState,TValue> lhs, State<TState,TValue> rhs) => ! lhs.Equals(rhs);
+        #endregion
+    }
+#else
+    public delegate StatePayload<TState, TValue> State<TState, TValue>(TState s);
+#endif
 
     /// <summary>TODO</summary>
     /// <typeparam name="TState">Type of the state to and from which this delegate selects</typeparam>
@@ -45,6 +120,7 @@ namespace PGSolutions.Utilities.Monads {
     /// <typeparam name="TState">Type of the state to and from which this delegate selects</typeparam>
     /// <typeparam name="TValue">Type of the value which this delegate accepts</typeparam>
     /// <typeparam name="TResult">Type of the value which this delegate returns</typeparam>
+    [SuppressMessage("Microsoft.Design", "CA1005:AvoidExcessiveParametersOnGenericTypes")]
     public delegate State<TState,TResult>         PayloadSelector<TState,TValue,TResult>(StatePayload<TState,TValue> p);
 
     /// <summary>Core Monadic functionality for State, as Extension methods</summary>
@@ -54,14 +130,14 @@ namespace PGSolutions.Utilities.Monads {
         public static State<TState,bool>          DoWhile<TState>( this
             State<TState,bool> @this
         ) {
-            @this.ContractedNotNull("this");
-            Contract.Ensures(Contract.Result<State<TState,bool>>() != null);
+            //@this.ContractedNotNull("this");
+            //Ensures(Result<State<TState,bool>>() != null);
 
-            return s => {
-                StatePayload<TState,bool> payload;
-                do { payload = @this(s); s = payload.State; } while (payload.Value);
+            return new State<TState, bool>(s => {
+                StatePayload<TState, bool> payload;
+                do { payload = @this.Invoke(s); s = payload.State; } while (payload.Value);
                 return payload;
-            };
+            });
         }
 
         /// <summary>Generates an unending stream of successive StatePayload{TState,T} objects.</summary>
@@ -69,11 +145,11 @@ namespace PGSolutions.Utilities.Monads {
             State<TState,TValue> @this,
             TState startState
         ) {
-            @this.ContractedNotNull("this");
-            Contract.Ensures(Contract.Result<IEnumerable<StatePayload<TState,TValue>>>() != null);
+            //@this.ContractedNotNull("this");
+            Ensures(Result<IEnumerable<StatePayload<TState,TValue>>>() != null);
 
             var payload = new StatePayload<TState,TValue>(startState,default(TValue));
-            while (true) yield return (payload = @this(payload.State));
+            while (true) yield return (payload = @this.Invoke(payload.State));
         }
 
         /// <summary>Optimized implementation of operator (liftM): liftM f m = m >>= (\x -> return (f x)).</summary>
@@ -82,9 +158,11 @@ namespace PGSolutions.Utilities.Monads {
             Func<TValue, TResult> projector
         ) {
             projector.ContractedNotNull("projector");
-            Contract.Ensures(Contract.Result<State<TState, TResult>>() != null);
+            //Ensures(Result<State<TState, TResult>>() != null);
 
-            return s => new StatePayload<TState, TResult>(s, projector(@this(s).Value));
+            return new State<TState,TResult>(
+                s => new StatePayload<TState, TResult>(s, projector(@this.Invoke(s).Value))
+            );
         }
 
         /// <summary>Implementation of Bind operator: (>>=): m a -> (a -> m b) -> m b.</summary>
@@ -99,9 +177,11 @@ namespace PGSolutions.Utilities.Monads {
             PayloadSelector<TState, TValue, TResult> selector
         ) {
             selector.ContractedNotNull("selector");
-            Contract.Ensures(Contract.Result<State<TState,TResult>>() != null);
+            //Ensures(Result<State<TState,TResult>>() != null);
 
-            return s => @this(s).Bind(p => selector(p)(p.State));
+            return new State<TState, TResult>(
+                s => @this.Invoke(s).Bind(p => selector(p).Invoke(p.State))
+            );
         }
 
         /// <summary>LINQ-compatible alias for ?join?.</summary>
@@ -121,66 +201,49 @@ namespace PGSolutions.Utilities.Monads {
         ) {
             selector.ContractedNotNull("selector");
             projector.ContractedNotNull("projector");
-            Contract.Ensures(Contract.Result<State<TState,TResult>>() != null);
+            //Ensures(Result<State<TState,TResult>>() != null);
 
-            return s =>
-              @this(s).Bind(p => new StatePayload<TState,TResult>(s,
-                projector(p.Value, selector(p)(s).Value)) );
+            return new State<TState, TResult>(
+                s =>
+                  @this.Invoke(s).Bind(p => new StatePayload<TState,TResult>(s,
+                    projector(p.Value, selector(p).Invoke(s).Value)) )
+            );
         }
 
         /// <summary>TODO</summary>
         public static State<TState,TValue>        ToState<TState,TValue>( this TValue @this
         ) {
-            Contract.Ensures(Contract.Result<State<TState,TValue>>() != null);
-            return s => new StatePayload<TState,TValue>(s,@this);
+            //Ensures(Result<State<TState,TValue>>() != null);
+            return new State<TState, TValue>(
+                 s => new StatePayload<TState,TValue>(s,@this)
+            );
         }      
 
         /// <summary>Performs <see cref="selector"/> on the result from a Get.</summary>
         public static State<TState,Unit>          GetCompose<TState>(Selector<TState,Unit> selector) {
             selector.ContractedNotNull("selector");
-            Contract.Ensures(Contract.Result<State<TState,Unit>>() != null);
+            //Ensures(Result<State<TState,Unit>>() != null);
 
-            return s => selector(s)(s);;
+            return new State<TState, Unit>(
+                 s => selector(s).Invoke(s)
+            );
         }
 
         /// <summary>Puts the transformed state and returns the original state.</summary>
         /// <remarks>Optimized implementation of Get.Compose(s => Put(transform(s))).</remarks>
         public static State<TState,TState>        Modify<TState>(Transform<TState> transform) {
             transform.ContractedNotNull("transform");
-            Contract.Ensures(Contract.Result<State<TState,TState>>() != null);
+            //Ensures(Result<State<TState,TState>>() != null);
 
-#if  true
-            return s => new StatePayload<TState,TState>(transform(s),s);
-
-#else
-            return new _modify(transform).Run;
-        }
-
-        private class _modify {
-            public _modify(Transform<TState> transform) {
-                transform.ContractedNotNull("transform");
-                _transform = transform;
-            }
-            private readonly Transform<TState> _transform;
-
-            public StatePayload<TState,TState> Run(TState s) {
-                return new StatePayload<TState,TState>(_transform(s),s);
-            }
-
-            /// <summary>The invariants enforced by this struct type.</summary>
-            [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-            [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
-            [ContractInvariantMethod]
-            [Pure]private void ObjectInvariant() {
-              Contract.Invariant( _transform != null );
-            }
-#endif
+            return new State<TState, TState>(
+                 s => new StatePayload<TState, TState>(transform(s), s)
+            );
         }
 
         /// <summary>Puts the supplied state, resturning a Unit.</summary>
         public static State<TState,Unit>          Put<TState>(TState state) {
             state.ContractedNotNull("state");
-            Contract.Ensures(Contract.Result< State<TState,Unit> >() != null);
+            //Ensures(Result< State<TState,Unit> >() != null);
 
             return (State<TState,Unit>) new StatePayload<TState,Unit>(state, Unit._);
         }
@@ -188,7 +251,7 @@ namespace PGSolutions.Utilities.Monads {
         /// <summary>Get's the current state as both State and Value.</summary>
         public static State<TState, TState> Get<TState>(TState state) {
             state.ContractedNotNull("state");
-            Contract.Ensures(Contract.Result<State<TState, TState>>() != null);
+            //Ensures(Result<State<TState, TState>>() != null);
 
             return (State<TState,TState>) new StatePayload<TState, TState>(state, state);
         }

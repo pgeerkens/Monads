@@ -48,11 +48,11 @@ namespace PGSolutions.Utilities.Monads {
             State<TState, TValue> @this,
             Func<TState, State<TState,TResult>> follower
         ) {
-            @this.ContractedNotNull("this");
+            //@this.ContractedNotNull("this");
             follower.ContractedNotNull("follower");
-            Contract.Ensures(Contract.Result<State<TState,TResult>>() != null);
+            //Contract.Ensures(Contract.Result<State<TState,TResult>>() != null);
 
-            return new State<TState,TResult>( s => follower(s)(@this(s).State) );
+            return new State<TState,TResult>( s => follower(s).Invoke(@this.Invoke(s).State) );
         }
 
         /// <summary>Implementation of <b>then</b>: (>>):  mv1 >> mv2  =  mv1 >>= (\_ -> mv2)</summary>
@@ -65,11 +65,11 @@ namespace PGSolutions.Utilities.Monads {
             State<TState, TValue> @this,
             State<TState, TResult> follower
         ) {
-            @this.ContractedNotNull("this");
-            follower.ContractedNotNull("follower");
-            Contract.Ensures(Contract.Result<State<TState,TResult>>() != null);
+            //@this.ContractedNotNull("this");
+            //follower.ContractedNotNull("follower");
+            //Contract.Ensures(Contract.Result<State<TState,TResult>>() != null);
 
-            return new State<TState,TResult>( s => follower(@this(s).State) );
+            return new State<TState,TResult>( s => follower.Invoke(@this.Invoke(s).State) );
         }
 
         /// <summary>TODO</summary>
@@ -78,12 +78,14 @@ namespace PGSolutions.Utilities.Monads {
             Predicate<TState> predicate
         ) {
             @this.ContractedNotNull("this");
-            Contract.Ensures(Contract.Result<State<TState, Unit>>() != null);
+            //Contract.Ensures(Contract.Result<State<TState, Unit>>() != null);
 
-            return s => {
-                while (predicate(s)) { s = @this(s); }
-                return new StatePayload<TState, Unit>(s, Unit._);
-            };
+            return new State<TState,Unit>(
+                    s => {
+                    while (predicate(s)) { s = @this.Invoke(s); }
+                    return new StatePayload<TState, Unit>(s, Unit._);
+                }
+            );
         }
 
         /// <summary>Generates an unending stream of successive TState objects.</summary>
@@ -103,7 +105,7 @@ namespace PGSolutions.Utilities.Monads {
             Transform<TState> @this
         ) {
             @this.ContractedNotNull("this");
-            Contract.Ensures(Contract.Result<State<TState, TState>>() != null);
+            //Contract.Ensures(Contract.Result<State<TState, TState>>() != null);
 
             return State.Modify(@this);
         }
