@@ -165,6 +165,7 @@
     <Compile Include="MaybeXTests.cs" />
     <Compile Include="ReaderTests.cs" />
     <Compile Include="StateTests.cs" />
+    <Compile Include="StaticContractsCases.cs" />
     <Compile Include="TestExtensions.cs" />
     <Compile Include="UnitTest1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
