@@ -33,8 +33,10 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace PGSolutions.Utilities.Monads {
-  /// <summary>Class representing, conceptually, the "type" of <i>void</i>.</summary>
-  public struct Unit : IEquatable<Unit> {
+    using static Contract;
+
+    /// <summary>Class representing, conceptually, the "type" of <i>void</i>.</summary>
+    public struct Unit : IEquatable<Unit> {
     /// <summary>The single instance of <see cref="Unit"/></summary>
     [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "_")]
     [SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
@@ -52,7 +54,7 @@ namespace PGSolutions.Utilities.Monads {
     }
 
     /// <inheritdoc/>
-    [Pure]public override int GetHashCode() { Contract.Ensures(Contract.Result<int>()==0); return 0; }
+    [Pure]public override int GetHashCode() { Ensures(Result<int>()==0); return 0; }
 
     /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
     [Pure]public static bool operator == (Unit lhs, Unit rhs) { return lhs.Equals(rhs); }
@@ -68,7 +70,7 @@ namespace PGSolutions.Utilities.Monads {
     ) { 
         action.ContractedNotNull("action");
         projector.ContractedNotNull("projector");
-        Contract.Ensures(Contract.Result<Func<Unit>>() != null);
+        Ensures(Result<Func<Unit>>() != null);
 
         return () => projector(action());
     }
@@ -77,8 +79,8 @@ namespace PGSolutions.Utilities.Monads {
     ) {
         action.ContractedNotNull("action");
         selector.ContractedNotNull("selector");
-        Contract.Requires(selector(Unit._) != null);
-        Contract.Ensures(Contract.Result<Func<Unit>>() != null);
+        Requires(selector(Unit._) != null);
+        Ensures(Result<Func<Unit>>() != null);
 
         var unit = action();
         return () => selector(unit)();
@@ -90,7 +92,7 @@ namespace PGSolutions.Utilities.Monads {
         action.ContractedNotNull("action");
         selector.ContractedNotNull("selector");
         projector.ContractedNotNull("projector");
-        Contract.Ensures(Contract.Result<Func<Unit>>() != null);
+        Ensures(Result<Func<Unit>>() != null);
 
         var unit = action();
         return () => projector(unit, selector(unit)() );

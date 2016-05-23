@@ -30,6 +30,8 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace System.Diagnostics.Contracts {
+    using static Contract;
+
     /// <summary>Extension methods to enhance Code Contracts and integration with Code Analysis.</summary>
     [Pure]
     public static class ContractExtensions {
@@ -40,7 +42,7 @@ namespace System.Diagnostics.Contracts {
         [ContractArgumentValidator]  // Requires Assemble Mode = Custom Parameter Validation
         public static void ContractedNotNullEx<T>([ValidatedNotNull]this T value, string name) {
               if (value == null) throw new ArgumentNullException(name);
-              Contract.EndContractBlock();
+              EndContractBlock();
         }
         /// <summary>Throws <c>ArgumentNullException{name}</c> if <c>value</c> is null.</summary>
         /// <param name="value">Value to be tested.</param>
@@ -50,7 +52,7 @@ namespace System.Diagnostics.Contracts {
         [ContractArgumentValidator]  // Requires Assemble Mode = Custom Parameter Validation
         public static void ContractedNotNullEx<T,E>([ValidatedNotNull]this T value, string name)
         where E:Exception {
-            Contract.Requires<E>(value != null, name);
+            Requires<E>(value != null, name);
         }
 #else
         /// <summary>Throws <c>ContractException{name}</c> if <c>value</c> is null.</summary>
@@ -60,7 +62,7 @@ namespace System.Diagnostics.Contracts {
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "name")]
         [ContractAbbreviator] // Requires Assemble Mode = Standard Contract Requires
         public static void ContractedNotNull<T>([ValidatedNotNull]this T value, string name) {
-            Contract.Requires(value != null, name);
+            Requires(value != null, name);
         }
 #endif
 
@@ -74,7 +76,7 @@ namespace System.Diagnostics.Contracts {
         /// Unfortunate, but not critical.
         /// </remarks>
         public static bool Implies(this bool condition, bool contract) {
-            Contract.Ensures((! condition || contract)  ==  Contract.Result<bool>() );
+            Ensures((! condition || contract)  ==  Result<bool>() );
             return ! condition || contract;
         }
 
@@ -83,7 +85,7 @@ namespace System.Diagnostics.Contracts {
         /// <param name="lower">Inclusive lower bound for the range.</param>
         /// <param name="height">Height of the range.</param>
         public static bool InRange(this int value, int lower, int height) {
-            Contract.Ensures( (lower <= value && value < lower+height)  ==  Contract.Result<bool>() );
+            Ensures( (lower <= value && value < lower+height)  ==  Result<bool>() );
             return lower <= value && value < lower+height;
         }
     }

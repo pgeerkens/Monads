@@ -34,13 +34,15 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace PGSolutions.Utilities.Monads {
-  // Impure.
+    using static Contract;
+
+    // Impure.
     public static class TaskExtensions {
         public static async Task<TResult>     Select<TSource, TResult>(this
             Task<TSource> source, 
             Func<TSource, TResult> selector
         ) {
-            Contract.Ensures(Contract.Result<Task<TResult>>() != null);
+            Ensures(Result<Task<TResult>>() != null);
             return selector(await source);
         }
 
@@ -48,7 +50,7 @@ namespace PGSolutions.Utilities.Monads {
             Task<TSource> source,
             Func<TSource, Task<TResult>> selector
         ) {
-            Contract.Ensures(Contract.Result<Task<TResult>>() != null);
+            Ensures(Result<Task<TResult>>() != null);
             return source.SelectMany(selector, Functions.Second);
         }
 
@@ -58,7 +60,7 @@ namespace PGSolutions.Utilities.Monads {
             Func<TSource, Task<TSelector>> selector,
             Func<TSource, TSelector, TResult> resultSelector
         ) {
-            Contract.Ensures(Contract.Result<Task<TResult>>() != null);
+            Ensures(Result<Task<TResult>>() != null);
             var sourceResult = await source;
             return resultSelector(sourceResult, await selector(sourceResult));
         }
@@ -68,7 +70,7 @@ namespace PGSolutions.Utilities.Monads {
             Task source,
             Func<Unit, TResult> selector
         ) {
-            Contract.Ensures(Contract.Result<Task<TResult>>() != null);
+            Ensures(Result<Task<TResult>>() != null);
             return source.SelectMany(value => selector(value).Task());
         }
 
@@ -77,7 +79,7 @@ namespace PGSolutions.Utilities.Monads {
             Task source,
             Func<Unit, Task<TResult>> selector
         ) {
-            Contract.Ensures(Contract.Result<System.Threading.Tasks.Task<TResult>>() != null);
+            Ensures(Result<System.Threading.Tasks.Task<TResult>>() != null);
             return source.SelectMany(selector, Functions.Second);
         }
 
@@ -87,7 +89,7 @@ namespace PGSolutions.Utilities.Monads {
             Func<Unit, Task<TSelector>> selector,
             Func<Unit, TSelector, TResult> resultSelector)
         {
-            Contract.Ensures(Contract.Result<Task<TResult>>() != null);
+            Ensures(Result<Task<TResult>>() != null);
             await source;
             return resultSelector(Unit._, await selector(Unit._));
         }
@@ -95,7 +97,7 @@ namespace PGSolutions.Utilities.Monads {
         // η: Unit -> Task.
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "unit")]
         public static Task Task(Unit unit) {
-            Contract.Ensures(Contract.Result<System.Threading.Tasks.Task>() != null);
+            Ensures(Result<System.Threading.Tasks.Task>() != null);
             return System.Threading.Tasks.Task.Run(() => { }); }
 
         // ι: TUnit -> Task is already implemented previously with η: Unit -> Task.
@@ -103,7 +105,7 @@ namespace PGSolutions.Utilities.Monads {
         // ι: Unit -> Func<Unit>
     //    public static Task<Unit> Unit(Unit unit) { return unit.Task(); }
         public static Task<T> Task<T>(this T value) {
-            Contract.Ensures(Contract.Result<System.Threading.Tasks.Task<T>>() != null);
+            Ensures(Result<System.Threading.Tasks.Task<T>>() != null);
             return System.Threading.Tasks.Task.FromResult(value);
         }
 

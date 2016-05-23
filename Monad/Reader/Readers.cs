@@ -35,18 +35,20 @@ using System.Linq;
 using PGSolutions.Utilities.Monads;
 
 namespace PGSolutions.Utilities.Monads {
-  /// <summary>Sample instances of the <see cref="Reader"/> monad pattern.</summary>
-  public static class Readers {
+    using static Contract;
+
+    /// <summary>Sample instances of the <see cref="Reader"/> monad pattern.</summary>
+    public static class Readers {
     /// <summary>An auto-incrementing zero-baed counter.</summary>
     public static Func<int>             Counter() {
-        Contract.Ensures(Contract.Result<Func<int>>() != null);
+        Ensures(Result<Func<int>>() != null);
         return Counter(0);
     }
 
     /// <summary>An auto-incrementing <i>start</i>-based counter.</summary>
     /// <param name="start">The initial value of the counter.</param>
     public static Func<int>             Counter(int start) {
-        Contract.Ensures(Contract.Result<Func<int>>() != null);
+        Ensures(Result<Func<int>>() != null);
 
         var index   = start;
         var reader  = new Reader<int,int>(_ => index++);
@@ -57,7 +59,7 @@ namespace PGSolutions.Utilities.Monads {
     /// <param name="predicate">The condition for when <b>true</b> should be reported.</param>
     public static Func<bool>            MatchCounter(Func<int, bool> predicate) {
         predicate.ContractedNotNull("predicate");
-        Contract.Ensures(Contract.Result<Func<bool>>() != null);
+        Ensures(Result<Func<bool>>() != null);
         return MatchCounter(predicate,0);
     }
 
@@ -66,7 +68,7 @@ namespace PGSolutions.Utilities.Monads {
     /// <param name="start">The initial value of the counter.</param>
     public static Func<bool>            MatchCounter(Func<int, bool> predicate, int start) {
         predicate.ContractedNotNull("predicate");
-        Contract.Ensures(Contract.Result<Func<bool>>() != null);
+        Ensures(Result<Func<bool>>() != null);
 
         var index   = start;
         var reader  = new Reader<int, bool>(_ => predicate(index++));
@@ -75,7 +77,7 @@ namespace PGSolutions.Utilities.Monads {
 
     /// <summary>A timer that, on each invocation, reports the <see cref="TimeSpan"/> since its creation.</summary>
     public static Func<TimeSpan>        Timer() {
-        Contract.Ensures(Contract.Result<Func<TimeSpan>>() != null);
+        Ensures(Result<Func<TimeSpan>>() != null);
 
         var oldTime = DateTime.Now;
         var timer   = new Reader<DateTime,TimeSpan>(newTime => newTime - oldTime);
@@ -84,7 +86,7 @@ namespace PGSolutions.Utilities.Monads {
 
     #region  What is Timer() really doing?
     public static Func<TimeSpan> Timer2() {
-        Contract.Ensures(Contract.Result<Func<TimeSpan>>() != null);
+        Ensures(Result<Func<TimeSpan>>() != null);
 
         return new _TimerInternals_().Invoke;
     }
@@ -103,7 +105,7 @@ namespace PGSolutions.Utilities.Monads {
       [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
       [ContractInvariantMethod]
       [Pure]private void ObjectInvariant() {
-          Contract.Invariant(_timer != null);
+          Invariant(_timer != null);
       }
     }
     #endregion

@@ -27,12 +27,12 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
-using System.Linq;
 
 namespace PGSolutions.Utilities.Monads {
+    using static Contract;
+
     public static class StringExtensions {
 
         /// <summary>Shortcut for String.Format(CultureInfo.InvariantCulture, @this, arg).</summary>
@@ -42,7 +42,7 @@ namespace PGSolutions.Utilities.Monads {
         public static string BuildMe(this string @this, params object[] arg) {
             @this.ContractedNotNull("this");
             arg.ContractedNotNull("arg");
-            Contract.Ensures(Contract.Result<string>() != null);
+            Ensures(Result<string>() != null);
 
             return String.Format(CultureInfo.InvariantCulture, @this, arg);
         }

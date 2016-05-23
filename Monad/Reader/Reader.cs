@@ -33,7 +33,9 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace PGSolutions.Utilities.Monads {
-  public delegate TValue Reader<in TEnvironment, out TValue>(TEnvironment environment);
+    using static Contract;
+
+    public delegate TValue Reader<in TEnvironment, out TValue>(TEnvironment environment);
 
   public static class Reader {
     public static Reader<TEnvironment,TResult>    Bind<TEnvironment,TSource, TResult>( this
@@ -42,7 +44,7 @@ namespace PGSolutions.Utilities.Monads {
     ) {
         @this.ContractedNotNull("this");
         selector.ContractedNotNull("selector");
-        Contract.Ensures(Contract.Result<Reader<TEnvironment,TResult> >() != null);
+        Ensures(Result<Reader<TEnvironment,TResult> >() != null);
 
         return environment => selector(@this(environment))(environment);
     }
@@ -56,7 +58,7 @@ namespace PGSolutions.Utilities.Monads {
         @this.ContractedNotNull("this");
         selector.ContractedNotNull("selector");
         resultSelector.ContractedNotNull("resultSelector");
-        Contract.Ensures(Contract.Result<Reader<TEnvironment,TResult> >() != null);
+        Ensures(Result<Reader<TEnvironment,TResult> >() != null);
 
         return environment =>
             {
@@ -71,7 +73,7 @@ namespace PGSolutions.Utilities.Monads {
     /// <param name="value"></param>
     public static Reader<TEnvironment, T>         ToReader<TEnvironment, T>(this T value) {
         value.ContractedNotNull("value");
-        Contract.Ensures(Contract.Result<Reader<TEnvironment, T> >() != null);
+        Ensures(Result<Reader<TEnvironment, T> >() != null);
 
         return environment => value;
     }
@@ -86,7 +88,7 @@ namespace PGSolutions.Utilities.Monads {
     ) {
         source.ContractedNotNull("source");
         selector.ContractedNotNull("selector");
-        Contract.Ensures(Contract.Result<Reader<TEnvironment,TResult>>() != null);
+        Ensures(Result<Reader<TEnvironment,TResult>>() != null);
 
         return source.SelectMany(value => selector(value).ToReader<TEnvironment, TResult>());
     }
@@ -98,7 +100,7 @@ namespace PGSolutions.Utilities.Monads {
     ) {
         source.ContractedNotNull("source");
         selector.ContractedNotNull("selector");
-        Contract.Ensures(Contract.Result<Reader<TEnvironment,TResult> >() != null);
+        Ensures(Result<Reader<TEnvironment,TResult> >() != null);
 
         return environment => selector(source(environment))(environment);
     }
@@ -112,7 +114,7 @@ namespace PGSolutions.Utilities.Monads {
         source.ContractedNotNull("source");
         selector.ContractedNotNull("selector");
         resultSelector.ContractedNotNull("resultSelector");
-        Contract.Ensures(Contract.Result<Reader<TEnvironment,TResult> >() != null);
+        Ensures(Result<Reader<TEnvironment,TResult> >() != null);
 
         return environment =>
             {
@@ -136,7 +138,7 @@ namespace PGSolutions.Utilities.Monads {
     /// <returns></returns>
     public static Reader<TEnvironment,Unit>       Unit<TEnvironment>(Unit unit)
     {
-        Contract.Ensures(Contract.Result<Reader<TEnvironment,Unit>>() != null);
+        Ensures(Result<Reader<TEnvironment,Unit>>() != null);
 
         return unit.ToReader<TEnvironment, Unit>();
     }
@@ -147,7 +149,7 @@ namespace PGSolutions.Utilities.Monads {
       public static TFirst        First<TFirst,TSecond> (TFirst first, TSecond second) {
           first.ContractedNotNull("first");
           second.ContractedNotNull("second");
-          Contract.Ensures(Contract.Result<TFirst>() != null);
+          Ensures(Result<TFirst>() != null);
 
           return first;
       }
@@ -155,7 +157,7 @@ namespace PGSolutions.Utilities.Monads {
       public static TSecond       Second<TFirst,TSecond>(TFirst first, TSecond second) {
           first.ContractedNotNull("first");
           second.ContractedNotNull("second");
-          Contract.Ensures(Contract.Result<TSecond>() != null);
+          Ensures(Result<TSecond>() != null);
 
           return second;
       }

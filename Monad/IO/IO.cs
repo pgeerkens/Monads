@@ -31,6 +31,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Utilities.Monads {
+    using static Contract;
+
     /// <summary>TODO</summary>
     public struct IO<TSource> : IEquatable<IO<TSource>> {
         [SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
@@ -39,7 +41,7 @@ namespace PGSolutions.Utilities.Monads {
        /// <summary>Create a new instance of the class.</summary>
         public IO(Func<TSource> functor) : this() {
             functor.ContractedNotNull("source");
-            Contract.Ensures(_functor != null);
+            Ensures(_functor != null);
             _functor = functor;
         }
 
@@ -99,7 +101,7 @@ namespace PGSolutions.Utilities.Monads {
         [ContractInvariantMethod]
         [Pure]
         private void ObjectInvariant() {
-            Contract.Invariant(_functor != null);
+            Invariant(_functor != null);
         }
 
         #region Value Equality with IEquatable<T>.

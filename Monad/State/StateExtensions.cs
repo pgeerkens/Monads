@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Utilities.Monads {
+    using static Contract;
 
     /// <summary>TODO</summary>
     /// <typeparam name="TState">Type of the state which this delegate transforms.</typeparam>
@@ -50,7 +51,7 @@ namespace PGSolutions.Utilities.Monads {
         ) {
             //@this.ContractedNotNull("this");
             follower.ContractedNotNull("follower");
-            //Contract.Ensures(Contract.Result<State<TState,TResult>>() != null);
+            //Ensures(Result<State<TState,TResult>>() != null);
 
             return new State<TState,TResult>( s => follower(s).Invoke(@this.Invoke(s).State) );
         }
@@ -67,7 +68,7 @@ namespace PGSolutions.Utilities.Monads {
         ) {
             //@this.ContractedNotNull("this");
             //follower.ContractedNotNull("follower");
-            //Contract.Ensures(Contract.Result<State<TState,TResult>>() != null);
+            //Ensures(Result<State<TState,TResult>>() != null);
 
             return new State<TState,TResult>( s => follower.Invoke(@this.Invoke(s).State) );
         }
@@ -78,7 +79,7 @@ namespace PGSolutions.Utilities.Monads {
             Predicate<TState> predicate
         ) {
             @this.ContractedNotNull("this");
-            //Contract.Ensures(Contract.Result<State<TState, Unit>>() != null);
+            //Ensures(Result<State<TState, Unit>>() != null);
 
             return new State<TState,Unit>(
                     s => {
@@ -95,7 +96,7 @@ namespace PGSolutions.Utilities.Monads {
         ) {
             @this.ContractedNotNull("this");
             startState.ContractedNotNull("startState");
-            Contract.Ensures(Contract.Result<IEnumerable<TState>>() != null);
+            Ensures(Result<IEnumerable<TState>>() != null);
 
             while (true) yield return (startState = @this(startState));
         }
@@ -105,7 +106,7 @@ namespace PGSolutions.Utilities.Monads {
             Transform<TState> @this
         ) {
             @this.ContractedNotNull("this");
-            //Contract.Ensures(Contract.Result<State<TState, TState>>() != null);
+            //Ensures(Result<State<TState, TState>>() != null);
 
             return State.Modify(@this);
         }
