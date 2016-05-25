@@ -35,18 +35,20 @@ namespace PGSolutions.Utilities.Monads {
 
     /// <summary>TODO</summary>
     public struct IO<TSource> : IEquatable<IO<TSource>> {
+        static readonly Func<TSource> _default = () => default(TSource);
         [SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
-        public static IO<TSource> Empty { get { return _empty; } } readonly static IO<TSource> _empty = new IO<TSource>();
+        public static IO<TSource> Empty { get { return _empty; } }
+        readonly static IO<TSource> _empty = new IO<TSource>();//()=>default(TSource));
 
-       /// <summary>Create a new instance of the class.</summary>
+        /// <summary>Create a new instance of the class.</summary>
         public IO(Func<TSource> functor) : this() {
-            functor.ContractedNotNull("source");
-            Ensures(_functor != null);
+     //       functor.ContractedNotNull("source");
             _functor = functor;
         }
 
         /// <summary>Invokes the internal functor, returning the result.</summary>
-        public TSource Invoke() => _functor();  readonly Func<TSource> _functor;
+        public TSource Invoke() => (_functor | _default)();
+        readonly MaybeX<Func<TSource>> _functor;
 
         /// <summary>LINQ-compatible implementation of the monadic map operator.</summary>
         /// <remarks>
@@ -58,8 +60,8 @@ namespace PGSolutions.Utilities.Monads {
         ) {
             projector.ContractedNotNull("projector");
 
-            var functor = _functor;
-            return new IO<TResult>(() => projector(functor()));
+            var @this = this;
+            return new IO<TResult>(() => projector(@this.Invoke()));
         }
 
         /// <summary>LINQ-compatible implementation of the monadic bind operator.</summary>
@@ -72,8 +74,8 @@ namespace PGSolutions.Utilities.Monads {
         ) {
             selector.ContractedNotNull("selector");
 
-            var functor = _functor;
-            return new IO<TResult>(selector(functor()).Invoke);
+            var @this = this;
+            return new IO<TResult>(() => selector(@this.Invoke()).Invoke());
         }
 
         /// <summary>LINQ-compatible implementation of the monadic join operator.</summary>
@@ -88,11 +90,11 @@ namespace PGSolutions.Utilities.Monads {
             selector.ContractedNotNull("selector");
             projector.ContractedNotNull("projector");
 
-            var functor = _functor;
+            var @this = this;
             return new IO<TResult>(() => {
-                var source = functor();
+                var source = @this.Invoke();
                 return selector(source).Select(t => projector(source, t)).Invoke();
-            });
+            } );
         }
 
         ///<summary>The invariants enforced by this struct type.</summary>
@@ -101,7 +103,7 @@ namespace PGSolutions.Utilities.Monads {
         [ContractInvariantMethod]
         [Pure]
         private void ObjectInvariant() {
-            Invariant(_functor != null);
+      //      Invariant(_functor != null);
         }
 
         #region Value Equality with IEquatable<T>.

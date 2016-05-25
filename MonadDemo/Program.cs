@@ -57,7 +57,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
   #if true
         Gcd_S4.Best.Run.Invoke(start).ToMaybe().SelectMany(result => {
             var value = result.Value;
-            var title = Gcd_S4.GetTitle(Gcd_S4.Best.Run);
+            var title = Gcd_S4.GetTest("Best.Run");
             Console.WriteLine("    GCD = {0} for {1} - {2}", value.Gcd, start, title);
             Console.WriteLine();
             return Maybe.Unit;

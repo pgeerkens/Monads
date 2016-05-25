@@ -72,7 +72,7 @@ namespace PGSolutions.Utilities.Monads {
         ) {
             projector.ContractedNotNull("projector");
 
-            return ! _hasValue ? Maybe<TResult>.Nothing : projector(_value);
+            return ! HasValue ? Maybe<TResult>.Nothing : projector(_value);
         }
 
         ///<summary>The monadic Bind operation of type T to type MaybeX{TResult}.</summary>
@@ -85,7 +85,7 @@ namespace PGSolutions.Utilities.Monads {
         ) {
             selector.ContractedNotNull("selector");
 
-            return ! _hasValue  ?  Maybe<TResult>.Nothing  :  selector(_value);
+            return ! HasValue  ?  Maybe<TResult>.Nothing  :  selector(_value);
         }
 
         /// <summary>LINQ-compatible implementation of the monadic join operator.</summary>
@@ -101,8 +101,8 @@ namespace PGSolutions.Utilities.Monads {
             projector.ContractedNotNull("projector");
 
             var @this = this;
-            return ! _hasValue ? Maybe<TResult>.Nothing
-                               : selector(_value).Select(e => projector(@this._value, e));
+            return ! HasValue ? Maybe<TResult>.Nothing
+                              : selector(_value).Select(e => projector(@this._value, e));
         }
 
         ///<summary>Returns whether this Maybe{T} has a value.</summary>
@@ -114,9 +114,7 @@ namespace PGSolutions.Utilities.Monads {
             defaultValue.ContractedNotNull("defaultValue");
             Ensures(Result<T>() != null);
 
-            var result = !_hasValue ? defaultValue : _value;
-            Assume(result != null);
-            return result;
+            return ! HasValue ? defaultValue : _value;
         }
         ///<summary>Extract value of the Maybe{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
         [Pure]
@@ -133,7 +131,7 @@ namespace PGSolutions.Utilities.Monads {
         [ContractInvariantMethod]
         [Pure]
         private void ObjectInvariant() {
-            Invariant(!HasValue || _value != null);
+            Invariant( _value != null || ! HasValue );
         }
 
         ///<summary>Wraps a T as a Maybe{T}.</summary>

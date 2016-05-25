@@ -49,49 +49,49 @@ namespace PGSolutions.Utilities.Monads.Demos {
         StateRes Transform { get; }
         /// <summary>TODO</summary>
         string Title { get; }
+        /// <summary>TODO</summary>
+        string Name { get; }
     }
 
     /// <summary>TODO</summary>
     [SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
     [Pure]
     public static class Gcd_S4 { // Beware! - These must be declared & initialized in this order
+
+        const BindingFlags bindFlags = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
+
         /// <summary>TODO</summary>
         /// <param name="getAll">Specify true if old implementations desired to run as well as just nes ones.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public static MaybeX<IEnumerable<ITest>> GetTests(bool getAll) =>
-            ( from test2 in new List<StateRes>() {
-                  Imperative.Run1, Imperative.Run2,
-                  Haskell.Run1,    Haskell.Run2,  Haskell.Run3,
-                  Linq.Run1,       Linq.Run2,     Linq.Run3,
-                  Best.Run
-                }
-              select new Test(test2, GetTitle(test2)) as ITest
+            ( from @class in typeof(Gcd_S4).GetNestedTypes(bindFlags)
+              from field  in @class.GetFields(bindFlags)
+              from atts   in field.CustomAttributes
+              where field.Name.Substring(0, 3) == "Run"
+                 && atts.AttributeType.Name =="DescriptionAttribute"
+              select new {
+                   Name        = @class.Name + "." + field.Name
+                  ,Description = atts.ConstructorArguments[0].Value as string
+                  ,Transform   = field.GetValue(null) as StateRes?
+              }
               into item
               where getAll
-                 || ( item.Transform != Haskell.Run1
-                   && item.Transform != Haskell.Run2
-                   && item.Transform != Linq.Run1
-                   && item.Transform != Linq.Run2
+                 || ( item.Name != "Haskell.Run1"
+                   && item.Name != "Haskell.Run2"
+                   && item.Name != "Linq.Run1"
+                   && item.Name != "Linq.Run2"
                     )
-              select item
+              where item.Transform.HasValue
+              where false
+              select new Test(item.Transform.Value, item.Description, item.Name) as ITest
             ).ToList().AsReadOnly();
 
         /// <summary>TODO</summary>
-        public static string GetTitle(StateRes transform) {
-            const BindingFlags bindFlags = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
-
-            //transform.ContractedNotNull("transform");
-            Contract.Ensures(Contract.Result<string>() != null);
-
-            var result  = ( from @class  in typeof(Gcd_S4).GetNestedTypes(bindFlags)
-                            from fields in @class.GetFields(bindFlags)
-                            from atts in fields.CustomAttributes
-                            where atts.ConstructorArguments.Count > 0
-                              &&  ReferenceEquals(fields.GetValue(typeof(StateRes)), transform)
-                            select atts.ConstructorArguments[0].Value as string
-                            ).FirstOrDefault()
-                            ?? "";
-            return result;
+        public static MaybeX<ITest> GetTest(string name) {
+            var tests = GetTests(true) | new List<ITest>();
+            return ( from test in tests
+                     where test.Name == name
+                     select test).FirstOrDefault().ToMaybeX();
         }
 
         #region Utilities
@@ -121,8 +121,8 @@ namespace PGSolutions.Utilities.Monads.Demos {
         /// <summary>TODO</summary>
         private struct Test : ITest {
             /// <summary>TODO</summary>
-            public Test(StateRes transform, string title) {
-                _transform = transform; _title = title;
+            public Test(StateRes transform, string title, string name) {
+                _transform = transform; _title = title; _name = name;
             }
             /// <summary>TODO</summary>
             public StateRes Transform { get { return _transform; } }
@@ -130,8 +130,46 @@ namespace PGSolutions.Utilities.Monads.Demos {
             /// <summary>TODO</summary>
             public string Title { get { return _title; } }
             readonly string _title;
+            /// <summary>TODO</summary>
+            public string Name { get { return _name; } }
+            readonly string _name;
         }
         #endregion
+
+        /// <summary>TODO</summary>
+        [Pure]
+        internal static class Imperative {
+
+            // ~ 0.91 sec
+            /// <summary>TODO</summary>
+            [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
+            [Description("Fully imperative; w/o substitution.")]
+            public static readonly StateRes Run1 = ToStateRes(new StateInt(_run1));
+            private static PayloadInt _run1(GcdStart state) {
+                while (state.A != state.B) {
+                    state  = state.A > state.B ? new GcdStart(state.A - state.B, state.A)
+                           : state.A < state.B ? new GcdStart(state.A, state.B - state.A)
+                                               : state;
+                }
+                return new PayloadInt(state, state.A);
+            }
+
+            // ~ 0.60 sec
+            /// <summary>TODO</summary>
+            [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
+            [Description("Fully imperative; w/ substitution.")]
+            public static readonly StateRes Run2 = ToStateRes(new StateInt(_run2));
+            private static PayloadInt _run2(GcdStart state) {
+                while (state.A != state.B) {
+                    var x = state.A; var y = state.B;
+
+                    state  =    x    >    y ? new GcdStart(x    -    y, x)
+                           : x    <    y ? new GcdStart(x, y    -    x)
+                                               : state;
+                }
+                return new PayloadInt(state, state.A);
+            }
+        }
 
         /// <summary>TODO</summary>
         [Pure]
@@ -219,41 +257,6 @@ namespace PGSolutions.Utilities.Monads.Demos {
             /// <summary>TODO</summary>
             [Description("Best LINQ w/ Enumerate(Transform<TState>, TState) and w/o using 'let'.")]
             public static readonly StateRes Run3 = ToStateRes(_run3);
-        }
-
-        /// <summary>TODO</summary>
-        [Pure]
-        internal static class Imperative {
-
-              // ~ 0.91 sec
-            /// <summary>TODO</summary>
-            [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-            [Description("Fully imperative; w/o substitution.")]
-            public static readonly StateRes Run1 = ToStateRes(new StateInt(_run1));
-            private static PayloadInt _run1(GcdStart state) {
-                while (state.A != state.B) {
-                    state  = state.A > state.B ? new GcdStart(state.A - state.B,      state.A     )
-                           : state.A < state.B ? new GcdStart(     state.A,      state.B - state.A)
-                                               : state;
-                  }
-              return new PayloadInt(state, state.A);
-            }
-
-              // ~ 0.60 sec
-            /// <summary>TODO</summary>
-            [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-            [Description("Fully imperative; w/ substitution.")]
-            public static readonly StateRes Run2 = ToStateRes(new StateInt(_run2));
-            private static PayloadInt _run2(GcdStart state) {
-                while (state.A != state.B) {
-                    var x = state.A; var y = state.B;
-
-                    state  =    x    >    y    ? new GcdStart(   x    -    y,            x        )
-                           :    x    <    y    ? new GcdStart(        x,            y    -    x   )
-                                               : state;
-                }
-                return new PayloadInt(state, state.A);
-            }
         }
 
         /// <summary>TODO</summary>

@@ -56,7 +56,6 @@ namespace PGSolutions.Utilities.Monads.Demos {
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         public static IO<Unit> Run(IReadOnlyList<GcdStart> states) {
             states.ContractedNotNull("states");
-
             return (
                 from test in Gcd_S4.GetTests(false) | new List<ITest>()
                 let elapsed = Readers.Timer()
@@ -82,7 +81,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
                          select ConsoleWriteLine()
                        ).Invoke()
             ).LastOrDefault();
-          }
+        }
 
         /// <summary>Return a pair of positive integers with the same GCD as the supplied parameters.</summary>
         private static PayloadMaybe ValidateState(Maybe<GcdStart> start) {

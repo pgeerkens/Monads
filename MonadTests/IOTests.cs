@@ -74,14 +74,14 @@ namespace PGSolutions.Utilities.Monads.IO2.UnitTests {
 
             int lhs = 2 * (1 + 2 + 1) - 1;
             int rhs = query.Invoke();
-            Assert.Equal(lhs, rhs); // Execution.
+            Assert.Equal(lhs, rhs);
 
-            Assert.True(isExecuted1);
-            Assert.True(isExecuted2);
-            Assert.True(isExecuted3);
-            Assert.True(isExecuted4);
-            Assert.True(isExecuted5); // Laziness.
-            Assert.True(isExecuted6); // Laziness.
+            Assert.True(isExecuted1); // Delayed execution.
+            Assert.True(isExecuted2); // Delayed execution.
+            Assert.True(isExecuted3); // Delayed execution.
+            Assert.True(isExecuted4); // Delayed execution.
+            Assert.True(isExecuted5); // Delayed execution.
+            Assert.True(isExecuted6); // Delayed execution.
         }
 
         static Func<int, IO<int>> addOne3 = x => (x + 1).ToIO();
