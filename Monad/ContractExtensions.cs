@@ -79,8 +79,8 @@ namespace System.Diagnostics.Contracts {
         /// Unfortunate, but not critical.
         /// </remarks>
         public static bool Implies(this bool condition, bool contract) {
-            Ensures((! condition || contract)  ==  Result<bool>() );
-            return ! condition || contract;
+            Ensures(Result<bool>()  ==  (contract  ||  ! condition) );
+            return contract  ||  ! condition;
         }
 
         /// <summary>Returns true exactly if lower &lt;= value &lt; lower+height</summary>

@@ -104,7 +104,7 @@ namespace PGSolutions.Utilities.Monads {
         ///<summary>Returns whether this MaybeX{T} has a value.</summary>
         public bool HasValue {
             get {
-                Ensures((_value != null) == HasValue);
+                Ensures(HasValue.Implies(_value != null));
                 return _value != null;
             }
         }
@@ -132,7 +132,7 @@ namespace PGSolutions.Utilities.Monads {
         [ContractInvariantMethod]
         [Pure]
         private void ObjectInvariant() {
-            Invariant(HasValue == (_value != null));
+            Invariant(HasValue.Implies(_value != null));
         }
 
         ///<summary>Wraps a T as a MaybeX{T}.</summary>

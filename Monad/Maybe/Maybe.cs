@@ -53,6 +53,7 @@ namespace PGSolutions.Utilities.Monads {
         ///<summary>Create a new Maybe{T}.</summary>
         private Maybe(T value) : this() {
             Ensures(!HasValue ||  _value != null);
+            //Ensures(HasValue.Implies(_value != null));
 
             _value    = value;
             _hasValue = _value != null;
@@ -131,6 +132,7 @@ namespace PGSolutions.Utilities.Monads {
         [Pure]
         private void ObjectInvariant() {
             Invariant(_value != null || !HasValue);
+            //Invariant(HasValue.Implies(_value != null));
         }
 
         ///<summary>Wraps a T as a Maybe{T}.</summary>
