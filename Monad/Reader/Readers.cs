@@ -58,7 +58,7 @@ namespace PGSolutions.Utilities.Monads {
     /// <summary>An auto-incrementing zero-based counter that reports when <paramref name="predicate"/> is true of the counter.</summary>
     /// <param name="predicate">The condition for when <b>true</b> should be reported.</param>
     public static Func<bool>            MatchCounter(Func<int, bool> predicate) {
-        predicate.ContractedNotNull("predicate");
+        predicate.ContractedNotNull(nameof(predicate));
         Ensures(Result<Func<bool>>() != null);
         return MatchCounter(predicate,0);
     }
@@ -67,7 +67,7 @@ namespace PGSolutions.Utilities.Monads {
     /// <param name="predicate">The condition for when <b>true</b> should be reported.</param>
     /// <param name="start">The initial value of the counter.</param>
     public static Func<bool>            MatchCounter(Func<int, bool> predicate, int start) {
-        predicate.ContractedNotNull("predicate");
+        predicate.ContractedNotNull(nameof(predicate));
         Ensures(Result<Func<bool>>() != null);
 
         var index   = start;

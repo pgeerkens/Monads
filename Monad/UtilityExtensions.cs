@@ -40,8 +40,8 @@ namespace PGSolutions.Utilities.Monads {
         /// <param name="arg">The arguments to be formatted into the FOrmat string.</param>
         /// <returns></returns>
         public static string BuildMe(this string @this, params object[] arg) {
-            @this.ContractedNotNull("this");
-            arg.ContractedNotNull("arg");
+            @this.ContractedNotNull(nameof(@this));
+            arg.ContractedNotNull(nameof(arg));
             Ensures(Result<string>() != null);
 
             return String.Format(CultureInfo.InvariantCulture, @this, arg);

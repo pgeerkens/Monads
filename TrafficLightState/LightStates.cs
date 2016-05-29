@@ -41,7 +41,7 @@ namespace TrafficLightDemo {
     /// <summary>TODO</summary>
     public static async Task<Unit> ExecuteTrafficLight<T>
       (this ITrafficLight<T> e) {
-        e.ContractedNotNull("e");
+        e.ContractedNotNull(nameof(e));
         Contract.Ensures(Contract.Result<Task<Unit>>() != null);  // not supported for async/await
         try {
             var trafficLightState = await LightStates<T>.Start(e)(e);
@@ -56,7 +56,7 @@ namespace TrafficLightDemo {
       int delayTenthsSeconds,
       IO<Unit> action
     ) {
-        transition.ContractedNotNull("transition");
+        transition.ContractedNotNull(nameof(transition));
         Contract.Ensures(Contract.Result<Reader<ITrafficLight<T>,Task<LightStates<T>.TrafficLightState>>>() != null);
 
         return e => from _ in ( from _ in action
@@ -71,56 +71,56 @@ namespace TrafficLightDemo {
     public delegate Reader<ITrafficLight<T>, Task<TrafficLightState>>   Transition(ITrafficLight<T> e);
 
     public static readonly Transition Start        = e => Reset.GetState(             5,
-          ( from _    in e.UpDownTown.SetColour      (e.Green)
-            from __   in e.CrossTown.SetColour       (e.Yellow)
-            from ___  in e.UpTownLeftTurn.SetColour  (e.Green)
-            from ____ in e.DownTownLeftTurn.SetColour(e.Red)
+          ( from _    in e.UpDownTown.SetColor      (e.Green)
+            from __   in e.CrossTown.SetColor       (e.Yellow)
+            from ___  in e.UpTownLeftTurn.SetColor  (e.Green)
+            from ____ in e.DownTownLeftTurn.SetColor(e.Red)
             select _) );
     public static readonly Transition Reset        = e => LeftTurnGreen.GetState(    20,
-          ( from _    in e.UpDownTown.SetColour      (e.Red)
-            from __   in e.CrossTown.SetColour       (e.Red)
-            from ___  in e.UpTownLeftTurn.SetColour  (e.Red)
-            from ____ in e.DownTownLeftTurn.SetColour(e.Red)
+          ( from _    in e.UpDownTown.SetColor      (e.Red)
+            from __   in e.CrossTown.SetColor       (e.Red)
+            from ___  in e.UpTownLeftTurn.SetColor  (e.Red)
+            from ____ in e.DownTownLeftTurn.SetColor(e.Red)
             select _) );
 
     #region Transitions
     static readonly Transition CrossTownRed        = e => LeftTurnGreen.GetState(     3,
-          ( from _    in e.CrossTown.SetColour       (e.Red)
+          ( from _    in e.CrossTown.SetColor       (e.Red)
             select _) );
 
     static readonly Transition LeftTurnGreen       = e => LeftTurnYellow.GetState(   37,
-          ( from _    in e.UpTownLeftTurn.SetColour  (e.Green)
-            from __   in e.DownTownLeftTurn.SetColour(e.Green)
+          ( from _    in e.UpTownLeftTurn.SetColor  (e.Green)
+            from __   in e.DownTownLeftTurn.SetColor(e.Green)
             select _) );
 
     static readonly Transition LeftTurnYellow      = e => LeftTurnRed.GetState(      10,
-          ( from _    in e.UpTownLeftTurn.SetColour  (e.Yellow)
-            from __   in e.DownTownLeftTurn.SetColour(e.Yellow)
+          ( from _    in e.UpTownLeftTurn.SetColor  (e.Yellow)
+            from __   in e.DownTownLeftTurn.SetColor(e.Yellow)
             select _) );
 
     static readonly Transition LeftTurnRed         = e => UpDownTownGreen.GetState(   0,
-          ( from _    in e.UpTownLeftTurn.SetColour  (e.Red)
-            from __   in e.DownTownLeftTurn.SetColour(e.Red)
+          ( from _    in e.UpTownLeftTurn.SetColor  (e.Red)
+            from __   in e.DownTownLeftTurn.SetColor(e.Red)
             select _) );
 
     static readonly Transition UpDownTownGreen     = e => UpDownTownYellow.GetState(100,
-          ( from _    in e.UpDownTown.SetColour      (e.Green)
+          ( from _    in e.UpDownTown.SetColor      (e.Green)
             select _) );
 
     static readonly Transition UpDownTownYellow    = e => UpDownTownRed.GetState(    10,
-          ( from _    in e.UpDownTown.SetColour      (e.Yellow)
+          ( from _    in e.UpDownTown.SetColor      (e.Yellow)
             select _) );
 
     static readonly Transition UpDownTownRed       = e => CrossTownGreen.GetState(    3,
-          ( from _    in e.UpDownTown.SetColour      (e.Red)
+          ( from _    in e.UpDownTown.SetColor      (e.Red)
             select _) );
 
     static readonly Transition CrossTownGreen      = e => CrossTownYellow.GetState(  67,
-          ( from _    in e.CrossTown.SetColour       (e.Green)
+          ( from _    in e.CrossTown.SetColor       (e.Green)
             select _) );
 
     static readonly Transition CrossTownYellow     = e => CrossTownRed.GetState(     10,
-          ( from _    in e.CrossTown.SetColour       (e.Yellow)
+          ( from _    in e.CrossTown.SetColor       (e.Yellow)
             select _) );
     #endregion
   }

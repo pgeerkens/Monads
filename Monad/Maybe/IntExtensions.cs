@@ -27,58 +27,73 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Linq;
 
-namespace PGSolutions.Utilities.Monads {
-  public static class IntExtensions {
-    public static Maybe<int> DoSomeDivision(this int @this, int denominator) {
-      return from a in @this.Divide(denominator)
-             from b in a.Divide(2)
-             select b;
-    }
-    public static Maybe<int> DoSomeDivision(this int @this, params int[] denominators) {
-      denominators.ContractedNotNull("denominators");
+//namespace PGSolutions.Utilities.Monads {
+//    public static class IntExtensions {
+//        public static Maybe<int> Divide(this Maybe<int> numerator, Maybe<int> denominator) =>
+//            numerator.SelectMany(n => denominator.SelectMany(d => n.Divide(d)));
+//        public static Maybe<int> Add(this Maybe<int> numerator, Maybe<int> denominator) =>
+//            numerator.SelectMany(n => denominator.SelectMany(d => n.Add(d)));
+//        public static Maybe<int> Sub(this Maybe<int> numerator, Maybe<int> denominator) =>
+//            numerator.SelectMany(n => denominator.SelectMany(d => n.Sub(d)));
 
-      var intermediate = @this.ToMaybe();
-      foreach (var d in denominators) intermediate = intermediate.SelectMany(v => v.Divide(d));
-      return intermediate;
-    }
+//        public static Maybe<int> Divide(this int numerator, int denominator) =>
+//            denominator == 0 || (numerator == Int32.MinValue && denominator == -1)
+//                    ? default(Maybe<int>)
+//                    : (numerator / denominator).ToMaybe();
+//        /// <summary>
+//        /// courtesy Ivan Stoev: http://w3foverflow.com/question/integer-overflow-detection-c-for-add/
+//        /// </summary>
+//        /// <remarks>
+//        /// See also <href a="https://www.fefe.de/intof.html">Catching Integer Overflows in C</href>
+//        /// </remarks>
+//        public static Maybe<int> Add(this int a, int b) {
+//            unchecked {
+//                int c = a + b;
+//                return ((a ^ b) >= 0) & ((a ^ c) < 0) ? default(Maybe<int>)
+//                                                      : c.ToMaybe();
+//            }
+//        }
+//        public static Maybe<int> Sub(this int a, int b) =>
+//            b != int.MinValue ? a.Add(-b)
+//                      : a < 0 ? b.Add(a).SelectMany<int>(e => (-e).ToMaybe())
+//                              : default(Maybe<int>);
+//    }
+//}
+//namespace PGSolutions.Utilities.Monads.Test {
+//    internal static class IntExtensions {
 
-    public static Maybe<int> Divide(this Maybe<int> numerator, Maybe<int> denominator) {
-      return numerator.SelectMany(n => denominator.SelectMany(d => n.Divide(d)));
-    }
-    public static Maybe<int> Add(this Maybe<int> numerator, Maybe<int> denominator) {
-      return numerator.SelectMany(n => denominator.SelectMany(d => n.Add(d)));
-    }
-    public static Maybe<int> Sub(this Maybe<int> numerator, Maybe<int> denominator) {
-      return numerator.SelectMany(n => denominator.SelectMany(d => n.Sub(d)));
-    }
+//        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+//        public static int? Divide(this int? numerator, int? denominator) =>
+//            numerator.SelectMany(n => denominator.SelectMany(d => n.Divide(d)));
+//        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+//        public static int? Add(this int? numerator, int? denominator) =>
+//            numerator.SelectMany(n => denominator.SelectMany(d => n.Add(d)));
+//        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+//        public static int? Sub(this int? numerator, int? denominator) =>
+//            numerator.SelectMany(n => denominator.SelectMany(d => n.Sub(d)));
 
-    public static Maybe<int> Divide(this int numerator, int denominator) {
-      return denominator == 0 || (numerator == Int32.MinValue && denominator == -1)
-          ? Maybe<int>.Nothing
-          : numerator / denominator;
-    }
-    /// <summary>
-    /// courtesy Ivan Stoev: http://w3foverflow.com/question/integer-overflow-detection-c-for-add/
-    /// </summary>
-    /// <remarks>
-    /// See also <href a="https://www.fefe.de/intof.html">Catching Integer Overflows in C</href>
-    /// </remarks>
-    public static Maybe<int> Add(this int a, int b) {
-      unchecked {
-        int c = a + b;
-        return ((a ^ b) >= 0) & ((a ^ c) < 0) ? Maybe<int>.Nothing
-                                              : c;
-      }
-    }
-    public static Maybe<int> Sub(this int a, int b) {
-      return b != int.MinValue ? a.Add(-b)
-                       : a < 0 ? b.Add(a).SelectMany<int>(e => -e)
-                               : Maybe<int>.Nothing;
-    }
-  }
-}
+//        public static int? Divide(this int numerator, int denominator) =>
+//            denominator == 0 || (numerator == Int32.MinValue && denominator == -1)
+//                    ? default(int?)
+//                    : numerator / denominator;
+//        /// <summary>
+//        /// courtesy Ivan Stoev: http://w3foverflow.com/question/integer-overflow-detection-c-for-add/
+//        /// </summary>
+//        /// <remarks>
+//        /// See also <href a="https://www.fefe.de/intof.html">Catching Integer Overflows in C</href>
+//        /// </remarks>
+//        public static int? Add(this int a, int b) {
+//            unchecked {
+//                int c = a + b;
+//                return ((a ^ b) >= 0) & ((a ^ c) < 0) ? default(int?)
+//                                                      : c;
+//            }
+//        }
+//        public static int? Sub(this int a, int b) =>
+//            b != int.MinValue ? a.Add(-b)
+//                      : a < 0 ? from e in b.Add(a) select -e
+//                              : default(int?);
+//    }
+//}

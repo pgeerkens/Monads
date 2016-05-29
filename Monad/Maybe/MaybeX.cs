@@ -48,8 +48,7 @@ namespace PGSolutions.Utilities.Monads {
     public struct MaybeX<T> : IEquatable<MaybeX<T>> where T:class {
         /// <summary>The Invalid Data value.</summary>
         [SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
-        public static MaybeX<T> Nothing { get { return _nothing; } }
-        static readonly MaybeX<T> _nothing = new MaybeX<T>();
+        public static MaybeX<T> Nothing { get { return default(MaybeX<T>); } }
 
         ///<summary>Create a new MaybeX{T}.</summary>
         private MaybeX(T value) : this() {
@@ -66,9 +65,9 @@ namespace PGSolutions.Utilities.Monads {
         public MaybeX<TResult>  Select<TResult>(
             Func<T, TResult> projector
         ) where TResult : class {
-            projector.ContractedNotNull("projector");
+            projector.ContractedNotNull(nameof(projector));
 
-            return (_value == null) ? MaybeX<TResult>.Nothing : projector(_value);
+            return (_value == null) ? default(MaybeX<TResult>) : projector(_value);
         }
 
         ///<summary>The monadic Bind operation of type T to type MaybeX{TResult}.</summary>
@@ -80,9 +79,9 @@ namespace PGSolutions.Utilities.Monads {
         public  MaybeX<TResult> SelectMany<TResult>(
             Func<T, MaybeX<TResult>> selector
         ) where TResult:class {
-            selector.ContractedNotNull("selector");
+            selector.ContractedNotNull(nameof(selector));
 
-            return (_value == null) ? MaybeX<TResult>.Nothing : selector(_value);
+            return (_value == null) ? default(MaybeX<TResult>) : selector(_value);
         }
 
         /// <summary>LINQ-compatible implementation of the monadic join operator.</summary>
@@ -94,11 +93,11 @@ namespace PGSolutions.Utilities.Monads {
             Func<T, MaybeX<TIntermediate>> selector,
             Func<T,TIntermediate,TResult> projector
         ) where TIntermediate:class where TResult:class {
-            selector.ContractedNotNull("selector");
-            projector.ContractedNotNull("projector");
+            selector.ContractedNotNull(nameof(selector));
+            projector.ContractedNotNull(nameof(projector));
 
             var @this = this;
-            return (_value == null) ? MaybeX<TResult>.Nothing
+            return (_value == null) ? default(MaybeX<TResult>)
                                     : selector(_value).Select(e => projector(@this._value, e));
         }
 
@@ -113,7 +112,7 @@ namespace PGSolutions.Utilities.Monads {
         ///<summary>Extract value of the MaybeX{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
         [Pure]
         public T BitwiseOr(T defaultValue) {
-            defaultValue.ContractedNotNull("defaultValue");
+            defaultValue.ContractedNotNull(nameof(defaultValue));
             Ensures(Result<T>() != null);
 
             return _value ?? defaultValue;
@@ -121,7 +120,7 @@ namespace PGSolutions.Utilities.Monads {
         ///<summary>Extract value of the MaybeX{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
         [Pure]
         public static T operator | (MaybeX<T> value, T defaultValue) {
-            defaultValue.ContractedNotNull("defaultValue");
+            defaultValue.ContractedNotNull(nameof(defaultValue));
             Ensures(Result<T>() != null);
 
             return value.BitwiseOr(defaultValue);
@@ -190,12 +189,20 @@ namespace PGSolutions.Utilities.Monads {
     public static class MaybeX {
         ///<summary>Amplifies a reference-type T to a MaybeX{T}.</summary>
         ///<remarks>The monad <i>unit</i> function.</remarks>
-        public static MaybeX<T> ToMaybeX<T>(this T @this) where T:class => @this;
+        public static MaybeX<T> AsMaybeX<T>(this T @this) where T:class => @this;
+
+        ///<summary>Amplifies a reference-type T to a MaybeX{T}.</summary>
+        ///<remarks>The monad <i>unit</i> function.</remarks>
+        public static MaybeX<object> ToMaybeX<T>(this T @this) where T : struct => @this;
 
         ///<summary>Returns the type of the underlying type {TValue}.</summary>
+        [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "this")]
         public static Type GetUnderlyingType<T>(this MaybeX<T> @this) where T:class {
             Ensures(Result<System.Type>() != null);
             return typeof(T);
         }
+
+        public static MaybeX<T> Cast<T>(this MaybeX<object> @this) where T:class =>
+            from o in @this select (T)o;
     }
 }

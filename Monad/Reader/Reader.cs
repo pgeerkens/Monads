@@ -42,8 +42,8 @@ namespace PGSolutions.Utilities.Monads {
         Reader<TEnvironment, TSource> @this,
         Func<TSource, Reader<TEnvironment, TResult>> selector
     ) {
-        @this.ContractedNotNull("this");
-        selector.ContractedNotNull("selector");
+        @this.ContractedNotNull(nameof(@this));
+        selector.ContractedNotNull(nameof(selector));
         Ensures(Result<Reader<TEnvironment,TResult> >() != null);
 
         return environment => selector(@this(environment))(environment);
@@ -55,9 +55,9 @@ namespace PGSolutions.Utilities.Monads {
         Func<TSource, Reader<TEnvironment, TSelector>> selector,
         Func<TSource, TSelector, TResult> resultSelector
     ) { 
-        @this.ContractedNotNull("this");
-        selector.ContractedNotNull("selector");
-        resultSelector.ContractedNotNull("resultSelector");
+        @this.ContractedNotNull(nameof(@this));
+        selector.ContractedNotNull(nameof(selector));
+        resultSelector.ContractedNotNull(nameof(resultSelector));
         Ensures(Result<Reader<TEnvironment,TResult> >() != null);
 
         return environment =>
@@ -72,7 +72,7 @@ namespace PGSolutions.Utilities.Monads {
     /// <typeparam name="T"></typeparam>
     /// <param name="value"></param>
     public static Reader<TEnvironment, T>         ToReader<TEnvironment, T>(this T value) {
-        value.ContractedNotNull("value");
+        value.ContractedNotNull(nameof(value));
         Ensures(Result<Reader<TEnvironment, T> >() != null);
 
         return environment => value;
@@ -86,8 +86,8 @@ namespace PGSolutions.Utilities.Monads {
         Reader<TEnvironment, TSource> source,
         Func<TSource, TResult> selector
     ) {
-        source.ContractedNotNull("source");
-        selector.ContractedNotNull("selector");
+        source.ContractedNotNull(nameof(source));
+        selector.ContractedNotNull(nameof(selector));
         Ensures(Result<Reader<TEnvironment,TResult>>() != null);
 
         return source.SelectMany(value => selector(value).ToReader<TEnvironment, TResult>());
@@ -98,8 +98,8 @@ namespace PGSolutions.Utilities.Monads {
         Reader<TEnvironment, TSource> source,
         Func<TSource, Reader<TEnvironment, TResult>> selector
     ) {
-        source.ContractedNotNull("source");
-        selector.ContractedNotNull("selector");
+        source.ContractedNotNull(nameof(source));
+        selector.ContractedNotNull(nameof(selector));
         Ensures(Result<Reader<TEnvironment,TResult> >() != null);
 
         return environment => selector(source(environment))(environment);
@@ -111,9 +111,9 @@ namespace PGSolutions.Utilities.Monads {
         Func<TSource, Reader<TEnvironment, TSelector>> selector,
         Func<TSource, TSelector, TResult> resultSelector
     ) { 
-        source.ContractedNotNull("source");
-        selector.ContractedNotNull("selector");
-        resultSelector.ContractedNotNull("resultSelector");
+        source.ContractedNotNull(nameof(source));
+        selector.ContractedNotNull(nameof(selector));
+        resultSelector.ContractedNotNull(nameof(resultSelector));
         Ensures(Result<Reader<TEnvironment,TResult> >() != null);
 
         return environment =>
@@ -147,16 +147,16 @@ namespace PGSolutions.Utilities.Monads {
   [Pure]
   public static class Functions {
       public static TFirst        First<TFirst,TSecond> (TFirst first, TSecond second) {
-          first.ContractedNotNull("first");
-          second.ContractedNotNull("second");
+          first.ContractedNotNull(nameof(first));
+          second.ContractedNotNull(nameof(second));
           Ensures(Result<TFirst>() != null);
 
           return first;
       }
 
       public static TSecond       Second<TFirst,TSecond>(TFirst first, TSecond second) {
-          first.ContractedNotNull("first");
-          second.ContractedNotNull("second");
+          first.ContractedNotNull(nameof(first));
+          second.ContractedNotNull(nameof(second));
           Ensures(Result<TSecond>() != null);
 
           return second;

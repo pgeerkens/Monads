@@ -35,14 +35,14 @@ namespace TrafficLightDemo {
     /// <summary>TODO</summary>
     [ContractClass(typeof(ISettableLightContract<>))]
     public interface ISettableLight<T> {
-        IO<Unit> SetColour(T colour);
+        IO<Unit> SetColor(T color);
     }
 
     /// <summary>TODO</summary>
     [ContractClassFor(typeof(ISettableLight<>))]
     public abstract class ISettableLightContract<T> : ISettableLight<T> {
-        public IO<Unit> SetColour(T colour) {
-            Contract.Requires(colour != null, "colour");
+        public IO<Unit> SetColor(T color) {
+            Contract.Requires(color != null, "colour");
             return Unit._.ToIO();
         }
     }

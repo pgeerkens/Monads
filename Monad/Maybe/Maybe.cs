@@ -48,8 +48,7 @@ namespace PGSolutions.Utilities.Monads {
     public struct Maybe<T> : IEquatable<Maybe<T>> {
         /// <summary>The Invalid data value.</summary>
         [Pure]
-        public static Maybe<T> Nothing { get { return _nothing; }
-        } static readonly Maybe<T> _nothing = new Maybe<T>();
+        public static Maybe<T> Nothing { get { return default(Maybe<T>); } }
 
         ///<summary>Create a new Maybe{T}.</summary>
         private Maybe(T value) : this() {
@@ -67,25 +66,25 @@ namespace PGSolutions.Utilities.Monads {
         ///         return @this.Bind(v => projector(v).ToMaybe());
         ///</remarks>
         [Pure]
-        public Maybe<TResult> Select<TResult>(
+        public Maybe<TResult>   Select<TResult>(
             Func<T, TResult> projector
         ) {
-            projector.ContractedNotNull("projector");
+            projector.ContractedNotNull(nameof(projector));
 
-            return ! HasValue ? Maybe<TResult>.Nothing : projector(_value);
+            return ! HasValue ? default(Maybe<TResult>) : (Maybe<TResult>)projector(_value);
         }
 
-        ///<summary>The monadic Bind operation of type T to type MaybeX{TResult}.</summary>
+        ///<summary>The monadic Bind operation of type T to type Maybe{TResult}.</summary>
         /// <remarks>
         /// Convenience method - not used by LINQ
         /// </remarks>
         [Pure]
-        public Maybe<TResult> SelectMany<TResult>(
+        public Maybe<TResult>   SelectMany<TResult>(
             Func<T, Maybe<TResult>> selector
         ) {
-            selector.ContractedNotNull("selector");
+            selector.ContractedNotNull(nameof(selector));
 
-            return ! HasValue  ?  Maybe<TResult>.Nothing  :  selector(_value);
+            return ! HasValue ? default(Maybe<TResult>) : selector(_value);
         }
 
         /// <summary>LINQ-compatible implementation of the monadic join operator.</summary>
@@ -93,15 +92,15 @@ namespace PGSolutions.Utilities.Monads {
         /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
         /// </remarks>
         [Pure]
-        public Maybe<TResult> SelectMany<TIntermediate, TResult>(
+        public Maybe<TResult>   SelectMany<TIntermediate, TResult>(
             Func<T, Maybe<TIntermediate>> selector,
             Func<T, TIntermediate, TResult> projector
         ) {
-            selector.ContractedNotNull("selector");
-            projector.ContractedNotNull("projector");
+            selector.ContractedNotNull(nameof(selector));
+            projector.ContractedNotNull(nameof(projector));
 
             var @this = this;
-            return ! HasValue ? Maybe<TResult>.Nothing
+            return ! HasValue ? default(Maybe<TResult>)
                               : selector(_value).Select(e => projector(@this._value, e));
         }
 
@@ -111,7 +110,7 @@ namespace PGSolutions.Utilities.Monads {
         ///<summary>Extract value of the Maybe{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
         [Pure]
         public T BitwiseOr(T defaultValue) {
-            defaultValue.ContractedNotNull("defaultValue");
+            defaultValue.ContractedNotNull(nameof(defaultValue));
             Ensures(Result<T>() != null);
 
             return ! HasValue ? defaultValue : _value;
@@ -119,7 +118,7 @@ namespace PGSolutions.Utilities.Monads {
         ///<summary>Extract value of the Maybe{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
         [Pure]
         public static T operator | (Maybe<T> value, T defaultValue) {
-            defaultValue.ContractedNotNull("defaultValue");
+            defaultValue.ContractedNotNull(nameof(defaultValue));
             Ensures(Result<T>() != null);
 
             return value.BitwiseOr(defaultValue);
@@ -131,30 +130,30 @@ namespace PGSolutions.Utilities.Monads {
         [ContractInvariantMethod]
         [Pure]
         private void ObjectInvariant() {
-            Invariant( _value != null || ! HasValue );
+            Invariant(_value != null || !HasValue);
         }
 
         ///<summary>Wraps a T as a Maybe{T}.</summary>
         [Pure]
-        public static implicit operator Maybe<T>(T value) => new Maybe<T>(value);
+        public static explicit operator Maybe<T>(T value) => new Maybe<T>(value);
 
-        readonly T    _value;
+        readonly T _value;
         readonly bool _hasValue;
 
         ///<summary>Returns the type of the underlying type {TValue}.</summary>
         [Pure]
         public Type GetUnderlyingType {
             get { Ensures(Result<System.Type>() != null);
-                  return typeof(T);}
+                return typeof(T); }
         }
 
         #region Value Equality with IEquatable<T> and "excluded middle" present w/ either side has no value.
         #region implicit static constructor
-        static readonly bool           _valueIsStruct = typeof(ValueType).IsAssignableFrom(typeof(T))
+        static readonly bool _valueIsStruct = typeof(ValueType).IsAssignableFrom(typeof(T))
                                                      || typeof(string).IsAssignableFrom(typeof(T));
-        static readonly Func<T,T,bool> _valEquals     = (T lhs, T rhs) => lhs.Equals(rhs);
-        static readonly Func<T,T,bool> _refEquals     = (T lhs, T rhs) => ReferenceEquals(lhs, rhs);
-        static readonly Func<T,T,bool> _equals        = _valueIsStruct ? _valEquals  : _refEquals;
+        static readonly Func<T, T, bool> _valEquals = (T lhs, T rhs) => lhs.Equals(rhs);
+        static readonly Func<T, T, bool> _refEquals = (T lhs, T rhs) => ReferenceEquals(lhs, rhs);
+        static readonly Func<T, T, bool> _equals = _valueIsStruct ? _valEquals : _refEquals;
         #endregion
 
         /// <inheritdoc/>
@@ -165,7 +164,7 @@ namespace PGSolutions.Utilities.Monads {
         [Pure]
         public bool Equals(Maybe<T> other) =>
             HasValue ? other.HasValue && _equals(_value, other._value)
-                     : ! other.HasValue;
+                     : !other.HasValue;
 
         /// <inheritdoc/>
         [Pure]
@@ -173,11 +172,11 @@ namespace PGSolutions.Utilities.Monads {
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]
-        public static bool operator == (Maybe<T> lhs, Maybe<T> rhs) => lhs.Equals(rhs);
+        public static bool operator ==(Maybe<T> lhs, Maybe<T> rhs) => lhs.Equals(rhs);
 
         /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]
-        public static bool operator != (Maybe<T> lhs, Maybe<T> rhs) => ! lhs.Equals(rhs);
+        public static bool operator !=(Maybe<T> lhs, Maybe<T> rhs) => !lhs.Equals(rhs);
 
         ///<summary>Tests value-equality, returning <b>Nothing</b> if either value doesn't exist.</summary>
         [Pure]
@@ -196,24 +195,33 @@ namespace PGSolutions.Utilities.Monads {
         [Pure]
         public override string ToString() {
             Ensures(Result<string>() != null);
-            return SelectMany<string>(v => v.ToString()) | "";
+            return SelectMany<string>(v => v.ToString().ToMaybe()) | "";
         }
+
+        //public MaybeX<TValue> AsMaybeX<TValue>() where TValue : class,T =>
+        //    HasValue ? (TValue)_value : default(MaybeX<TValue>);
+        //public MaybeX<object> ToMaybeX<TValue>() where TValue : struct, T =>
+        //    HasValue ? (TValue)(object)_value : default(MaybeX<object>);
     }
 
+    [Pure]
     public static class Maybe {
-        public static Maybe<Unit> Unit { get { return PGSolutions.Utilities.Monads.Unit._.ToMaybe();} }
-
         ///<summary>Amplifies a reference-type T to a Maybe{T}.</summary>
         ///<remarks>The monad <i>unit</i> function.</remarks>
-        [Pure]
         public static Maybe<TValue> ToMaybe<TValue>(this TValue @this) =>
-            @this == null ? Maybe<TValue>.Nothing : (Maybe<TValue>)@this;
+            @this == null ? default(Maybe<TValue>) : (Maybe<TValue>)@this;
 
         ///<summary>Extract value of the Maybe{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
-        [Pure]
-        public static  Func<TStruct>  Extract<TStruct>(this Maybe<Func<TStruct>> @this) where TStruct:struct {
+        public static Func<TStruct> Extract<TStruct>(this Maybe<Func<TStruct>> @this) where TStruct : struct {
             Ensures(Result<Func<TStruct>>() != null);
-            return @this | (()=>default(TStruct));
+            return @this | (() => default(TStruct));
         }
+
+        /// <summary>TODO</summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="this"></param>
+        /// <returns></returns>
+        public static Maybe<T> Cast<T>(this Maybe<object> @this) where T : class =>
+            from o in @this select (T)o;
     }
 }

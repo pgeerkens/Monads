@@ -36,7 +36,7 @@ namespace PGSolutions.Utilities.Monads {
     public static class EnumerableExtensions {
         /// <summary>TODO</summary>
         public static IO<Unit> FirstUnit(this IEnumerable<IO<Unit>> @this) {
-            @this.ContractedNotNull("this");
+            @this.ContractedNotNull(nameof(@this));
             return @this.FirstOrDefault();
         }
     }

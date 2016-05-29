@@ -49,9 +49,7 @@ namespace PGSolutions.Utilities.Monads {
             State<TState, TValue> @this,
             Func<TState, State<TState,TResult>> follower
         ) {
-            //@this.ContractedNotNull("this");
-            follower.ContractedNotNull("follower");
-            //Ensures(Result<State<TState,TResult>>() != null);
+            follower.ContractedNotNull(nameof(follower));
 
             return new State<TState,TResult>( s => follower(s).Invoke(@this.Invoke(s).State) );
         }
@@ -66,10 +64,6 @@ namespace PGSolutions.Utilities.Monads {
             State<TState, TValue> @this,
             State<TState, TResult> follower
         ) {
-            //@this.ContractedNotNull("this");
-            //follower.ContractedNotNull("follower");
-            //Ensures(Result<State<TState,TResult>>() != null);
-
             return new State<TState,TResult>( s => follower.Invoke(@this.Invoke(s).State) );
         }
 
@@ -78,7 +72,7 @@ namespace PGSolutions.Utilities.Monads {
             Transform<TState> @this, 
             Predicate<TState> predicate
         ) {
-            @this.ContractedNotNull("this");
+            @this.ContractedNotNull(nameof(@this));
             //Ensures(Result<State<TState, Unit>>() != null);
 
             return new State<TState,Unit>(
@@ -94,8 +88,8 @@ namespace PGSolutions.Utilities.Monads {
             Transform<TState> @this,
             TState startState
         ) {
-            @this.ContractedNotNull("this");
-            startState.ContractedNotNull("startState");
+            @this.ContractedNotNull(nameof(@this));
+            startState.ContractedNotNull(nameof(startState));
             Ensures(Result<IEnumerable<TState>>() != null);
 
             while (true) yield return (startState = @this(startState));
@@ -105,7 +99,7 @@ namespace PGSolutions.Utilities.Monads {
         public static State<TState, TState> Modify<TState>(this
             Transform<TState> @this
         ) {
-            @this.ContractedNotNull("this");
+            @this.ContractedNotNull(nameof(@this));
             //Ensures(Result<State<TState, TState>>() != null);
 
             return State.Modify(@this);

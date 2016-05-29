@@ -37,65 +37,67 @@ namespace PGSolutions.Utilities.Monads {
 
     /// <summary>Class representing, conceptually, the "type" of <i>void</i>.</summary>
     public struct Unit : IEquatable<Unit> {
-    /// <summary>The single instance of <see cref="Unit"/></summary>
-    [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "_")]
-    [SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
-    [CLSCompliant(false)]
-    public static Unit _ { get {return _this;} } static Unit _this = new Unit();
+        /// <summary>The single instance of <see cref="Unit"/></summary>
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "_")]
+        [SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
+        [CLSCompliant(false)]
+        public static Unit _ { get {return _this;} } static Unit _this = new Unit();
 
-    #region Value Equality with IEquatable<T>.
-    /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-    [Pure]public bool Equals(Unit other) { return true; }
+        #region Value Equality with IEquatable<T>.
+        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
+        [Pure]public bool Equals(Unit other) { return true; }
 
-    /// <inheritdoc/>
-    [Pure]public override bool Equals(object obj) { 
-      var other = obj as Unit?;
-      return other != null  &&  other.Equals(obj);
+        /// <inheritdoc/>
+        [Pure]public override bool Equals(object obj) { 
+            var other = obj as Unit?;
+            return other != null  &&  other.Equals(obj);
+        }
+
+        /// <inheritdoc/>
+        [Pure]public override int GetHashCode() { Ensures(Result<int>()==0); return 0; }
+
+        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
+        [Pure]public static bool operator == (Unit lhs, Unit rhs) { return lhs.Equals(rhs); }
+
+        /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
+        [Pure]public static bool operator != (Unit lhs, Unit rhs) { return ! lhs.Equals(rhs); }
+        #endregion
     }
 
-    /// <inheritdoc/>
-    [Pure]public override int GetHashCode() { Ensures(Result<int>()==0); return 0; }
+    public static class UnitExtensions {
+        public static Func<Unit>     Select(this
+            Func<Unit> action, 
+            Func<Unit, Unit> projector
+        ) { 
+            action.ContractedNotNull(nameof(action));
+            projector.ContractedNotNull(nameof(projector));
+            Ensures(Result<Func<Unit>>() != null);
 
-    /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-    [Pure]public static bool operator == (Unit lhs, Unit rhs) { return lhs.Equals(rhs); }
+            return () => projector(action());
+        }
+        public static Func<Unit>     SelectMany(this
+            Func<Unit> action, 
+            Func<Unit, Func<Unit>> selector
+        ) {
+            action.ContractedNotNull(nameof(action));
+            selector.ContractedNotNull(nameof(selector));
+            Requires(selector(Unit._) != null);
+            Ensures(Result<Func<Unit>>() != null);
 
-    /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
-    [Pure]public static bool operator != (Unit lhs, Unit rhs) { return ! lhs.Equals(rhs); }
-    #endregion
-  }
+            return () => selector(action())();
+        }
+        public static Func<Unit>     SelectMany<TSelection>(this
+            Func<Unit> action,
+            Func<Unit, Func<TSelection>> selector,
+            Func<Unit,TSelection,Unit> projector
+        ) {
+            action.ContractedNotNull(nameof(action));
+            selector.ContractedNotNull(nameof(selector));
+            projector.ContractedNotNull(nameof(projector));
+            Ensures(Result<Func<Unit>>() != null);
 
-  public static class UnitExtensions {
-    public static Func<Unit>           Select(this Func<Unit> action, 
-        Func<Unit, Unit> projector
-    ) { 
-        action.ContractedNotNull("action");
-        projector.ContractedNotNull("projector");
-        Ensures(Result<Func<Unit>>() != null);
-
-        return () => projector(action());
+            var unit = action.Invoke();
+            return () => projector(unit, selector(unit)() );
+        }
     }
-    public static Func<Unit>           SelectMany(this Func<Unit> action, 
-        Func<Unit, Func<Unit>> selector
-    ) {
-        action.ContractedNotNull("action");
-        selector.ContractedNotNull("selector");
-        Requires(selector(Unit._) != null);
-        Ensures(Result<Func<Unit>>() != null);
-
-        var unit = action();
-        return () => selector(unit)();
-    }
-    public static Func<Unit>           SelectMany<TSelection>(Func<Unit> action,
-        Func<Unit, Func<TSelection>> selector,
-        Func<Unit,TSelection,Unit> projector
-    ) {
-        action.ContractedNotNull("action");
-        selector.ContractedNotNull("selector");
-        projector.ContractedNotNull("projector");
-        Ensures(Result<Func<Unit>>() != null);
-
-        var unit = action();
-        return () => projector(unit, selector(unit)() );
-    }
-  }
 }

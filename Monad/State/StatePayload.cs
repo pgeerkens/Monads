@@ -44,8 +44,8 @@ namespace PGSolutions.Utilities.Monads {
         Justification = "This nested type shares the Generic Type parameters of its parent, and is structurally associated with it.")]
     public struct StatePayload<TState, TValue> : IEquatable<StatePayload<TState, TValue>> {
         public StatePayload(TState state, TValue value) : this() {
-            state.ContractedNotNull("state");
-            value.ContractedNotNull("value");
+            state.ContractedNotNull(nameof(state));
+            value.ContractedNotNull(nameof(value));
             Ensures(_state != null);
             Ensures(_value != null);
 
@@ -64,28 +64,19 @@ namespace PGSolutions.Utilities.Monads {
             } } readonly TValue _value;
 
         [Pure]
-        public static explicit operator State<TState,TValue>(StatePayload<TState, TValue> payload) {
-            //Ensures(Result<State<TState,TValue>>() != null);
-
-            return new State<TState,TValue>(
-                s => payload
-            );
-        }
+        public static explicit operator State<TState,TValue>(StatePayload<TState, TValue> payload) =>
+            new State<TState,TValue>( s => payload );
         [Pure]
-        public static State<TState, TValue> ToState(StatePayload<TState, TValue> payload) {
-            //Ensures(Result<State<TState,TValue>>() != null);
-
-            return new State<TState, TValue>(
-                s => payload
-            );
-        }
+        public static State<TState, TValue> ToState(StatePayload<TState, TValue> payload) =>
+            new State<TState, TValue>( s => payload );
 
         /// <summary>Implementation of <i>Bind</i> for an Identity monad.</summary>
+        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
         [Pure]
         public StatePayload<TState,TResult> Bind<TResult>(
             Func<StatePayload<TState,TValue>, StatePayload<TState,TResult>> selector
         ) {
-            selector.ContractedNotNull("selector");
+            selector.ContractedNotNull(nameof(selector));
 
             return selector(this);
         }
@@ -105,17 +96,14 @@ namespace PGSolutions.Utilities.Monads {
         /// <inheritdoc/>
         [Pure]
         public override bool Equals(object obj) {
-            var other = (obj as StatePayload<TState, TValue>?).ToMaybe();
-            var @this = this;
-            return other.SelectMany<bool>(o => o.Equals(@this)) | false;
-            //return other != null  &&  this.Equals(other);
+            var other = (obj as StatePayload<TState, TValue>?);
+            return other.HasValue  &&  this.Equals(other.Value);
         }
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]
-        public bool Equals(StatePayload<TState, TValue> other) {
-            return this.Value.Equals(other.Value) && this.State.Equals(other.State);
-        }
+        public bool Equals(StatePayload<TState, TValue> other) =>
+            this.Value.Equals(other.Value) && this.State.Equals(other.State);
 
         /// <inheritdoc/>
         [Pure]
@@ -130,15 +118,13 @@ namespace PGSolutions.Utilities.Monads {
 
         /// <summary>Tests value-equality.</summary>
         [Pure]
-        public static bool operator ==(StatePayload<TState, TValue> lhs, StatePayload<TState, TValue> rhs) {
-          return lhs.Equals(rhs);
-        }
+        public static bool operator ==(StatePayload<TState, TValue> lhs, StatePayload<TState, TValue> rhs) =>
+            lhs.Equals(rhs);
 
         /// <summary>Tests value-inequality.</summary>
         [Pure]
-        public static bool operator !=(StatePayload<TState, TValue> lhs, StatePayload<TState, TValue> rhs) {
-          return !lhs.Equals(rhs);
-        }
+        public static bool operator !=(StatePayload<TState, TValue> lhs, StatePayload<TState, TValue> rhs) =>
+            !lhs.Equals(rhs);
         #endregion
     }
 }

@@ -82,7 +82,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
                    && item.Name != "Linq.Run2"
                     )
               where item.Transform.HasValue
-              where false
+              //where false
               select new Test(item.Transform.Value, item.Description, item.Name) as ITest
             ).ToList().AsReadOnly();
 
@@ -91,7 +91,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
             var tests = GetTests(true) | new List<ITest>();
             return ( from test in tests
                      where test.Name == name
-                     select test).FirstOrDefault().ToMaybeX();
+                     select test).FirstOrDefault().AsMaybeX();
         }
 
         #region Utilities
@@ -142,6 +142,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
 
             // ~ 0.91 sec
             /// <summary>TODO</summary>
+            [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
             [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
             [Description("Fully imperative; w/o substitution.")]
             public static readonly StateRes Run1 = ToStateRes(new StateInt(_run1));
@@ -156,6 +157,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
 
             // ~ 0.60 sec
             /// <summary>TODO</summary>
+            [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
             [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
             [Description("Fully imperative; w/ substitution.")]
             public static readonly StateRes Run2 = ToStateRes(new StateInt(_run2));
@@ -215,6 +217,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
               // ~ 1.5 sec
             private static readonly StateInt _run3 = AlgorithmState.DoWhile().Then(GcdExtract);
             /// <summary>TODO</summary>
+            [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
             [Description("Straight Haskel w/ DoWhile().")]
             public static readonly StateRes Run3 = ToStateRes(_run3);
         }
@@ -255,6 +258,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
                             select new PayloadInt(s, s.A)
                           ).First());
             /// <summary>TODO</summary>
+            [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
             [Description("Best LINQ w/ Enumerate(Transform<TState>, TState) and w/o using 'let'.")]
             public static readonly StateRes Run3 = ToStateRes(_run3);
         }

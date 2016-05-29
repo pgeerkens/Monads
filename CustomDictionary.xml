@@ -20,7 +20,7 @@
             <Word>rhs</Word>
             <Word>secs</Word>
 
-            <Word>Hadlow</Word>
+           <Word>Hadlow</Word>
             <Word>Napoleonics</Word>
          </Recognized>
          <Deprecated>
@@ -30,7 +30,9 @@
             <Term CompoundAlternate=""></Term>
          </Compound>
          <DiscreteExceptions>
-            <Term></Term>
+            <Term>CrossTown</Term>
+            <Term>DownTown</Term>
+            <Term>UpTown</Term>
          </DiscreteExceptions>
       </Words>
       <Acronyms>

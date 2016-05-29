@@ -30,6 +30,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace System.Diagnostics.Contracts {
+    using Runtime.CompilerServices;
     using static Contract;
 
     /// <summary>Extension methods to enhance Code Contracts and integration with Code Analysis.</summary>
@@ -61,6 +62,8 @@ namespace System.Diagnostics.Contracts {
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "value")]
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "name")]
         [ContractAbbreviator] // Requires Assemble Mode = Standard Contract Requires
+        [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ContractedNotNull<T>([ValidatedNotNull]this T value, string name) {
             Requires(value != null, name);
         }

@@ -50,7 +50,7 @@ namespace PGSolutions.Utilities.Monads {
         /// <summary>Utility method to perform <paramref name="action"/> and then return IO{Unit}.</summary>
         /// <remarks>This simplifies the writing of various Write instances of IOMonad.</remarks>
         private static IO<Unit> ReturnIOUnit(Action action) {
-            action.ContractedNotNull("action");
+            action.ContractedNotNull(nameof(action));
 
             action();
             return Unit._.ToIO();

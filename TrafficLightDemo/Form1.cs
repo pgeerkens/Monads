@@ -79,7 +79,7 @@ namespace TrafficLightDemo {
     #region Implementation
     [Pure]
     static Bitmap SetTransparent(Bitmap bitmap) {
-        bitmap.ContractedNotNull("bitmap");
+        bitmap.ContractedNotNull(nameof(bitmap));
         Contract.Ensures(Contract.Result<Bitmap>() != null);
 
         bitmap.MakeTransparent(bitmap.GetPixel(1,1));
@@ -88,7 +88,7 @@ namespace TrafficLightDemo {
 
     [Pure]
     static Unit SetLight(PictureBox light, Image lightColour) {
-        light.ContractedNotNull("light");
+        light.ContractedNotNull(nameof(light));
         light.Image = lightColour;
         return Unit._;
     }
@@ -124,13 +124,13 @@ namespace TrafficLightDemo {
 
     struct SettableLight : ISettableLight {
         public SettableLight(PictureBox pictureBox) : this() {
-          pictureBox.ContractedNotNull("pictureBox");
+          pictureBox.ContractedNotNull(nameof(pictureBox));
           Contract.Ensures(_pictureBox != null);
 
           _pictureBox = pictureBox;
         }
 
-            IO<Unit> ISettableLight.SetColour(Image image) {
+            IO<Unit> ISettableLight.SetColor(Image image) {
                 _pictureBox.Image = image;
                 return Unit._.ToIO();
             }
@@ -148,9 +148,9 @@ namespace TrafficLightDemo {
 
     struct TrafficLight : ITrafficLight<Image> {
       public TrafficLight(ICancellationTokenSource ctsSource, params PictureBox[] lights) : this() {
-        ctsSource.ContractedNotNull("ctsSource");
+        ctsSource.ContractedNotNull(nameof(ctsSource));
         Contract.Requires(ctsSource.Source != null);
-        lights.ContractedNotNull("lights");
+        lights.ContractedNotNull(nameof(lights));
         Contract.Requires(3 < lights.Length);
         Contract.Requires( lights[0] != null );
         Contract.Requires( lights[1] != null );

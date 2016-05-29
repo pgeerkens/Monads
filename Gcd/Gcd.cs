@@ -49,13 +49,14 @@ namespace PGSolutions.Utilities.Monads.Demos {
         static readonly CultureInfo _culture = CultureInfo.CurrentUICulture;
 
         /// <summary>TODO</summary>
-        public static Maybe<IO<Unit>> Run2(Maybe<IReadOnlyList<GcdStart>> maybeStates) =>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+        public static Maybe<IO<Unit>> Run2(Maybe<IList<GcdStart>> maybeStates) =>
             from states in maybeStates select Run(states);
 
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
-        public static IO<Unit> Run(IReadOnlyList<GcdStart> states) {
-            states.ContractedNotNull("states");
+        public static IO<Unit> Run(IList<GcdStart> states) {
+            states.ContractedNotNull(nameof(states));
             return (
                 from test in Gcd_S4.GetTests(false) | new List<ITest>()
                 let elapsed = Readers.Timer()
@@ -88,17 +89,17 @@ namespace PGSolutions.Utilities.Monads.Demos {
             return new PayloadMaybe(
                 from state in start
                 from x in state.A == 1
-                       || state.B == 1            ? new GcdStart(1, 1)
+                       || state.B == 1            ? new GcdStart(1, 1).ToMaybe()
                         : state.A != int.MinValue
-                       && state.B != int.MinValue ? new GcdStart(Math.Abs(state.A), Math.Abs(state.B))
-                        : state.A == state.B      ? new GcdStart(state.A, state.B)
+                       && state.B != int.MinValue ? new GcdStart(Math.Abs(state.A), Math.Abs(state.B)).ToMaybe()
+                        : state.A == state.B      ? new GcdStart(state.A, state.B).ToMaybe()
                         : state.A == int.MinValue ? new GcdStart(Math.Abs(state.A + Math.Abs(state.B)),
-                                                                 Math.Abs(state.B))
+                                                                 Math.Abs(state.B)).ToMaybe()
 #if PreventIncalculable
                         : state.B == int.MinValue ? new GcdStart(Math.Abs(state.A), 
                                                                  Math.Abs(state.B + Math.Abs(state.A)))
 #endif
-                        : Maybe<GcdStart>.Nothing
+                        : default(Maybe<GcdStart>)
                 select x,
                 Unit._);
         }

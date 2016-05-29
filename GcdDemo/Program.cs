@@ -63,7 +63,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
                     passNo == 0  ?  i < 13
                                  :  i < 2 || 11 < i;
 
-        static int i = 3;
+        static int i = 0;
         static int Main() => ( i==0 ? ImperativeSyntax("Imperative")
                              : i==1 ? FluentSyntax("Fluent")
                              : i==2 ? ComprehensionSyntax("Comprehension")
@@ -75,7 +75,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
                 var counter = 0;
                 var list = gcdStartStates.Where(state => _predicate(pass, counter++));
 
-                Gcd.Run2(list.ToList());
+                Gcd.Run2((Maybe<IList<GcdStart>>)(list.ToList()));
                 Write(Prompt(mode));
                 var c = ReadKey();
                 WriteLine();
@@ -125,7 +125,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
                      where _predicate(pass, counter())
                      select state ) 
             into list
-            where ( from _   in Gcd.Run2(list.ToList()) | IO<Unit>.Empty
+            where ( from _ in Gcd.Run2((Maybe<IList<GcdStart>>)(list.ToList())) | IO<Unit>.Empty
                     from __  in ConsoleWrite(Prompt(mode))
                     from c   in ConsoleReadKey()
                     from ___ in ConsoleWriteLine()

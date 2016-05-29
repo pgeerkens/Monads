@@ -26,294 +26,161 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
+
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 
 using Xunit;
-using MsTest = Microsoft.VisualStudio.TestTools.UnitTesting;
+//using MsTest = Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PGSolutions.Utilities.Monads.UnitTests {
-
-    [MsTest.TestClass] [ExcludeFromCodeCoverage]
+    [ExcludeFromCodeCoverage] [CLSCompliant(false)]
     public class MaybeXTests {
-        internal static IList<MaybeX<string>> data = new List<MaybeX<string>>()
-                                { "Fred", "George", null, "Ron", "Ginny" }.AsReadOnly();
-
-        [Fact][MsTest.TestMethod]
-        public void BasicTest1() {
-            var expected = "Fred/George//Ron/Ginny/";
-            var actual   = string.Join("/", from e in data
-                                            select e.ToString()) + "/";
-            Assert.Equal(expected, actual);
-            //Assert.Equal("Fred/George//Ron/Ginny/",
-            //        string.Join("/", from e in data
-            //                         select e.ToString()) + "/");
-        }
-        [Fact][MsTest.TestMethod]
-        public void BasicTest2() {
-            Assert.Equal("Fred/George/Nothing/Ron/Ginny/",
-                    string.Join("/",  from e in data
-                                        select e.ToNothingString() ) + "/" );
-
-        }
-        /// <summary>Equivalent code in first "Fluent" and then "Comprehension" syntax:</summary>
-        [Fact][MsTest.TestMethod]
-        public void SimpleLinqEquivalenceTest() {
-            Assert.Equal(
-                    string.Join("/", data.Where (e => e.HasValue).
-                                            Select(e => e.ToString())
-                                ) + "/",
-                    string.Join("/",  from e in data
-                                        where e.HasValue
-                                        select e.ToString()
-                                ) + "/" );
+        public MaybeXTests() {
+            _data        = ( from e in new List<string>() { "Percy", null, "George", "Ron", "Ginny" }
+                             select e.AsMaybeX()
+                           ).ToList().AsReadOnly();
+            _addOne      = x => x + "constant";
+            _addEight    = x => x + "/" + x;
+            _datetime    = DateTime.Now;
         }
 
-        [Fact][MsTest.TestMethod]
-        public void ValueEqualityTest1() {
-            string george = string.Copy("George");
-            Assert.Equal(george,"George");
-        }
-        [Fact][MsTest.TestMethod]
-        public void ValueEqualityTest2() {
-            string george = string.Copy("George");
-            Assert.Equal("George/",
-                    string.Join("/",  from e in data
-                                      let s = from item in e select item
-                                      where s == george
-                                      select e.ToNothingString()
-                                ) + "/" );
-        }
-        [Fact][MsTest.TestMethod]
-        public void ValueEqualityTest3() {
-            string george = string.Copy("George");
-                Assert.Equal("Fred/Nothing/Ron/Ginny/",
-                    string.Join("/",  from e in data
-                                      let s = from item in e select item
-                                      where s != george
-                                      select e.ToNothingString()
-                                ) + "/" );
+        readonly IList<MaybeX<string>>        _data;
+        readonly Func<string, MaybeX<string>> _addOne;
+        readonly Func<string, MaybeX<string>> _addEight;
+        readonly DateTime                     _datetime;
+
+        [Theory]
+        [InlineData("",        "Percy//George/Ron/Ginny")]
+        [InlineData("Nothing", "Percy/Nothing/George/Ron/Ginny")]
+        public void BasicTest(string defaultValue, string expected) {
+            var received = string.Join("/", from e in _data
+                                            select e | defaultValue
+                                            );
+            Contract.Assert(received != null);
+            Assert.Equal(expected, received);
         }
 
-        [Fact][MsTest.TestMethod]
-        public void IncludedMiddleTest1() {
-            Assert.Equal("George/",
-                    string.Join("/",  from e in data
-                                      where e == "George"
-                                      select e.ToNothingString()
-                               ) + "/" );
-        }
-        [Fact][MsTest.TestMethod]
-        public void IncludedMiddleTest2() {
-            Assert.Equal("Fred/Nothing/Ron/Ginny/",
-                    string.Join("/",  from e in data
-                                      where e != "George"
-                                      select e.ToNothingString()
-                               ) + "/" );
+        /// <summary>Verify that == and != are opposites, and are implemented as Equals().</summary>
+        [Theory]
+        [InlineData(true, "George")]
+        [InlineData(false, "Percy/Nothing/Ron/Ginny")]
+        public void IncludedMiddleTest(bool comparison, string expected) {
+            expected.ContractedNotNull(nameof(expected));
+            var received = string.Join("/", from e in _data
+                                            where e.Equals("George") == comparison
+                                            select e.ToNothingString()
+                                            );
+            Assert.True(expected == received);
+            Assert.False(ReferenceEquals(expected, received));
+
+            received     = string.Join("/", from e in _data
+                                            where (e == "George") == comparison
+                                            select e.ToNothingString()
+                                            );
+            Assert.Equal(expected, received);
+
+            received     = string.Join("/", from e in _data
+                                            where (e != "George") != comparison
+                                            select e.ToNothingString()
+                                            );
+            Assert.Equal(expected, received);
         }
 
-        [Fact][MsTest.TestMethod]
-        public void ExcludedMiddleTest1() {
-            Assert.Equal("George/",
-                    string.Join("/",  from e in data
-                                      where e.AreNonNullEqual("George") ?? false
-                                      select e.ToNothingString()
-                               ) + "/" );
-        }
-        [Fact][MsTest.TestMethod]
-        public void ExcludedMiddleTest2() {
-            Assert.Equal("Fred/Ron/Ginny/",
-                    string.Join("/",  from e in data
-                                      where e.AreNonNullUnequal("George") ?? false
-                                      select e.ToNothingString()
-                               ) + "/" );
-        }
-        [Fact][MsTest.TestMethod]
-        public void ExcludedMiddleTest3() {
-            Assert.Equal("Nothing/",
-                    string.Join("/",  from e in data
-                                      where ! e.AreNonNullUnequal("George").HasValue
-                                      select e.ToNothingString()
-                                ) + "/" );
+        [Theory]
+        [InlineData(true,  "George")]
+        [InlineData(false, "Percy/Ron/Ginny")]
+        [InlineData(null,  "Nothing")]
+        public void ExcludedMiddleTest(bool? comparison, string expected) {
+            var received = string.Join("/", from e in _data
+                                            where e.AreNonNullEqual("George") == comparison
+                                            select e.ToNothingString()
+                                            );
+            Assert.Equal(expected, received);
         }
 
-        [Fact][MsTest.TestMethod]
-        public void MemberAccessTestNotNothing() {
-            Assert.Equal("Fred/Ron/Ginny/",
-                    string.Join("/",  from e in data
-                                      where e.SelectMany<string>(s=>s).AreNonNullUnequal("George") ?? false
-                                      select e.ToNothingString()
-                                ) + "/" );
-        }
-
-        [Fact][MsTest.TestMethod]
-        public void LazyTest() {
+        [Fact]
+        public static void LazyEvaluationTest() {
             var state = new ExternalState();
-            var x = ( from a in (MaybeX<Func<int>>)state.GetState
-                    select a
-                    ) | (()=>0);
+            var x = (from a in (Maybe<Func<int>>)state.GetState select a).Extract();
             var y = x();
 
-            for (int i = 0; i++ < 5; ) state.GetState();
+            for (int i = 0; i++ < 5;) state.GetState();
 
             Assert.Equal(0, y);
-
             Assert.Equal(6, state.GetState());
-
             Assert.Equal(7, x());
-
-            //var xx = new MaybeX<IList<int>>(null);
-            //Console.WriteLine(xx);
         }
 
         /// <summary>Chaining with LINQ Comprehension syntax: all valid</summary>
         /// <remarks>
         /// after Wes Dyer: http://blogs.msdn.com/b/wesdyer/archive/2008/01/11/the-marvels-of-monads.aspx
         /// </remarks>
-        [Fact][MsTest.TestMethod]
-        public void WesDyerTest1() {
-            Assert.Equal("Fred Weasley",
-                    ( from x in "Fred".ToMaybeX()
-                        from y in " Weasley".ToMaybeX()
-                        select x + y ).ToNothingString() );
+        [Theory]
+        [InlineData("Fred Weasley", " Weasley")]
+        [InlineData("Nothing",      null)]
+        public static void WesDyerTest(string expected, string second) {
+            var received = ( from x in "Fred".AsMaybeX()
+                             from y in second.AsMaybeX()
+                             select x + y).ToNothingString();
+            Assert.Equal(expected, received);
         }
-
-        /// <summary>Chaining with LINQ Comprehension syntax: one invalid</summary>
-        /// <remarks>
-        /// after Wes Dyer: http://blogs.msdn.com/b/wesdyer/archive/2008/01/11/the-marvels-of-monads.aspx
-        /// </remarks>
-        [Fact][MsTest.TestMethod]
-        public void WesDyerTest2() {
-            Assert.Equal("Nothing",
-                    ( from x in "Fred".ToMaybeX()
-                        from y in MaybeX<string>.Nothing
-                        select x + y
-                    ).ToNothingString() );
-        }
-
-        /// <summary>Chaining with LINQ Fluent syntax: one invalid</summary>
-        /// <remarks>
-        /// after Wes Dyer: http://blogs.msdn.com/b/wesdyer/archive/2008/01/11/the-marvels-of-monads.aspx
-        /// </remarks>
-        [Fact][MsTest.TestMethod]
-        public void WesDyerTest3() {
-            Assert.Equal("Nothing",
-                    "Fred".ToMaybeX().SelectMany(x => MaybeX<string>.Nothing, (x, y) => new { x, y })
-                                     .Select(z => z.x + z.y)
-                                     .ToNothingString() );
-        }
-
-        /// <summary>Equivalency of chaining in "Fluent" and then "Comprehension" syntax: all valid</summary>
-        /// <remarks>
-        /// after Wes Dyer: http://blogs.msdn.com/b/wesdyer/archive/2008/01/11/the-marvels-of-monads.aspx
-        /// </remarks>
-        [Fact][MsTest.TestMethod]
-        public void CompoundLinqEquivalenceTest() {
-            Assert.Equal(
-                    "Fred".ToMaybeX().SelectMany(x => " Weasley".ToMaybeX(), (x, y) => new { x, y })
-                                     .Select(z => z.x + z.y )
-                                     .ToNothingString(),
-                    ( from x in "Fred".ToMaybeX()
-                      from y in " Weasley".ToMaybeX()
-                      select x + y
-                    ).ToNothingString() );
-        }
-
-        static readonly Func<string,MaybeX<string>> addOne = x => x + "constant";
-        static readonly Func<string,MaybeX<string>> addEight = x => x + "/" + x;
 
         /// <summary>Monad law 1: m.Monad().Bind(f) == f(m)</summary>
-        [Fact][MsTest.TestMethod]
-        public void MonadLaw1MaybeX() {
+        [Fact]
+        public void MonadLaw1() {
             const string description = "Monad law 1: m.Monad().Bind(f) == f(m)";
 
-            var lhs = "1".ToMaybeX().SelectMany(addOne);
-            var rhs = addOne("1");
+            var lhs = "1".AsMaybeX().SelectMany(_addOne);
+            var rhs = _addOne("1");
             Assert.True(lhs == rhs, description);
         }
 
         /// <summary>Monad law 2: M.Bind(Monad) == M</summary>
-        [Fact][MsTest.TestMethod]
-        public void MonadLaw2MaybeX() {
+        [Fact]
+        public static void MonadLaw2() {
             const string description = "Monad law 2: M.Bind(Monad) == M";
 
-            var M   = " four".ToMaybeX();
-            var lhs = M.SelectMany(i => i.ToMaybeX());
+            var M = " four".AsMaybeX();
+            var lhs = M.SelectMany(i => i.AsMaybeX());
             var rhs = M;
             Assert.True(lhs == rhs, description);
         }
 
         /// <summary>Monad law 3: M.Bind(f1).Bind(f2) == M.Bind(x => f1(x).Bind(f2))</summary>
-        [Fact][MsTest.TestMethod]
-        public void MonadLaw3MaybeX() {
+        [Fact]
+        public void MonadLaw3() {
             const string description = "Monad law 3: M.Bind(f1).Bind(f2) == M.Bind(x => f1(x).Bind(f2))";
 
             //Func<string,MaybeX<string>> addOne = x => x + 1;
-            var M   = " four".ToMaybeX();
-            var lhs = M.SelectMany(addOne).SelectMany(addEight);
-            var rhs = M.SelectMany(x => addOne(x).SelectMany(addEight));
+            var M = " four".AsMaybeX();
+            var lhs = M.SelectMany(_addOne).SelectMany(_addEight);
+            var rhs = M.SelectMany(x => _addOne(x).SelectMany(_addEight));
             Assert.True(lhs == rhs, description);
         }
 
-        #if false
         /// <summary>Chaining with LINQ Comprehension syntax: all valid</summary>
         /// <remarks>
         /// after Mike Hadlow: http://mikehadlow.blogspot.ca/2011/01/monads-in-c-5-MaybeX.html
         /// </remarks>
-        [Fact][MsTest.TestMethod]
-        public void MikeHadlowTest1() {
-            const int denominator = 2;
-            var dt = DateTime.Now;
-            Assert.Equal("Hello World! " + dt.ToShortDateString(),
-                ( from a in "Hello World!".ToMaybeX()
-                    from c in dt.ToMaybeX()
-                    let sds = c.ToShortDateString()
-                    select a + " " + sds
-                ).ToNothingString() );
+        [Theory]
+        [InlineData(4, true, "Hello World! 6 ")]
+        [InlineData(0, false, "Nothing")]
+        [InlineData(6, true,  "Hello World! 4 ")]
+        public void MikeHadlowTest(int denominator, bool append, string expected) {
+            if (append) expected = expected + _datetime.ToShortDateString();
+
+            var received = ( from a in "Hello World!".AsMaybeX()
+                             from b in ((SafeInt)24 / denominator).Value.SelectMany(v=>v.ToMaybeX())
+                             from c in ((object)_datetime).AsMaybeX()
+                             let sds = ((DateTime)c).ToShortDateString()
+                             select a + " " +  (int)b + " " + sds
+                           ).ToNothingString();
+
+            Assert.Equal(expected, received);
         }
-
-        /// <summary>Chaining with LINQ Comprehension syntax: one invalid</summary>
-        /// <remarks>
-        /// after Mike Hadlow: http://mikehadlow.blogspot.ca/2011/01/monads-in-c-5-MaybeX.html
-        /// </remarks>
-        [Fact][MsTest.TestMethod]
-        public void MikeHadlowTest2() {
-            const int denominator = 0;
-
-            Assert.Equal("Nothing",
-                ( from a in "Hello World!".ToMaybe()
-                    from b in 12.DoSomeDivision(denominator,2)
-                    from c in DateTime.Now.ToMaybe()
-                    let sds = c.ToShortDateString()
-                    select a + " " + b.ToString() + " " + sds
-                ).ToNothingString() );
-        }
-
-        /// <summary>Chaining with LINQ Comprehension syntax: one invalid</summary>
-        /// <remarks>
-        /// after Mike Hadlow: http://mikehadlow.blogspot.ca/2011/01/monads-in-c-5-MaybeX.html
-        /// </remarks>
-        [Fact][MsTest.TestMethod]
-        public void MikeHadlowTest3() {
-            var dt = DateTime.Now;
-            Assert.Equal("Hello World! 4 " + dt.ToShortDateString(),
-                ( from a in "Hello World!".ToMaybe()
-                    from b in 24.DoSomeDivision(2,3)
-                    from c in dt.ToMaybe()
-                    let sds = c.ToShortDateString()
-                    select a + " " + b.ToString() + " " + sds
-                ).ToNothingString() );
-        }
-        #endif
-    }
-
-    internal class ExternalState {
-        private  int        _state;
-
-        public ExternalState() { _state = -1;  }
-        public  int GetState() { return ++_state; }
     }
 }

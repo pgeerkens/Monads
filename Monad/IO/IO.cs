@@ -42,7 +42,6 @@ namespace PGSolutions.Utilities.Monads {
 
         /// <summary>Create a new instance of the class.</summary>
         public IO(Func<TSource> functor) : this() {
-     //       functor.ContractedNotNull("source");
             _functor = functor;
         }
 
@@ -58,7 +57,7 @@ namespace PGSolutions.Utilities.Monads {
         public IO<TResult> Select<TResult>(
             Func<TSource, TResult> projector
         ) {
-            projector.ContractedNotNull("projector");
+            projector.ContractedNotNull(nameof(projector));
 
             var @this = this;
             return new IO<TResult>(() => projector(@this.Invoke()));
@@ -72,7 +71,7 @@ namespace PGSolutions.Utilities.Monads {
         public IO<TResult> SelectMany<TResult>(
             Func<TSource, IO<TResult>> selector
         ) {
-            selector.ContractedNotNull("selector");
+            selector.ContractedNotNull(nameof(selector));
 
             var @this = this;
             return new IO<TResult>(() => selector(@this.Invoke()).Invoke());
@@ -87,8 +86,8 @@ namespace PGSolutions.Utilities.Monads {
             Func<TSource, IO<T>> selector,
             Func<TSource, T, TResult> projector
         ) {
-            selector.ContractedNotNull("selector");
-            projector.ContractedNotNull("projector");
+            selector.ContractedNotNull(nameof(selector));
+            projector.ContractedNotNull(nameof(projector));
 
             var @this = this;
             return new IO<TResult>(() => {
@@ -136,7 +135,7 @@ namespace PGSolutions.Utilities.Monads {
     public static class IO {
         /// <summary>TODO</summary>
         public static IO<TSource> ToIO<TSource>( this Func<TSource> source) {
-            source.ContractedNotNull("source");
+            source.ContractedNotNull(nameof(source));
             return new IO<TSource>(source);
         }
     }
