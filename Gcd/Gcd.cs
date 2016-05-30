@@ -61,17 +61,40 @@ namespace PGSolutions.Utilities.Monads.Demos {
                 from test in Gcd_S4.GetTests(false) | new List<ITest>()
                 let elapsed = Readers.Timer()
                 let isThird = Readers.MatchCounter(i => i==3, 1)
-                select ( from _   in ConsoleWriteLine("{0}", test.Title)
+#if false
+                from a in ( from _   in ConsoleWriteLine("{0}", test.Title)
+                            from __  in ( from start in states
+                                          select new {
+                                             Start  = start,
+                                             Result = from validated in ValidateState(start.ToMaybe()).State
+                                                      select test.Transform.Invoke(validated).Value
+                                          } into item
+                                          select ConsoleWriteLine(
+                                              @"    GCD = {0,14} for {1}: Elapsed = {2:ss\.fff} secs; {3}",
+                                              ( from r in item.Result
+                                                select string.Format(_culture,"{0,14:N0}", r.Gcd)
+                                              ) | "incalculable",
+                                              item.Start,
+                                              elapsed(),
+                                              isThird() ? "I'm third!" : ""
+                                          )
+                                        ).Last()
+                            from ___ in ConsoleWriteLine(@"Elapsed Time: {0:ss\.ff} secs", elapsed())
+                            select ConsoleWriteLine()
+                          )
+                select a.Invoke()
+#else
+                let a= ( from _   in ConsoleWriteLine("{0}", test.Title)
                          from __  in ( from start in states
                                        select new {
-                                          Start = start,
+                                          Start  = start,
                                           Result = from validated in ValidateState(start.ToMaybe()).State
                                                    select test.Transform.Invoke(validated).Value
                                        } into item
                                        select ConsoleWriteLine(
                                            @"    GCD = {0,14} for {1}: Elapsed = {2:ss\.fff} secs; {3}",
                                            ( from r in item.Result
-                                             select String.Format(_culture,"{0,14:N0}", r.Gcd)
+                                             select string.Format(_culture,"{0,14:N0}", r.Gcd)
                                            ) | "incalculable",
                                            item.Start,
                                            elapsed(),
@@ -80,7 +103,9 @@ namespace PGSolutions.Utilities.Monads.Demos {
                                      ).Last()
                          from ___ in ConsoleWriteLine(@"Elapsed Time: {0:ss\.ff} secs", elapsed())
                          select ConsoleWriteLine()
-                       ).Invoke()
+                       )
+                select a.Invoke()
+#endif
             ).LastOrDefault();
         }
 

@@ -70,16 +70,16 @@ namespace PGSolutions.Utilities.Monads.Demos {
               where field.Name.Substring(0, 3) == "Run"
                  && atts.AttributeType.Name =="DescriptionAttribute"
               select new {
-                   Name        = @class.Name + "." + field.Name
-                  ,Description = atts.ConstructorArguments[0].Value as string
-                  ,Transform   = field.GetValue(null) as StateRes?
+                  Name        = @class.Name + "." + field.Name,
+                  Description = atts.ConstructorArguments[0].Value as string,
+                  Transform   = field.GetValue(null) as StateRes?
               }
               into item
               where getAll
-                 || ( item.Name != "Haskell.Run1"
-                   && item.Name != "Haskell.Run2"
-                   && item.Name != "Linq.Run1"
-                   && item.Name != "Linq.Run2"
+                 || ( item.Name != nameof(Haskell)+"."+nameof(Haskell.Run1)
+                   && item.Name != nameof(Haskell)+"."+nameof(Haskell.Run2)
+                   && item.Name != nameof(Linq)+"."+nameof(Linq.Run1)
+                   && item.Name != nameof(Linq)+"."+nameof(Linq.Run2)
                     )
               where item.Transform.HasValue
               //where false

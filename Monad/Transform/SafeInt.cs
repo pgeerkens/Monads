@@ -160,12 +160,13 @@ namespace PGSolutions.Utilities.Monads {
         /// <summary>Returns a Nullable{int} with the difference, or null if the operation fails.</summary>
         public static int? SafeSubtract(this int minuend, int subtrahend) =>
             subtrahend != int.MinValue ? minuend.SafeAddition(-subtrahend)
-                         : minuend < 0 ? from e in subtrahend.SafeAddition(minuend) select -e
-                                       : default(int?);
+                        : minuend >= 0 ? default(int?)
+                                       : from e in int.MaxValue.SafeAddition(minuend)
+                                         select e+1;
 
         /// <summary>Returns a Nullable{int} with the quotient, or null if the operation fails.</summary>
         public static int? SafeDivide(this int dividend, int divisor) =>
-            divisor == 0 || (dividend == Int32.MinValue && divisor == -1)
+            divisor == 0 || (dividend == int.MinValue && divisor == -1)
                           ? default(int?)
                           : dividend / divisor;
     }

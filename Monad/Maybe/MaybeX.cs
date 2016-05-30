@@ -46,10 +46,6 @@ namespace PGSolutions.Utilities.Monads {
     /// for both instances.
     /// </remarks>
     public struct MaybeX<T> : IEquatable<MaybeX<T>> where T:class {
-        /// <summary>The Invalid Data value.</summary>
-        [SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
-        public static MaybeX<T> Nothing { get { return default(MaybeX<T>); } }
-
         ///<summary>Create a new MaybeX{T}.</summary>
         private MaybeX(T value) : this() {
             _value    = value;
@@ -62,7 +58,7 @@ namespace PGSolutions.Utilities.Monads {
         /// Always available from Bind():
         ///         return @this.Bind(v => projector(v).ToMaybe());
         ///</remarks>
-        public MaybeX<TResult>  Select<TResult>(
+        public MaybeX<TResult>    Select<TResult>(
             Func<T, TResult> projector
         ) where TResult : class {
             projector.ContractedNotNull(nameof(projector));
@@ -76,7 +72,7 @@ namespace PGSolutions.Utilities.Monads {
         /// </remarks>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         [Pure]
-        public  MaybeX<TResult> SelectMany<TResult>(
+        public  MaybeX<TResult>   SelectMany<TResult>(
             Func<T, MaybeX<TResult>> selector
         ) where TResult:class {
             selector.ContractedNotNull(nameof(selector));
@@ -89,7 +85,7 @@ namespace PGSolutions.Utilities.Monads {
         /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
         /// </remarks>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public MaybeX<TResult> SelectMany<TIntermediate, TResult>(
+        public MaybeX<TResult>   SelectMany<TIntermediate, TResult>(
             Func<T, MaybeX<TIntermediate>> selector,
             Func<T,TIntermediate,TResult> projector
         ) where TIntermediate:class where TResult:class {

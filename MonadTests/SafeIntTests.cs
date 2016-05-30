@@ -36,6 +36,7 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
     [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors")]
     [CLSCompliant(false)]
     public static class SafeIntTests {
+        #region Addition Tests
         [Theory]
         [InlineData( 1,int.MaxValue, +1, null)]
         [InlineData( 2,int.MaxValue,  0, int.MaxValue)]
@@ -53,8 +54,14 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
         [InlineData(11,int.MinValue,  0, int.MinValue)]
         [InlineData(12,int.MinValue, -1, null)]
 
-        [InlineData(13,int.MinValue/2, int.MinValue/2, int.MinValue)]
-        [InlineData(14,int.MaxValue/2, int.MaxValue/2, int.MaxValue-1)]
+        [InlineData(13,int.MinValue/2-1, int.MinValue/2, null)]
+        [InlineData(14,int.MinValue/2+0, int.MinValue/2, int.MinValue)]
+        [InlineData(15,int.MinValue/2+1, int.MinValue/2, int.MinValue+1)]
+
+        [InlineData(16,int.MaxValue/2+0, int.MaxValue/2, int.MaxValue-1)]
+        [InlineData(17,int.MaxValue/2+1, int.MaxValue/2, int.MaxValue)]
+        [InlineData(18,int.MaxValue/2+2, int.MaxValue/2, null)]
+        #endregion
         public static void AdditionTests(int i,int? op1, int? op2, int? e) {
             const string format = "#{0}{1}: expected={2}; received={3}";
             var lhs = (SafeInt)op1; var rhs = (SafeInt)op2;
@@ -66,26 +73,28 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
             Assert.True(expected.Equals(received), format.ICFormat(i,'B', expected, received));
         }
 
+        #region Subtraction Tests
         [Theory]
-        [InlineData( 1,int.MaxValue, -1, null,           int.MinValue)]
-        [InlineData( 2,int.MaxValue,  0, int.MaxValue,   int.MinValue+1)]
-        [InlineData( 3,int.MaxValue, +1, int.MaxValue-1, int.MinValue+2)]
+        [InlineData( 1,int.MaxValue, -2, null,           null)]
+        [InlineData( 2,int.MaxValue, -1, null,           int.MinValue)]
+        [InlineData( 3,int.MaxValue,  0, int.MaxValue,   int.MinValue+1)]
+        [InlineData( 4,int.MaxValue, +1, int.MaxValue-1, int.MinValue+2)]
 
-        [InlineData( 4,int.MaxValue-1, -1, int.MaxValue,   int.MinValue+1)]
-        [InlineData( 5,int.MaxValue-1,  0, int.MaxValue-1, int.MinValue+2)]
-        [InlineData( 6,int.MaxValue-1, +1, int.MaxValue-2, int.MinValue+3)]
+        [InlineData( 5,int.MaxValue-1, -3, null,           null)]
+        [InlineData( 6,int.MaxValue-1, -2, null,           int.MinValue)]
+        [InlineData( 7,int.MaxValue-1, -1, int.MaxValue,   int.MinValue+1)]
+        [InlineData( 8,int.MaxValue-1,  0, int.MaxValue-1, int.MinValue+2)]
 
-        [InlineData( 7,int.MinValue+1, -1, int.MinValue+2, int.MaxValue-1)]
-        [InlineData( 8,int.MinValue+1,  0, int.MinValue+1, int.MaxValue)]
-        [InlineData( 9,int.MinValue+1, +1, int.MinValue,   null)]
+        [InlineData( 9,int.MinValue+1, -1, int.MinValue+2, int.MaxValue-1)]
+        [InlineData(10,int.MinValue+1,  0, int.MinValue+1, int.MaxValue)]
+        [InlineData(11,int.MinValue+1, +1, int.MinValue,   null)]
+        [InlineData(12,int.MinValue+1, +2, null,           null)]
 
-       // [InlineData(10,int.MinValue, -2, int.MinValue+2, int.MaxValue)]
-        [InlineData(10,int.MinValue, -1, int.MinValue+1, null)]
-        [InlineData(11,int.MinValue,  0, int.MinValue,   null)]
-        [InlineData(12,int.MinValue, +1, null,           null)]
-
-        [InlineData(13,int.MinValue/2, -(int.MinValue/2), int.MinValue,   null)]
-        [InlineData(14,int.MaxValue/2, -(int.MaxValue/2), int.MaxValue-1, int.MinValue+2)]
+        [InlineData(13,int.MinValue, -2, int.MinValue+2, int.MaxValue-1)]
+        [InlineData(14,int.MinValue, -1, int.MinValue+1, int.MaxValue)]
+        [InlineData(15,int.MinValue,  0, int.MinValue,   null)]
+        [InlineData(16,int.MinValue, +1, null,           null)]
+        #endregion
         public static void SubtractionTests(int i, int? op1, int? op2, int? e1, int? e2) {
             const string format = "#{0}{1}: expected={2}; received={3}";
             var lhs = (SafeInt)op1; var rhs = (SafeInt)op2;

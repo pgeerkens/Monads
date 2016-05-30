@@ -36,68 +36,64 @@ namespace PGSolutions.Utilities.Monads {
     using static Contract;
 
     /// <summary>Class representing, conceptually, the "type" of <i>void</i>.</summary>
-    public struct Unit : IEquatable<Unit> {
+    public struct Unit : IEquatable<Unit>, IComparable<Unit> {
         /// <summary>The single instance of <see cref="Unit"/></summary>
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "_")]
         [SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [CLSCompliant(false)]
         public static Unit _ { get {return _this;} } static Unit _this = new Unit();
 
+        /// <inheritdoc/>
+        public int CompareTo(Unit other) { Ensures(Result<int>()==0); return 0; }
+
         #region Value Equality with IEquatable<T>.
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-        [Pure]public bool Equals(Unit other) { return true; }
+        [Pure]public bool Equals(Unit other) => true;
 
         /// <inheritdoc/>
-        [Pure]public override bool Equals(object obj) { 
-            var other = obj as Unit?;
-            return other != null  &&  other.Equals(obj);
-        }
+        [Pure]public override bool Equals(object obj) => obj is Unit;
 
         /// <inheritdoc/>
-        [Pure]public override int GetHashCode() { Ensures(Result<int>()==0); return 0; }
+        [Pure]public override int  GetHashCode() { Ensures(Result<int>()==0); return 0; }
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-        [Pure]public static bool operator == (Unit lhs, Unit rhs) { return lhs.Equals(rhs); }
+        [Pure]public static bool operator == (Unit lhs, Unit rhs) =>lhs.Equals(rhs);
 
         /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
-        [Pure]public static bool operator != (Unit lhs, Unit rhs) { return ! lhs.Equals(rhs); }
+        [Pure]public static bool operator != (Unit lhs, Unit rhs) => ! lhs.Equals(rhs);
         #endregion
-    }
 
-    public static class UnitExtensions {
-        public static Func<Unit>     Select(this
-            Func<Unit> action, 
+        public Func<Unit>     Select(
             Func<Unit, Unit> projector
         ) { 
-            action.ContractedNotNull(nameof(action));
             projector.ContractedNotNull(nameof(projector));
             Ensures(Result<Func<Unit>>() != null);
 
-            return () => projector(action());
+            var @this = this;
+            return () => projector(@this);
         }
-        public static Func<Unit>     SelectMany(this
-            Func<Unit> action, 
+
+        public Func<Unit>     SelectMany(
             Func<Unit, Func<Unit>> selector
         ) {
-            action.ContractedNotNull(nameof(action));
             selector.ContractedNotNull(nameof(selector));
             Requires(selector(Unit._) != null);
             Ensures(Result<Func<Unit>>() != null);
 
-            return () => selector(action())();
+            var @this = this;
+            return () => selector(@this)();
         }
-        public static Func<Unit>     SelectMany<TSelection>(this
-            Func<Unit> action,
+
+        public Func<Unit>     SelectMany<TSelection>(
             Func<Unit, Func<TSelection>> selector,
             Func<Unit,TSelection,Unit> projector
         ) {
-            action.ContractedNotNull(nameof(action));
             selector.ContractedNotNull(nameof(selector));
             projector.ContractedNotNull(nameof(projector));
             Ensures(Result<Func<Unit>>() != null);
 
-            var unit = action.Invoke();
-            return () => projector(unit, selector(unit)() );
+            var @this = this;
+            return () => projector(@this, selector(@this)() );
         }
     }
 }
