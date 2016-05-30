@@ -53,7 +53,7 @@ namespace PGSolutions.Utilities.Monads {
         ///<summary>Create a new Maybe{T}.</summary>
         private Maybe(T value) : this() {
             Ensures(!HasValue ||  _value != null);
-            //Ensures(HasValue.Implies(_value != null));
+            //Ensures(HasValue.Implies(_value != null));    // works in MayceX.cs, not here.
 
             _value    = value;
             _hasValue = _value != null;
@@ -132,7 +132,7 @@ namespace PGSolutions.Utilities.Monads {
         [Pure]
         private void ObjectInvariant() {
             Invariant(_value != null || !HasValue);
-            //Invariant(HasValue.Implies(_value != null));
+            //Invariant(HasValue.Implies(_value != null));   // works in MayceX.cs, not here.
         }
 
         ///<summary>Wraps a T as a Maybe{T}.</summary>
@@ -223,7 +223,7 @@ namespace PGSolutions.Utilities.Monads {
         /// <typeparam name="T"></typeparam>
         /// <param name="this"></param>
         /// <returns></returns>
-        public static Maybe<T> Cast<T>(this Maybe<object> @this) where T : class =>
+        public static Maybe<T> Cast<T>(this Maybe<object> @this) => //where T : class =>
             from o in @this select (T)o;
     }
 }

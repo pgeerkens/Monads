@@ -5,13 +5,12 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 
 using Xunit;
-//using MsTest = Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PGSolutions.Utilities.Monads.UnitTests {
 
     [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors",
         Justification = "Unit tests require a public default constructor.")]
-    [ExcludeFromCodeCoverage] //[MsTest.TestClass]
+    [ExcludeFromCodeCoverage]
     public partial class EnumerableTests {
         [Fact]
         public static void ExecutionTest() {

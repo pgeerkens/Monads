@@ -35,11 +35,7 @@ using Xunit;
 namespace PGSolutions.Utilities.Monads.UnitTests {
     [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors")]
     [CLSCompliant(false)]
-    public class SafeIntTests {
-        public SafeIntTests() {
-
-        }
-
+    public static class SafeIntTests {
         [Theory]
         [InlineData( 1,int.MaxValue, +1, null)]
         [InlineData( 2,int.MaxValue,  0, int.MaxValue)]
@@ -83,6 +79,7 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
         [InlineData( 8,int.MinValue+1,  0, int.MinValue+1, int.MaxValue)]
         [InlineData( 9,int.MinValue+1, +1, int.MinValue,   null)]
 
+       // [InlineData(10,int.MinValue, -2, int.MinValue+2, int.MaxValue)]
         [InlineData(10,int.MinValue, -1, int.MinValue+1, null)]
         [InlineData(11,int.MinValue,  0, int.MinValue,   null)]
         [InlineData(12,int.MinValue, +1, null,           null)]
@@ -93,7 +90,7 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
             const string format = "#{0}{1}: expected={2}; received={3}";
             var lhs = (SafeInt)op1; var rhs = (SafeInt)op2;
             var expected = (SafeInt)e1;
-            var received  = lhs - rhs;
+            var received = lhs - rhs;
             Assert.True(expected.Equals(received), format.ICFormat(i,'A', expected, received));
 
             expected = (SafeInt)e2;
@@ -101,6 +98,7 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
             Assert.True(expected.Equals(received), format.ICFormat(i,'B', expected, received));
         }
     }
+
     public static class StringExtensions {
         static readonly CultureInfo _invariantCulture = CultureInfo.InvariantCulture;
         static readonly CultureInfo _currentCulture   = CultureInfo.CurrentUICulture;

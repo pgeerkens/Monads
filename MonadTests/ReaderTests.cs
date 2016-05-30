@@ -33,17 +33,16 @@ using System.Globalization;
 using System.Linq;
 
 using Xunit;
-//using MsTest = Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using PGSolutions.Utilities.Monads;
 
 namespace ReaderMonadTests {
 
-    //[MsTest.TestClass] [ExcludeFromCodeCoverage]
     [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors",
         Justification = "Unit tests require a public default constructor.")]
+    [ExcludeFromCodeCoverage]
     public class ReaderTests {
-        [Fact]//[MsTest.TestMethod]
+        [Fact]
         public static void ExecutionTest() {
             var isExecuted1 = false;
             var isExecuted2 = false;
@@ -74,7 +73,6 @@ namespace ReaderMonadTests {
         }
     }
 
-    //    [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible"), MsTest.TestClass]
     [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors",
         Justification = "Unit tests require a public default constructor.")]
     public class MonadLawTests {
@@ -85,7 +83,7 @@ namespace ReaderMonadTests {
         static Tuple<bool, string> config = Tuple.Create(true, "abc");
 
         /// <summary>Monad law 1: m.Monad().Bind(f) == f(m)</summary>
-        [Fact]//[MsTest.TestMethod]
+        [Fact]
         public static void MonadLaws() {
             Reader<Tuple<bool, string>, int> left = 1.ToReader<Tuple<bool, string>, int>().Bind(addOne);
             Reader<Tuple<bool, string>, int> right = addOne(1);
@@ -94,29 +92,28 @@ namespace ReaderMonadTests {
         }
 
         /// <summary>Monad law 2: M.Bind(Monad) == M</summary>
-        [Fact]//[MsTest.TestMethod]
+        [Fact]
         public static void MonadLaw2() {
             Tuple<bool, string> config = Tuple.Create(true, "abc");
 
             var expected = M.Bind(Reader.ToReader<Tuple<bool, string>, int>);
-            var actual   = M;
-            Assert.Equal(expected(config), actual(config));
+            var received = M;
+            Assert.Equal(expected(config), received(config));
         }
 
         /// <summary>Monad law 3: M.Bind(f).Bind(g) == M.Bind(x => f(x).Bind(g))</summary>
-        [Fact]//[MsTest.TestMethod]
+        [Fact]
         public static void MonadLaw3() {
             var expected = M.Bind(addOne).Bind(timesLength);
-            var actual   = M.Bind(x => addOne(x).Bind(timesLength));
-            Assert.Equal(expected(config), actual(config));
+            var received = M.Bind(x => addOne(x).Bind(timesLength));
+            Assert.Equal(expected(config), received(config));
         }
     }
 
-    //    [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible"), MsTest.TestClass]
     [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors",
         Justification = "Unit tests require a public default constructor.")]
     public class TomAndJerryDependencyInjectionTest {
-        [Fact]//[MsTest.TestMethod]
+        [Fact]
         public static void TomAndJerryTest() {
             const string CrLf = "\r\n";
             const string expected = @"
@@ -125,13 +122,13 @@ Who is this? This is Jerry!";
 
             Reader<string, string> tom = env => env + "This is Tom!";
             Reader<string, string> jerry = env => env + "This is Jerry!";
+            var query    = ( from t in tom
+                             from j in jerry
+                             select CrLf + t + CrLf + j
+                           );
 
-            var query = ( from t in tom
-                          from j in jerry
-                          select CrLf + t + CrLf + j
-                        );
-            var actual = query("Who is this? ");
-            Assert.Equal(actual, expected);
+            var received = query("Who is this? ");
+            Assert.Equal(expected, received);
         }
     }
 }

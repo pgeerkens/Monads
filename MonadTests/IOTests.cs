@@ -3,12 +3,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 
 using Xunit;
-//using MsTest = Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PGSolutions.Utilities.Monads.IO2.UnitTests {
-    [ExcludeFromCodeCoverage]//[MsTest.TestClass]
+    [ExcludeFromCodeCoverage]
     public static class IOTests {
-        [Fact]//[MsTest.TestMethod]
+        [Fact]
         public static void IOTest() {
             bool isExecuted1 = false;
             bool isExecuted2 = false;
@@ -41,7 +40,7 @@ namespace PGSolutions.Utilities.Monads.IO2.UnitTests {
             Assert.True(isExecuted4);
         }
 
-        [Fact]//[MsTest.TestMethod]
+        [Fact]
         public static void IOTestFunctional() {
             bool isExecuted1 = false;
             bool isExecuted2 = false;
@@ -88,7 +87,7 @@ namespace PGSolutions.Utilities.Monads.IO2.UnitTests {
         static Func<int, IO<int>> addOne3 = x => (x + 1).ToIO();
         static IO<int> M = 1.ToIO();
 
-        [Fact]//[MsTest.TestMethod]
+        [Fact]
         public static void MonadLaw1Test() {
             // Monad law 1: m.Monad().SelectMany(f) == f(m)
             var lhs = 1.ToIO().SelectMany<int>(addOne3); Contract.Assert(lhs  != null);
@@ -96,7 +95,7 @@ namespace PGSolutions.Utilities.Monads.IO2.UnitTests {
             Assert.Equal(lhs.Invoke(), rhs.Invoke());
         }
 
-        [Fact]//[MsTest.TestMethod]
+        [Fact]
         public static void MonadLaw2Test() {
             // Monad law 2: M.SelectMany(Monad) == M
             var lhs = M.SelectMany(m => m.ToIO());
@@ -104,7 +103,7 @@ namespace PGSolutions.Utilities.Monads.IO2.UnitTests {
             Assert.Equal(lhs.Invoke(), rhs.Invoke());
         }
 
-        [Fact]//[MsTest.TestMethod]
+        [Fact]
         public static void MonadLaw3Test() {
             // Monad law 3: M.SelectMany(f1).SelectMany(f2) == M.SelectMany(x => f1(x).SelectMany(f2))
             Func<int, IO<int>> addTwo = x => (x + 2).ToIO();

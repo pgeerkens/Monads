@@ -34,7 +34,6 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 
 using Xunit;
-//using MsTest = Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PGSolutions.Utilities.Monads.UnitTests {
     [ExcludeFromCodeCoverage] [CLSCompliant(false)]
@@ -70,6 +69,7 @@ namespace PGSolutions.Utilities.Monads.UnitTests {
         [InlineData(false, "Percy/Nothing/Ron/Ginny")]
         public void IncludedMiddleTest(bool comparison, string expected) {
             expected.ContractedNotNull(nameof(expected));
+
             var received = string.Join("/", from e in _data
                                             where e.Equals("George") == comparison
                                             select e.ToNothingString()
