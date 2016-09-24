@@ -27,139 +27,55 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Linq;
 
-namespace PGSolutions.Utilities.Monads {
+namespace PGSolutions.Monads {
     using static Contract;
 
+    /// <summary>TODO</summary>
     public delegate TValue Reader<in TEnvironment, out TValue>(TEnvironment environment);
 
-  public static class Reader {
-    public static Reader<TEnvironment,TResult>    Bind<TEnvironment,TSource, TResult>( this
-        Reader<TEnvironment, TSource> @this,
-        Func<TSource, Reader<TEnvironment, TResult>> selector
-    ) {
-        @this.ContractedNotNull(nameof(@this));
-        selector.ContractedNotNull(nameof(selector));
-        Ensures(Result<Reader<TEnvironment,TResult> >() != null);
+    /// <summary>TODO</summary>
+    public static class Reader {
+        /// <summary>TODO</summary>
+        public static Reader<TEnvironment,TResult>    Bind<TEnvironment,TSource, TResult>( this
+            Reader<TEnvironment, TSource> @this,
+            Func<TSource, Reader<TEnvironment, TResult>> selector
+        ) {
+            @this.ContractedNotNull(nameof(@this));
+            selector.ContractedNotNull(nameof(selector));
+            Ensures(Result<Reader<TEnvironment,TResult> >() != null);
 
-        return environment => selector(@this(environment))(environment);
+            return environment => selector(@this(environment))(environment);
+        }
+
+        /// <summary>TODO</summary>
+        public static Reader<TEnvironment,TResult>    Flatten<TEnvironment,TSource,TSelector,TResult>( this
+            Reader<TEnvironment, TSource> @this,
+            Func<TSource, Reader<TEnvironment, TSelector>> selector,
+            Func<TSource, TSelector, TResult> resultSelector
+        ) { 
+            @this.ContractedNotNull(nameof(@this));
+            selector.ContractedNotNull(nameof(selector));
+            resultSelector.ContractedNotNull(nameof(resultSelector));
+            Ensures(Result<Reader<TEnvironment,TResult> >() != null);
+
+            return environment =>
+                {
+                    var sourceResult = @this(environment);
+                    return resultSelector(sourceResult, selector(sourceResult)(environment));
+                };
+        }
+
+        /// <summary>η: T -> Reader&lt;TEnvironment, T></summary>
+        /// <typeparam name="TEnvironment"></typeparam>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="value"></param>
+        public static Reader<TEnvironment, T>         ToReader<TEnvironment, T>(this T value) {
+            value.ContractedNotNull(nameof(value));
+            Ensures(Result<Reader<TEnvironment, T> >() != null);
+
+            return environment => value;
+        }
     }
-
-    // Required by LINQ.
-    public static Reader<TEnvironment,TResult>    Flatten<TEnvironment,TSource,TSelector,TResult>( this
-        Reader<TEnvironment, TSource> @this,
-        Func<TSource, Reader<TEnvironment, TSelector>> selector,
-        Func<TSource, TSelector, TResult> resultSelector
-    ) { 
-        @this.ContractedNotNull(nameof(@this));
-        selector.ContractedNotNull(nameof(selector));
-        resultSelector.ContractedNotNull(nameof(resultSelector));
-        Ensures(Result<Reader<TEnvironment,TResult> >() != null);
-
-        return environment =>
-            {
-                var sourceResult = @this(environment);
-                return resultSelector(sourceResult, selector(sourceResult)(environment));
-            };
-    }
-
-    /// <summary>η: T -> Reader<TEnvironment, T></summary>
-    /// <typeparam name="TEnvironment"></typeparam>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="value"></param>
-    public static Reader<TEnvironment, T>         ToReader<TEnvironment, T>(this T value) {
-        value.ContractedNotNull(nameof(value));
-        Ensures(Result<Reader<TEnvironment, T> >() != null);
-
-        return environment => value;
-    }
-  }
-
-  [Pure]
-  public static class ReaderLinq {
-    // Select: (TSource -> TResult) -> (Reader<TEnvironment, TSource> -> Reader<TEnvironment, TResult>)
-    public static Reader<TEnvironment, TResult>   Select<TEnvironment, TSource, TResult>(this 
-        Reader<TEnvironment, TSource> source,
-        Func<TSource, TResult> selector
-    ) {
-        source.ContractedNotNull(nameof(source));
-        selector.ContractedNotNull(nameof(selector));
-        Ensures(Result<Reader<TEnvironment,TResult>>() != null);
-
-        return source.SelectMany(value => selector(value).ToReader<TEnvironment, TResult>());
-    }
-
-    // Not required, just for convenience.
-    public static Reader<TEnvironment,TResult>    SelectMany<TEnvironment, TSource, TResult>(this
-        Reader<TEnvironment, TSource> source,
-        Func<TSource, Reader<TEnvironment, TResult>> selector
-    ) {
-        source.ContractedNotNull(nameof(source));
-        selector.ContractedNotNull(nameof(selector));
-        Ensures(Result<Reader<TEnvironment,TResult> >() != null);
-
-        return environment => selector(source(environment))(environment);
-    }
-
-    // Required by LINQ.
-    public static Reader<TEnvironment,TResult>    SelectMany<TEnvironment,TSource,TSelector,TResult>(this
-        Reader<TEnvironment, TSource> source,
-        Func<TSource, Reader<TEnvironment, TSelector>> selector,
-        Func<TSource, TSelector, TResult> resultSelector
-    ) { 
-        source.ContractedNotNull(nameof(source));
-        selector.ContractedNotNull(nameof(selector));
-        resultSelector.ContractedNotNull(nameof(resultSelector));
-        Ensures(Result<Reader<TEnvironment,TResult> >() != null);
-
-        return environment =>
-            {
-                var sourceResult = source(environment);
-                return resultSelector(sourceResult, selector(sourceResult)(environment));
-            };
-    }
-
-    //// φ: Lazy<Reader<TEnvironment, T1>, Reader<TEnvironment, T2>> => Reader<TEnvironment, Lazy<T1, T2>>
-    //public static Reader<TEnvironment, Lazy<T1, T2>> Binary<TEnvironment, T1, T2>
-    //    (this Lazy<Reader<TEnvironment, T1>, Reader<TEnvironment, T2>> binaryFunctor) {
-    //    return
-    //        binaryFunctor.Value1.SelectMany(
-    //            value1 => binaryFunctor.Value2,
-    //            (value1, value2) => new Lazy<T1, T2>(value1, value2));
-    //}
-
-    /// <summary>ι: TUnit -> Reader<TEnvironment, TUnit></summary>
-    /// <typeparam name="TEnvironment"></typeparam>
-    /// <param name="unit"></param>
-    /// <returns></returns>
-    public static Reader<TEnvironment,Unit>       Unit<TEnvironment>(Unit unit)
-    {
-        Ensures(Result<Reader<TEnvironment,Unit>>() != null);
-
-        return unit.ToReader<TEnvironment, Unit>();
-    }
-  }
-
-  [Pure]
-  public static class Functions {
-      public static TFirst        First<TFirst,TSecond> (TFirst first, TSecond second) {
-          first.ContractedNotNull(nameof(first));
-          second.ContractedNotNull(nameof(second));
-          Ensures(Result<TFirst>() != null);
-
-          return first;
-      }
-
-      public static TSecond       Second<TFirst,TSecond>(TFirst first, TSecond second) {
-          first.ContractedNotNull(nameof(first));
-          second.ContractedNotNull(nameof(second));
-          Ensures(Result<TSecond>() != null);
-
-          return second;
-      }
-  }
 }

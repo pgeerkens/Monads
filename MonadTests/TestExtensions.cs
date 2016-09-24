@@ -30,7 +30,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
-namespace PGSolutions.Utilities.Monads.UnitTests {
+namespace PGSolutions.Monads.UnitTests {
     internal static class MaybeTestsExtensions {
         /// <summary>A string representing the object's value, or "Nothing" if it has no value.</summary>
         public static string ToNothingString<T>(this Maybe<T> @this) {

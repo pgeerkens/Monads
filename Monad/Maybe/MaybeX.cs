@@ -30,16 +30,16 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 
-namespace PGSolutions.Utilities.Monads {
+namespace PGSolutions.Monads {
     using static Contract;
 
     /// <summary>An immutable value-type MaybeX{T} monad.</summary>
-    /// <typeparam name="TValue">The base type, which can be either a class or struct type,
+    /// <typeparam name="T">The base type, which can be either a class or struct type,
     /// and will have the Equality definition track the default for the base-type:
     /// Value-equality for structs and string, reference equality for other classes.
     /// </typeparam>
-    /// <remarks
-    /// >Being a value-type reduces memory pressure on <see cref="System.GC"/>.
+    /// <remarks>
+    /// Being a value-type reduces memory pressure on <see cref="System.GC"/>.
     /// 
     /// Equality tracks the base type (struct or class), with the further proviseo
     /// that two instances can only be equal when <see cref="HasValue"/> is true
@@ -58,6 +58,7 @@ namespace PGSolutions.Utilities.Monads {
         /// Always available from Bind():
         ///         return @this.Bind(v => projector(v).ToMaybe());
         ///</remarks>
+        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
         public MaybeX<TResult>    Select<TResult>(
             Func<T, TResult> projector
         ) where TResult : class {
@@ -70,21 +71,24 @@ namespace PGSolutions.Utilities.Monads {
         /// <remarks>
         /// Convenience method - not used by LINQ
         /// </remarks>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+//        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
         [Pure]
         public  MaybeX<TResult>   SelectMany<TResult>(
             Func<T, MaybeX<TResult>> selector
         ) where TResult:class {
             selector.ContractedNotNull(nameof(selector));
 
-            return (_value == null) ? default(MaybeX<TResult>) : selector(_value);
+            var value = _value;
+            return (value == null) ? default(MaybeX<TResult>) : selector(value);
         }
 
         /// <summary>LINQ-compatible implementation of the monadic join operator.</summary>
         /// <remarks>
         /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
         /// </remarks>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+//        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
         public MaybeX<TResult>   SelectMany<TIntermediate, TResult>(
             Func<T, MaybeX<TIntermediate>> selector,
             Func<T,TIntermediate,TResult> projector
@@ -92,9 +96,9 @@ namespace PGSolutions.Utilities.Monads {
             selector.ContractedNotNull(nameof(selector));
             projector.ContractedNotNull(nameof(projector));
 
-            var @this = this;
+            var value = _value;
             return (_value == null) ? default(MaybeX<TResult>)
-                                    : selector(_value).Select(e => projector(@this._value, e));
+                                    : selector(value).Select(e => projector(value, e));
         }
 
         ///<summary>Returns whether this MaybeX{T} has a value.</summary>
@@ -160,17 +164,17 @@ namespace PGSolutions.Utilities.Monads {
         [Pure]
         public static bool operator != (MaybeX<T> lhs, MaybeX<T> rhs) => ! lhs.Equals(rhs);
 
-        ///<summary>Tests value-equality, returning <see cref="null"/> if either value doesn't exist.</summary>
+        ///<summary>Tests value-equality, returning null if either value doesn't exist.</summary>
         [Pure]
         public bool? AreNonNullEqual(MaybeX<T> rhs) =>
-            this.HasValue && rhs.HasValue ? this._value.Equals(rhs._value)
-                                          : null as bool?;
+            HasValue && rhs.HasValue ? _value.Equals(rhs._value)
+                                     : null as bool?;
 
-        ///<summary>Tests value-equality, returning <see cref="null"/> if either value doesn't exist.</summary>
+        ///<summary>Tests value-equality, returning null if either value doesn't exist.</summary>
         [Pure]
         public bool? AreNonNullUnequal(MaybeX<T> rhs) =>
-            this.HasValue && rhs.HasValue ? ! this._value.Equals(rhs._value)
-                                          : null as bool?;
+            HasValue && rhs.HasValue ? ! _value.Equals(rhs._value)
+                                     : null as bool?;
         #endregion
 
         /// <inheritdoc/>
@@ -181,23 +185,27 @@ namespace PGSolutions.Utilities.Monads {
         }
     }
 
+    /// <summary>TODO</summary>
     [Pure]
     public static class MaybeX {
         ///<summary>Amplifies a reference-type T to a MaybeX{T}.</summary>
         ///<remarks>The monad <i>unit</i> function.</remarks>
         public static MaybeX<T> AsMaybeX<T>(this T @this) where T:class => @this;
 
-        ///<summary>Amplifies a reference-type T to a MaybeX{T}.</summary>
+        ///<summary>Amplifies a value-type T to a MaybeX{T}.</summary>
         ///<remarks>The monad <i>unit</i> function.</remarks>
         public static MaybeX<object> ToMaybeX<T>(this T @this) where T : struct => @this;
 
         ///<summary>Returns the type of the underlying type {TValue}.</summary>
+        /// <param name="this">todo: describe this parameter on GetUnderlyingType</param>
+        [SuppressMessage("CodeCracker.Usage", "CC0057:UnusedParameters", MessageId = "this")]
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "this")]
         public static Type GetUnderlyingType<T>(this MaybeX<T> @this) where T:class {
             Ensures(Result<System.Type>() != null);
             return typeof(T);
         }
 
+        /// <summary>TODO</summary>
         public static MaybeX<T> Cast<T>(this MaybeX<object> @this) where T:class =>
             from o in @this select (T)o;
     }

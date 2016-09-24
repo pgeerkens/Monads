@@ -26,7 +26,6 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
-#define FluentStyle
 //#define PreventIncalculable
 using System;
 using System.Collections.Generic;
@@ -35,13 +34,14 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 
-using PGSolutions.Utilities.Monads;
+using PGSolutions.Monads;
 
-namespace PGSolutions.Utilities.Monads.Demos {
-    using PayloadMaybe  = StatePayload<Maybe<GcdStart>, Unit>;
+namespace PGSolutions.Monads.Demos {
+    using PayloadMaybe  = StructTuple<Maybe<GcdStart>, Unit>;
+    using static Contract;
     using static IOMonads;
 
-    /// <summary>Greatest Common DIvisor demo using State Monad.</summary>
+    /// <summary>Greatest Common Divisor demo using State Monad.</summary>
     /// <remarks>
     /// Example based on http://mvanier.livejournal.com/5846.html
     /// </remarks>
@@ -50,67 +50,48 @@ namespace PGSolutions.Utilities.Monads.Demos {
 
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public static Maybe<IO<Unit>> Run2(Maybe<IList<GcdStart>> maybeStates) =>
-            from states in maybeStates select Run(states);
+        public static Maybe<IO<Unit>> Run(Maybe<IList<GcdStart>> maybeStates) =>
+            from states in maybeStates
+            select ( from test in Gcd_S4.GetTests(false) | new List<ITest>()
+                     let elapsed = Readers.Timer()
+                     let isThird = Readers.MatchCounter(i => i==3, 1)
+                     select ( from _   in ConsoleWriteLine("{0}", test.Title)
+                              from __  in RunInner(test, states, elapsed, isThird).Last()
+                              from ___ in ConsoleWriteLine(@"Elapsed Time: {0:ss\.ff} secs", elapsed())
+                              from _x_ in ConsoleWriteLine()
+                              select Unit._
+                            ).Invoke()
+            ).LastOrDefault().ToIO();
 
-        /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
-        public static IO<Unit> Run(IList<GcdStart> states) {
+        private static IEnumerable<IO<Unit>> RunInner(
+            ITest test, IList<GcdStart> states, 
+            Func<TimeSpan>              elapsed, 
+            Func<bool>                  isThird
+        ) {
             states.ContractedNotNull(nameof(states));
-            return (
-                from test in Gcd_S4.GetTests(false) | new List<ITest>()
-                let elapsed = Readers.Timer()
-                let isThird = Readers.MatchCounter(i => i==3, 1)
-#if false
-                from a in ( from _   in ConsoleWriteLine("{0}", test.Title)
-                            from __  in ( from start in states
-                                          select new {
-                                             Start  = start,
-                                             Result = from validated in ValidateState(start.ToMaybe()).State
-                                                      select test.Transform.Invoke(validated).Value
-                                          } into item
-                                          select ConsoleWriteLine(
-                                              @"    GCD = {0,14} for {1}: Elapsed = {2:ss\.fff} secs; {3}",
-                                              ( from r in item.Result
-                                                select string.Format(_culture,"{0,14:N0}", r.Gcd)
-                                              ) | "incalculable",
-                                              item.Start,
-                                              elapsed(),
-                                              isThird() ? "I'm third!" : ""
-                                          )
-                                        ).Last()
-                            from ___ in ConsoleWriteLine(@"Elapsed Time: {0:ss\.ff} secs", elapsed())
-                            select ConsoleWriteLine()
-                          )
-                select a.Invoke()
-#else
-                let a= ( from _   in ConsoleWriteLine("{0}", test.Title)
-                         from __  in ( from start in states
-                                       select new {
-                                          Start  = start,
-                                          Result = from validated in ValidateState(start.ToMaybe()).State
-                                                   select test.Transform.Invoke(validated).Value
-                                       } into item
-                                       select ConsoleWriteLine(
-                                           @"    GCD = {0,14} for {1}: Elapsed = {2:ss\.fff} secs; {3}",
-                                           ( from r in item.Result
-                                             select string.Format(_culture,"{0,14:N0}", r.Gcd)
-                                           ) | "incalculable",
-                                           item.Start,
-                                           elapsed(),
-                                           isThird() ? "I'm third!" : ""
-                                       )
-                                     ).Last()
-                         from ___ in ConsoleWriteLine(@"Elapsed Time: {0:ss\.ff} secs", elapsed())
-                         select ConsoleWriteLine()
-                       )
-                select a.Invoke()
-#endif
-            ).LastOrDefault();
+            test.ContractedNotNull(nameof(test));
+            Ensures(Result<IEnumerable<IO<Unit>>>() != null);
+
+            return ( from start in states
+                     select new {
+                        Start  = start,
+                        Result = from validated in ValidateState(start.ToMaybe()).State
+                                 select test.Transform(validated).Value
+                     } into item
+                     select ConsoleWriteLine(
+                         @"    GCD = {0,14} for {1}: Elapsed = {2:ss\.fff} secs; {3}",
+                         ( from r in item.Result
+                           select string.Format(_culture,"{0,14:N0}", r.Gcd)
+                         ) | "incalculable",
+                         item.Start,
+                         elapsed(),
+                         isThird() ? "I'm third!" : ""
+                     )
+            );
         }
 
-        /// <summary>Return a pair of positive integers with the same GCD as the supplied parameters.</summary>
-        private static PayloadMaybe ValidateState(Maybe<GcdStart> start) {
+    /// <summary>Return a pair of positive integers with the same GCD as the supplied parameters.</summary>
+    private static PayloadMaybe ValidateState(Maybe<GcdStart> start) {
             return new PayloadMaybe(
                 from state in start
                 from x in state.A == 1
@@ -119,10 +100,12 @@ namespace PGSolutions.Utilities.Monads.Demos {
                        && state.B != int.MinValue ? new GcdStart(Math.Abs(state.A), Math.Abs(state.B)).ToMaybe()
                         : state.A == state.B      ? new GcdStart(state.A, state.B).ToMaybe()
                         : state.A == int.MinValue ? new GcdStart(Math.Abs(state.A + Math.Abs(state.B)),
-                                                                 Math.Abs(state.B)).ToMaybe()
+                                                                 Math.Abs(state.B)
+                                                                ).ToMaybe()
 #if PreventIncalculable
                         : state.B == int.MinValue ? new GcdStart(Math.Abs(state.A), 
-                                                                 Math.Abs(state.B + Math.Abs(state.A)))
+                                                                 Math.Abs(state.B + Math.Abs(state.A))
+                                                                ).ToMaybe()
 #endif
                         : default(Maybe<GcdStart>)
                 select x,

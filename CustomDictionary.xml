@@ -12,8 +12,11 @@
             <Word>u</Word><Word>v</Word><Word>w</Word><Word>x</Word><Word>y</Word>
             <Word>z</Word>
 
+            <Word>auth</Word>
+            <Word>env</Word>
             <Word>eval</Word>
             <Word>exec</Word>
+            <Word>fsm</Word>
             <Word>functor</Word>
             <Word>gcd</Word>
             <Word>lhs</Word>

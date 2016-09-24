@@ -1,73 +1,72 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
-using System.Linq;
 
-namespace PGSolutions.Utilities.Monads {
+namespace PGSolutions.Monads.DIDemo {
+    using static System.Diagnostics.Contracts.Contract;
 
-  public interface IConfig {
-      String         AuthInfo  { get; }
-      Action<String> LogMethod { get; }
-  }
+    public interface IConfig {
+        string         AuthInfo  { get; }
+        Action<string> LogMethod { get; }
+    }
 
-  public static class BusinessLogic {
-      const string successMessage = "\nWe wrote\n   {0}\nand\n   {1}\nto disk";
-      const string errorMessage   = "\nerror!";
+    public static class BusinessLogic {
+        const string successMessage = "\nWe wrote\n   {0}\nand\n   {1}\nto disk";
+        const string errorMessage   = "\nerror!";
 
-      /// <summary> Demonstrate nested composition through the magic of SelectMany</summary>
-      public static string Run<TConfig>(TConfig config) where TConfig:IConfig {
-          //var bl = new BusinessLogic<TConfig>();
-          return (
-              from intDb        in BusinessLogic<TConfig>.GetIntFromDB()
-              from netstr       in BusinessLogic<TConfig>.GetStrFromNetwork()
-              from writeSuccess in BusinessLogic<TConfig>.WriteStuffToDisk(intDb, netstr)
-              select (writeSuccess ? successMessage.BuildMe(intDb,netstr)
-                                   : errorMessage)
-        ) (config);
-      }
-  }
+        /// <summary> Demonstrate nested composition through the magic of SelectMany</summary>
+        public static string Run<TConfig>(TConfig config) where TConfig:IConfig {
+            return (from intDb        in BusinessLogic<TConfig>.GetIntFromDB
+                    from netstr       in BusinessLogic<TConfig>.GetStringFromNetwork
+                    from writeSuccess in BusinessLogic<TConfig>.WriteStuffToDisk(intDb, netstr)
+                    select writeSuccess ? successMessage.FormatMe(intDb,netstr)
+                                        : errorMessage
+            ) (config);
+        }
+    }
 
-  internal class BusinessLogic<TConfig> where TConfig:IConfig { 
-      public BusinessLogic(TConfig config) { ; }
+    public static class BusinessLogic<TConfig> where TConfig:IConfig {
+        [SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
+        public static Reader<TConfig,int>      GetIntFromDB { get {
+            const string dbMessage = "Getting an int from DB using credentials {0}";
+            Ensures(Result<Reader<TConfig,int>>() != null);
 
-      public  static Reader<TConfig, int>     GetIntFromDB() {
-          Contract.Ensures(Contract.Result<Reader<TConfig, int>>() != null);
-
-          const string dbMessage = "Getting an int from DB using credentials {0}";
-          return new Reader<TConfig, int>(config => {
-              config.LogMethod(dbMessage.BuildMe(config.AuthInfo));
+            return new Reader<TConfig, int>(config => {
+                config.LogMethod(dbMessage.FormatMe(config.AuthInfo));
                         // ....
-              return 4;
-          } );
-      }
+                return 4;
+            } );
+        } }
 
-      public  static Reader<TConfig, string>  GetStrFromNetwork() {
-          Contract.Ensures(Contract.Result<Reader<TConfig, string>>() != null);
+        [SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
+        public static Reader<TConfig, string> GetStringFromNetwork { get {
+                Ensures(Result<Reader<TConfig, string>>() != null);
 
-          return  ( from aDbInt in GetIntFromDB()
-                    from aGuid in GetGuidWithAuth()
-                        // ....
-                    select (aDbInt + "|" + aGuid + "|")
-                  );
-      }               
-    
-      public  static Reader<TConfig, Boolean> WriteStuffToDisk(int i, string str) {
-          Contract.Ensures(Contract.Result<Reader<TConfig, Boolean>>() != null);
+                return (from aDbInt in GetIntFromDB
+                        from aGuid in GetGuidWithAuth
+                            // ....
+                        select (aDbInt + "|" + aGuid + "|")
+                        );
+            } }
 
-          const string diskMessage = "writing\n   {1}\n   {2}\nto disk with credentials: {0}";
-          return new Reader<TConfig, Boolean>(config => {
-              config.LogMethod(diskMessage.BuildMe(config.AuthInfo, i, str));
-                  // ....
-              return true;
-          } );
-      }
+        [SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
+        public static Reader<TConfig,bool>     WriteStuffToDisk(int i, string s) {
+            Ensures(Result<Reader<TConfig, bool>>() != null);
 
-      private static Reader<TConfig, Guid>   GetGuidWithAuth() {
-          return new Reader<TConfig,Guid>(config => {
-              config.LogMethod("Getting a GUID");
-              return Guid.NewGuid();
-          } );
-      }
-  }
+            const string diskMessage = "writing\n   {1}\n   {2}\nto disk with credentials: {0}";
+            return new Reader<TConfig,bool>(config => {
+                config.LogMethod(diskMessage.FormatMe(config.AuthInfo, i, s));
+                    // ....
+                return true;
+            } );
+        }
+
+        private static Reader<TConfig,Guid>     GetGuidWithAuth { get {
+            Ensures(Result<Reader<TConfig,Guid>>() != null);
+
+            return new Reader<TConfig,Guid>(config => {
+                config.LogMethod("Getting a GUID");
+                return Guid.NewGuid();
+            } );
+        } }
+    }
 }

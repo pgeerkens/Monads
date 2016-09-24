@@ -79,7 +79,7 @@
     <WarningLevel>4</WarningLevel>
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
     <CodeContractsRuntimeOnlyPublicSurface>True</CodeContractsRuntimeOnlyPublicSurface>
-    <CodeContractsRuntimeThrowOnFailure>True</CodeContractsRuntimeThrowOnFailure>
+    <CodeContractsRuntimeThrowOnFailure>False</CodeContractsRuntimeThrowOnFailure>
     <CodeContractsRuntimeCallSiteRequires>True</CodeContractsRuntimeCallSiteRequires>
     <CodeContractsRuntimeSkipQuantifiers>True</CodeContractsRuntimeSkipQuantifiers>
     <CodeContractsRunCodeAnalysis>True</CodeContractsRunCodeAnalysis>
@@ -120,6 +120,7 @@
     <CodeContractsRuntimeCheckingLevel>Pre and Post</CodeContractsRuntimeCheckingLevel>
     <CodeContractsReferenceAssembly>Build</CodeContractsReferenceAssembly>
     <CodeContractsAnalysisWarningLevel>3</CodeContractsAnalysisWarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -137,14 +138,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Fsm.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="ISettableLight.cs" />
-    <Compile Include="ITrafficLight.cs" />
-    <Compile Include="LightStates.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="Monads.snk" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Monad\Monad.csproj">
@@ -157,12 +158,16 @@
       <Link>CustomDictionary.xml</Link>
     </CodeAnalysisDictionary>
   </ItemGroup>
+  <PropertyGroup>
+    <DontImportCodeContracts>True</DontImportCodeContracts>
+  </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-  </Target>
+  <PropertyGroup>
+    <!-- Adjust as appropriate -->
+    <PackagesRootDirectory Condition="$(PackagesRootDirectory) == ''">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\packages'))</PackagesRootDirectory>
+    <CodeContractsInstallDir>$(PackagesRootDirectory)\DotNet.Contracts.1.10.20606.1\</CodeContractsInstallDir>
+  </PropertyGroup>
+  <Import Project="$(CodeContractsInstallDir)\MsBuild\v$(MSBuildToolsVersion)\Microsoft.CodeContracts.targets" />
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>

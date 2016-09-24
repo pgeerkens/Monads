@@ -30,12 +30,13 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 
-namespace PGSolutions.Utilities.Monads {
-    using static Contract;
+namespace PGSolutions.Monads {
+   // using static Contract;
 
     /// <summary>TODO</summary>
     public struct IO<TSource> : IEquatable<IO<TSource>> {
         static readonly Func<TSource> _default = () => default(TSource);
+        /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
         public static IO<TSource> Empty { get { return _empty; } }
         readonly static IO<TSource> _empty = new IO<TSource>();//()=>default(TSource));
@@ -96,15 +97,6 @@ namespace PGSolutions.Utilities.Monads {
             } );
         }
 
-        ///<summary>The invariants enforced by this struct type.</summary>
-        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
-        [ContractInvariantMethod]
-        [Pure]
-        private void ObjectInvariant() {
-      //      Invariant(_functor != null);
-        }
-
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
         [Pure]
@@ -131,6 +123,8 @@ namespace PGSolutions.Utilities.Monads {
         #endregion
     }
 
+    /// <summary>TODO</summary>
+    [SuppressMessage("Microsoft.Naming", "CA1724:TypeNamesShouldNotMatchNamespaces")]
     [Pure]
     public static class IO {
         /// <summary>TODO</summary>

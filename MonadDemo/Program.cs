@@ -32,15 +32,16 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 
-using PGSolutions.Utilities.Monads;
+using PGSolutions.Monads;
 using System.Diagnostics.CodeAnalysis;
 
-namespace PGSolutions.Utilities.Monads.Demos {
+namespace PGSolutions.Monads.Demos {
 #pragma warning disable CA1303
 
     static class Program {
         static readonly CultureInfo  _culture = CultureInfo.InvariantCulture;
 
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String)")]
         [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String,System.Object,System.Object,System.Object)")]
         static void Main() {
             BasicTest();
@@ -53,23 +54,14 @@ namespace PGSolutions.Utilities.Monads.Demos {
 
             var start = new GcdStart(40,1024);
 
-  #if true
-            Gcd_S4.Best.Run.Invoke(start).ToMaybe().SelectMany(result => {
+            Gcd_S4.Best.Run(start).ToMaybe().SelectMany(result => {
                 var value = result.Value;
                 var title = Gcd_S4.GetTest("Best.Run");
                 Console.WriteLine("    GCD = {0} for {1} - {2}", value.Gcd, start, title);
-                Console.WriteLine();
+                Console.WriteLine("_______________________");
+                Console.WriteLine("Hit ENTER to close.");
                 return Unit._.ToMaybe();
             });
-  #else
-        var result8 = Gcd_S4.Best.Run(start);
-        if (result8 != null) {
-            var value   = result8.Value;
-            var title = Gcd_S4.GetTitle(Gcd_S4.Best.Run);
-            Console.WriteLine("    GCD = {0} for {1} - {2}",value.Gcd, start, title);
-            Console.WriteLine();
-        }
-  #endif
 
             Console.ReadLine();
         }
@@ -147,7 +139,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
                 int gcd   = list[0];
 
                 ( from n in list 
-                  select gcd = Gcd_S4.Best.Run.Invoke(new GcdStart(n, gcd)).Value.Gcd
+                  select gcd = Gcd_S4.Best.Run(new GcdStart(n, gcd)).Value.Gcd
                 ).LastOrDefault();
 
                 Console.WriteLine("    GCD = {0} for {1}", gcd, list.Format());
@@ -166,17 +158,6 @@ namespace PGSolutions.Utilities.Monads.Demos {
             }
             return result.Append(")").ToString();
         }
-
-        //private static void StateMaybeTest() {
-        //  //Func<char,StateMaybe<bool,MyString> mbcasewst = 
-        //  //    x => s =>  
-
-        //  //Func<char,char,char,char,StateMaybe<bool,MyString>> x = (MaybeX,y,z,ec) =>
-        //  //  x.b
-
-
-        //  //Console.WriteLine("_______________________");
-        //}
 
         private class ExternalState {
             private  int        _state;

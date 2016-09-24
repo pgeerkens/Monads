@@ -1,4 +1,4 @@
-#region The MIT License - Copyright (C) 2012-2016 Pieter Geerkens
+﻿#region The MIT License - Copyright (C) 2012-2016 Pieter Geerkens
 /////////////////////////////////////////////////////////////////////////////////////////
 //                PG Software Solutions - Monad Utilities
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -29,80 +29,84 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Diagnostics.CodeAnalysis;
 
-namespace PGSolutions.Utilities.Monads {
+namespace PGSolutions.Monads {
     using static Contract;
 
-    /// <summary>TODO</summary>
-    /// <typeparam name="TState">Type of the state which this delegate transforms.</typeparam>
-    public delegate TState Transform<TState>(TState s);
-
-    /// <summary>Extension methods for <see cref="StateTuple<TState,TValue>"/>.</summary>
+    /// <summary>Extension methods for <see cref="StructTuple{TState,TValue}"/>.</summary>
     [Pure]
-    public static class StateExtensions {
+    public static partial class StateExtensions {
 
         /// <summary>Implementation of <b>compose</b>: (>=>): f >=> g = \x -> (f x >>= g). </summary>
+        /// <param name="this">The start state for this transformation.</param>
+        /// <param name="follower">todo: describe follower parameter on Compose</param>
         /// <remarks> Optimized implementation of:
         ///         return this.Bind(t => follower(t.Item2));
         /// </remarks>
-        public static State<TState,TResult>   Compose<TState,TValue,TResult> ( this
+        public static State<TState,TResult>     Compose<TState,TValue,TResult> ( this
             State<TState, TValue> @this,
             Func<TState, State<TState,TResult>> follower
         ) {
             follower.ContractedNotNull(nameof(follower));
+            Ensures(Result<State<TState, TResult>>() != null);
 
-            return new State<TState,TResult>( s => follower(s).Invoke(@this.Invoke(s).State) );
+            return new State<TState,TResult>( s => follower(s)(@this(s).State) );
         }
 
         /// <summary>Implementation of <b>then</b>: (>>):  mv1 >> mv2  =  mv1 >>= (\_ -> mv2)</summary>
+        /// <param name="this">The start state for this transformation.</param>
+        /// <param name="follower">todo: describe follower parameter on Then</param>
         /// <remarks> Optimized implementation of:
         ///         return @this.Bind(t => follower);
         /// or
         ///         return @this.Then(s => follower);
         /// </remarks>
-        public static State<TState,TResult>   Then<TState,TValue,TResult>( this
+        public static State<TState,TResult>     Then<TState,TValue,TResult>( this
             State<TState, TValue> @this,
             State<TState, TResult> follower
         ) {
-            return new State<TState,TResult>( s => follower.Invoke(@this.Invoke(s).State) );
+            @this.ContractedNotNull(nameof(@this));
+            follower.ContractedNotNull(nameof(follower));
+            Ensures(Result<State<TState,TResult>>() != null);
+
+            return s => follower(@this(s).State);
         }
 
         /// <summary>TODO</summary>
-        public static State<TState, Unit> DoWhile<TState>(this
-            Transform<TState> @this, 
-            Predicate<TState> predicate
-        ) {
+        /// <param name="this">The start state for this transformation.</param>
+        /// <param name="s">todo: describe s parameter on Value</param>
+        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
+        public static TValue    Value<TState,TValue>(this State<TState,TValue> @this, TState s) {
             @this.ContractedNotNull(nameof(@this));
-            //Ensures(Result<State<TState, Unit>>() != null);
+            s.ContractedNotNull(nameof(s));
+            Ensures(Result<TValue>() != null);
 
-            return new State<TState,Unit>(
-                    s => {
-                    while (predicate(s)) { s = @this.Invoke(s); }
-                    return new StatePayload<TState, Unit>(s, Unit._);
-                }
-            );
+            return @this.Run(s).Value;
         }
 
-        /// <summary>Generates an unending stream of successive TState objects.</summary>
-        public static IEnumerable<TState> Enumerate<TState>(this
-            Transform<TState> @this,
-            TState startState
-        ) {
+        /// <summary>TODO</summary>
+        /// <param name="this">The start state for this transformation.</param>
+        /// <param name="s">todo: describe s parameter on State</param>
+        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
+        public static TState    State<TState,TValue>(this State<TState,TValue> @this, TState s) {
             @this.ContractedNotNull(nameof(@this));
-            startState.ContractedNotNull(nameof(startState));
-            Ensures(Result<IEnumerable<TState>>() != null);
+            s.ContractedNotNull(nameof(s));
+            Ensures(Result<TState>() != null);
 
-            while (true) yield return (startState = @this(startState));
+            return @this.Run(s).State;
         }
 
-        /// <summary>Puts the transformed state and returns the original.</summary>
-        public static State<TState, TState> Modify<TState>(this
-            Transform<TState> @this
-        ) {
+        /// <summary>TODO</summary>
+        /// <param name="this">The start state for this transformation.</param>
+        /// <param name="s">todo: describe s parameter on State</param>
+        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
+        public static StructTuple<TState,TValue> Run<TState, TValue>(this State<TState, TValue> @this, TState s) {
             @this.ContractedNotNull(nameof(@this));
-            //Ensures(Result<State<TState, TState>>() != null);
+            s.ContractedNotNull(nameof(s));
 
-            return State.Modify(@this);
+            var newState = @this(s);
+            return newState;
         }
     }
 }

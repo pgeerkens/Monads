@@ -32,7 +32,7 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using Xunit;
 
-namespace PGSolutions.Utilities.Monads.UnitTests {
+namespace PGSolutions.Monads.UnitTests {
     [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors")]
     [CLSCompliant(false)]
     public static class SafeIntTests {

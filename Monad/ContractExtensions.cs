@@ -70,6 +70,8 @@ namespace System.Diagnostics.Contracts {
 #endif
 
         /// <summary>Decorator for an object which is to have it's object invariants assumed.</summary>
+        [SuppressMessage("CodeCracker.Usage", "CC0057:UnusedParameters", MessageId = "t")]
+        [SuppressMessage("CodeCracker.Usage", "CC0090:MissingParametersInXmlDocs", MessageId = "t")]
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "t")]
         public static void AssumeInvariant<T>(this T t) { }
 
@@ -78,6 +80,7 @@ namespace System.Diagnostics.Contracts {
         /// Doesn't work anymore in VS 2015 and CC 1.10.10126.4.
         /// Unfortunate, but not critical.
         /// </remarks>
+        [SuppressMessage("CodeCracker.Usage", "CC0090:MissingParametersInXmlDocs", MessageId = "t")]
         public static bool Implies(this bool condition, bool contract) {
             Ensures(Result<bool>()  ==  (contract  ||  ! condition) );
             return contract  ||  ! condition;

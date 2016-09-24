@@ -28,7 +28,7 @@
 #endregion
 using System;
 
-namespace PGSolutions.Utilities.Monads.Transform {
+namespace PGSolutions.Monads {
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     /// <summary>TODO</summary>

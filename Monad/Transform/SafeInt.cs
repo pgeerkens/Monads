@@ -28,9 +28,8 @@
 #endregion
 using System;
 using System.Diagnostics.Contracts;
-using System.Linq;
 
-namespace PGSolutions.Utilities.Monads {
+namespace PGSolutions.Monads {
     using static Contract;
 
     /// <summary>TODO</summary>
@@ -56,24 +55,26 @@ namespace PGSolutions.Utilities.Monads {
         private SafeInt(int? value) : this() {
             _value    = value;
         }
-        readonly int? _value;
-        public int? Value => _value;
+     
+        /// <summary>TODO</summary>
+        public int? Value => _value;   private readonly int? _value;
 
+        /// <summary>TODO</summary>
         public static implicit operator SafeInt(int? value) => new SafeInt(value);
 
         /// <summary>TODO</summary>
         /// <param name="lhs"></param>
-        /// <param name="rhs"></param>
+        /// <param name="defaultValue"></param>
         public static int operator | (SafeInt lhs, int defaultValue) =>
              lhs._value.HasValue ? lhs._value.Value : defaultValue;
-        /// <summary><see cref="opBitwiseOr"/></summary>
+        /// <summary><see cref="BitwiseOr"/></summary>
         public static int BitwiseOr(SafeInt lhs, int defaultValue) => lhs | defaultValue;
 
         /// <summary>Returns a SafeInt with the sum, or null if the operation fails.</summary>
         public static SafeInt operator + (SafeInt addend1, SafeInt addend2) =>
             addend1._value.SelectMany(l =>
             addend2._value.SelectMany(r => l.SafeAddition(r)));
-        /// <summary><see cref="opAdd"/></summary>
+        /// <summary><see cref="Add"/></summary>
         public static SafeInt Add(SafeInt lhs, SafeInt rhs) => lhs + rhs;
 
         /// <summary>Returns a SafeInt with the difference, or null if the operation fails.</summary>
@@ -81,21 +82,21 @@ namespace PGSolutions.Utilities.Monads {
             lhs._value.SelectMany(l =>
             rhs._value.SelectMany(r => l.SafeSubtract(r)));
 
-        /// <summary><see cref="opSubtract"/></summary>
+        /// <summary><see cref="Subtract"/></summary>
         public static SafeInt Subtract(SafeInt minuend, SafeInt subtrahend) =>
             minuend - subtrahend;
 
         /// <summary>Returns a SafeInt with the quotient, or null if the operation fails.</summary>
         public static SafeInt operator / (SafeInt dividend, SafeInt divisor) =>
-            dividend._value.SelectMany(l =>
-            divisor._value.SelectMany(r => l.SafeDivide(r)));
+            dividend._value.SelectMany(lhs =>
+            divisor ._value.SelectMany(rhs => lhs.SafeDivide(rhs)));
 
-        /// <summary><see cref="opDivide"/></summary>
+        /// <summary><see cref="Divide"/></summary>
         public static SafeInt Divide(SafeInt lhs, SafeInt rhs) => lhs / rhs;
 
         /// <inheritdoc/>
         public int? CompareTo(SafeInt other) =>
-            from l in _value from r in other._value select l.CompareTo(r);
+            from lhs in _value from rhs in other._value select lhs.CompareTo(rhs);
 
         /// <inheritdoc/>
         bool? ISafeEquatable<SafeInt>.Equals(SafeInt other) => AreNonNullEqual(other);
@@ -121,13 +122,13 @@ namespace PGSolutions.Utilities.Monads {
         [Pure]
         public static bool operator !=(SafeInt lhs, SafeInt rhs) => !lhs.Equals(rhs);
 
-        ///<summary>Tests value-equality, returning <see cref="null"/> if either value doesn't exist.</summary>
+        ///<summary>Tests value-equality, returning null if either value doesn't exist.</summary>
         [Pure]
         public bool? AreNonNullEqual(SafeInt rhs) =>
             _value.HasValue && rhs._value.HasValue ? _value.Equals(rhs._value)
                                                    : null as bool?;
 
-        ///<summary>Tests value-equality, returning <see cref="null"/> if either value doesn't exist.</summary>
+        ///<summary>Tests value-equality, returning null if either value doesn't exist.</summary>
         [Pure]
         public bool? AreNonNullUnequal(SafeInt rhs) =>
             _value.HasValue && rhs._value.HasValue ? ! _value.Equals(rhs._value)
@@ -151,7 +152,7 @@ namespace PGSolutions.Utilities.Monads {
         /// <summary>Returns a Nullable{int} with the sum, or null if the operation fails.</summary>
         public static int? SafeAddition(this int addend1, int addend2) {
             unchecked {
-                int c = addend1 + addend2;
+                var c = addend1 + addend2;
                 return ((addend1 ^ addend2) >= 0) & ((addend1 ^ c) < 0) ? default(int?)
                                                                         : c;
             }

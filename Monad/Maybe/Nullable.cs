@@ -30,9 +30,10 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 
-namespace PGSolutions.Utilities.Monads {
-    using static Contract;
+namespace PGSolutions.Monads {
+    //using static Contract;
 
+    /// <summary>TODO</summary>
     [Pure]
     public static class Nullable {
         /// <summary>LINQ-compatible implementation of the monadic map operator.</summary>
@@ -42,6 +43,7 @@ namespace PGSolutions.Utilities.Monads {
         /// Always available from Bind():
         ///         return @this.Bind(v => projector(v).ToMaybe());
         ///</remarks>
+        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "1")]
         public static TResult?   Select<T, TResult>(this T? @this,
             Func<T, TResult> projector
         ) where T : struct where TResult : struct {
@@ -55,6 +57,7 @@ namespace PGSolutions.Utilities.Monads {
         /// Convenience method - not used by LINQ
         /// </remarks>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "1")]
         public static TResult?   SelectMany<T, TResult>(this T? @this,
             Func<T, TResult?> selector
         ) where T : struct where TResult : struct {
@@ -68,6 +71,7 @@ namespace PGSolutions.Utilities.Monads {
         /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
         /// </remarks>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "1")]
         public static TResult?   SelectMany<T, TIntermediate, TResult>(this T? @this,
             Func<T, TIntermediate?> selector,
             Func<T, TIntermediate, TResult> projector
@@ -84,6 +88,7 @@ namespace PGSolutions.Utilities.Monads {
         /// Convenience method - not used by LINQ
         /// </remarks>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "1")]
         public static Maybe<TResult>   SelectMany<T, TResult>(this T? @this,
             Func<T, Maybe<TResult>> selector
         ) where T : struct where TResult : struct {
@@ -97,6 +102,7 @@ namespace PGSolutions.Utilities.Monads {
         /// Convenience method - not used by LINQ
         /// </remarks>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "1")]
         public static MaybeX<TResult>   SelectMany<T, TResult>(this T? @this,
             Func<T, MaybeX<TResult>> selector
         ) where T : struct where TResult : class {

@@ -26,64 +26,61 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
-//#define GCDStateAsClass    // performance penalty of 0% to 40% for class compared to struct
+//#define GCDStateAsClass    // performance penalty of 30% to 200% for class compared to struct
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
-using System.Linq;
 
-namespace PGSolutions.Utilities.Monads.Demos {
+namespace PGSolutions.Monads.Demos {
 #if GCDStateAsClass
-  public class GCDState : IEquatable<GCDState> {
+    public class GcdStart : IEquatable<GcdStart> {
 #else
   /// <summary>TODO</summary>
-  public struct GcdStart : IEquatable<GcdStart> {
+    public struct GcdStart : IEquatable<GcdStart> {
 #endif
-     /// <summary>TODO</summary>
-   public GcdStart(int a, int b) { _a = a; _b = b; }
+   
+        /// <summary>TODO</summary>
+        public GcdStart(int a, int b) { _a = a; _b = b; }
 
-    /// <summary>TODO</summary>
-    public int A { get { return _a; } } private readonly int _a;
-    /// <summary>TODO</summary>
-    public int B { get { return _b; } } private readonly int _b;
+        /// <summary>TODO</summary>
+        public int A { get { return _a; } } private readonly int _a;
+        /// <summary>TODO</summary>
+        public int B { get { return _b; } } private readonly int _b;
 
-    #region Value Equality with IEquatable<T>.
-    static readonly CultureInfo _culture = CultureInfo.CurrentUICulture;
+        #region Value Equality with IEquatable<T>.
+        static readonly CultureInfo _culture = CultureInfo.CurrentUICulture;
 
-    /// <inheritdoc/>
-    public override string ToString() { 
-      return String.Format(_culture,"({0,14:N0}, {1,14:N0})",A,B);
+        /// <inheritdoc/>
+        public override string ToString() => "({0,14:N0}, {1,14:N0})".FormatMe(_culture,A,B);
+
+        /// <inheritdoc/>
+        [Pure]
+        public override bool Equals(object obj) {
+        #if GCDStateAsClass
+              var other = obj as GcdStart;
+              return other != null  &&  other.Equals(obj);
+        #else
+              var other = obj as GcdStart?;
+              return other.HasValue && other.Equals(obj);
+        #endif
+        }
+
+        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
+        [Pure]
+        public bool Equals(GcdStart other) { return A == other.A && B == other.B; }
+
+        /// <inheritdoc/>
+        [Pure]
+        public override int GetHashCode() { unchecked { return A ^ B; } }
+
+        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
+        [Pure]
+        public static bool operator ==(GcdStart lhs, GcdStart rhs) { return lhs.Equals(rhs); }
+
+        /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
+        [Pure]
+        public static bool operator !=(GcdStart lhs, GcdStart rhs) { return !lhs.Equals(rhs); }
+        #endregion
     }
-
-    /// <inheritdoc/>
-    [Pure]
-    public override bool Equals(object obj) {
-#if GCDStateAsClass
-      var other = obj as GCDState;
-      return other != null  &&  other.Equals(obj);
-#else
-      var other = obj as GcdStart?;
-      return other.HasValue && other.Equals(obj);
-#endif
-    }
-
-    /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-    [Pure]
-    public bool Equals(GcdStart other) { return this.A == other.A && this.B == other.B; }
-
-    /// <inheritdoc/>
-    [Pure]
-    public override int GetHashCode() { unchecked { return A ^ B; } }
-
-    /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-    [Pure]
-    public static bool operator ==(GcdStart lhs, GcdStart rhs) { return lhs.Equals(rhs); }
-
-    /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
-    [Pure]
-    public static bool operator !=(GcdStart lhs, GcdStart rhs) { return !lhs.Equals(rhs); }
-    #endregion
-  }
 }

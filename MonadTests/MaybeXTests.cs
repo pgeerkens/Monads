@@ -35,7 +35,7 @@ using System.Linq;
 
 using Xunit;
 
-namespace PGSolutions.Utilities.Monads.UnitTests {
+namespace PGSolutions.Monads.UnitTests {
     [ExcludeFromCodeCoverage] [CLSCompliant(false)]
     public class MaybeXTests {
         public MaybeXTests() {

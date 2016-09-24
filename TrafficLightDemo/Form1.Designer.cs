@@ -1,4 +1,4 @@
-﻿namespace TrafficLightDemo {
+﻿namespace PGSolutions.Monads.TrafficLightDemo {
   partial class Form1 {
     /// <summary>
     /// Required designer variable.
@@ -41,7 +41,7 @@
       // UpTownLeftTurnLight
       // 
       this.UpTownLeftTurnLight.BackColor = System.Drawing.SystemColors.ActiveCaption;
-      this.UpTownLeftTurnLight.Image = global::TrafficLightDemo.Properties.Resources.YellowLight;
+      this.UpTownLeftTurnLight.Image = global::PGSolutions.Monads.TrafficLightDemo.Properties.Resources.YellowLight;
       this.UpTownLeftTurnLight.InitialImage = null;
       this.UpTownLeftTurnLight.Location = new System.Drawing.Point(0, 25);
       this.UpTownLeftTurnLight.Name = "UpTownLeftTurnLight";
@@ -54,7 +54,7 @@
       // DownTownLeftTurnLight
       // 
       this.DownTownLeftTurnLight.BackColor = System.Drawing.SystemColors.ActiveCaption;
-      this.DownTownLeftTurnLight.Image = global::TrafficLightDemo.Properties.Resources.GreenLight;
+      this.DownTownLeftTurnLight.Image = global::PGSolutions.Monads.TrafficLightDemo.Properties.Resources.GreenLight;
       this.DownTownLeftTurnLight.InitialImage = null;
       this.DownTownLeftTurnLight.Location = new System.Drawing.Point(188, 25);
       this.DownTownLeftTurnLight.Name = "DownTownLeftTurnLight";
@@ -67,7 +67,7 @@
       // CrossTownLight
       // 
       this.CrossTownLight.BackColor = System.Drawing.SystemColors.ActiveCaption;
-      this.CrossTownLight.Image = global::TrafficLightDemo.Properties.Resources.YellowLight;
+      this.CrossTownLight.Image = global::PGSolutions.Monads.TrafficLightDemo.Properties.Resources.YellowLight;
       this.CrossTownLight.InitialImage = null;
       this.CrossTownLight.Location = new System.Drawing.Point(564, 25);
       this.CrossTownLight.Name = "CrossTownLight";
@@ -80,7 +80,7 @@
       // UpDownTownLight
       // 
       this.UpDownTownLight.BackColor = System.Drawing.SystemColors.ActiveCaption;
-      this.UpDownTownLight.Image = global::TrafficLightDemo.Properties.Resources.RedLight;
+      this.UpDownTownLight.Image = global::PGSolutions.Monads.TrafficLightDemo.Properties.Resources.RedLight;
       this.UpDownTownLight.InitialImage = null;
       this.UpDownTownLight.Location = new System.Drawing.Point(376, 25);
       this.UpDownTownLight.Name = "UpDownTownLight";

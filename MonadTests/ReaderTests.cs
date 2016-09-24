@@ -34,9 +34,7 @@ using System.Linq;
 
 using Xunit;
 
-using PGSolutions.Utilities.Monads;
-
-namespace ReaderMonadTests {
+namespace PGSolutions.Monads.UnitTests {
 
     [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors",
         Justification = "Unit tests require a public default constructor.")]

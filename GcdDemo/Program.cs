@@ -28,34 +28,35 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
-namespace PGSolutions.Utilities.Monads.Demos {
-    using static Char;
+namespace PGSolutions.Monads.Demos {
     using static Console;
     using static IOMonads;
+    using static String;
 
     class Program {
         static string Prompt(string mode) => 
-            String.Format("{0}: Type 'Q' to quit; <Enter> to repeat ... ",mode);
+            Format("{0}: Type 'Q' to quit; <Enter> to repeat ... ",mode);
         #region GCD States
         static readonly IList<GcdStart> gcdStartStates = new List<GcdStart>() {
-            new GcdStart(         40,            40),           //  0
-            new GcdStart(        1024,           40),           //  1
+             new GcdStart(         40,            40)            //  0
+            ,new GcdStart(        1024,           40)            //  1
 
-            new GcdStart(           9,           81),           //  2
-            new GcdStart(           5,        32765),           //  3
-            new GcdStart(           2,       199999),           //  4
-            new GcdStart(           2, short.MaxValue*40 - 1),  //  5
-            new GcdStart(        6553,        32765),           //  6
-            new GcdStart(     - 32765,         6553),           //  7
-            new GcdStart(       32765,        -6553),           //  8
-            new GcdStart(       32768, int.MinValue),           //  9
-            new GcdStart(int.MinValue,        32768),           // 10
-            new GcdStart(int.MinValue, int.MinValue),           // 11
+            ,new GcdStart(           9,           81)            //  2
+            ,new GcdStart(           5,        32765)            //  3
+            ,new GcdStart(           2,       199999)            //  4
+            ,new GcdStart(           2, short.MaxValue*40 - 1)   //  5
+            ,new GcdStart(        6553,        32765)            //  6
+            ,new GcdStart(     - 32765,         6553)            //  7
+            ,new GcdStart(       32765,        -6553)            //  8
+            ,new GcdStart(       32768, int.MinValue)            //  9
+            ,new GcdStart(int.MinValue,        32768)            // 10
+            ,new GcdStart(int.MinValue, int.MinValue)            // 11
 
-            new GcdStart(      -32767, int.MaxValue-1),         // 12
-            new GcdStart(           2, short.MaxValue*1000 - 1) // 13
+            ,new GcdStart(      -32767, int.MaxValue-1)          // 12
+            ,new GcdStart(           2, short.MaxValue*1000 - 1) // 13
         };
         #endregion
 
@@ -66,72 +67,63 @@ namespace PGSolutions.Utilities.Monads.Demos {
         static int i = 0;
         static int Main() => ( i==0 ? ImperativeSyntax("Imperative")
                              : i==1 ? FluentSyntax("Fluent")
-                             : i==2 ? ComprehensionSyntax("Comprehension")
-                                    : ComprehensionSyntax2("Comprehension2")
-                             ).FirstOrDefault(); // Doesn't assume result list non-empty, unlike: ).First();
+                                    : ComprehensionSyntax("Comprehension")
+                             ).FirstOrDefault(); // Doesn't assume result list non-empty
 
         static IEnumerable<int> ImperativeSyntax(string mode) {
             for(int pass=0; pass < int.MaxValue; pass++) {
                 var counter = 0;
-                var list = gcdStartStates.Where(state => _predicate(pass, counter++));
-
-                Gcd.Run2((Maybe<IList<GcdStart>>)(list.ToList()));
+                var enumerable = gcdStartStates.Where(state => _predicate(pass, counter++));
+#if true
+                var list = enumerable.ToList();
+                Gcd.Run((Maybe<IList<GcdStart>>)(list));
+#else
+                Gcd.Run2((Maybe<IList<GcdStart>>)(enumerable.ToList()));
+#endif
                 Write(Prompt(mode));
                 var c = ReadKey();
                 WriteLine();
 
-                if (ToUpper(c.KeyChar) == 'Q') yield return 0; //break;
+                if (c.KeyChar.ToUpper() == 'Q') yield return 0;
             }
-      //      return 0;
         }
-        #region Fluent syntax
+#region Fluent syntax
         static IEnumerable<int> FluentSyntax(string mode) =>
             ( Enumerable.Range(0,int.MaxValue)
                         .Select(pass => new {pass, counter = Readers.Counter(0)})
                         .Select(_    => gcdStartStates.Where(state => _predicate(_.pass,_.counter()))
                                                       .Select(state => state)
                                )
-            ).Where(list => 
-               ( Gcd.Run(list.ToList())
+            ).Where(enumerable => 
+               ( (Gcd.Run((Maybe<IList<GcdStart>>)enumerable.ToList()) | IO<Unit>.Empty)
                     .SelectMany(_ => ConsoleWrite(Prompt(mode)),(_,__) => new {})
                     .SelectMany(_ => ConsoleReadKey(),          (_, c) => new {c})
-                    .SelectMany(_ => ConsoleWriteLine(),        (_,__) => ToUpper(_.c.KeyChar) == 'Q')
+                    .SelectMany(_ => ConsoleWriteLine(),        (_,__) => _.c.KeyChar.ToUpper() == 'Q')
                ).Invoke()
-            ).Select(list => 0
-            );
-        #endregion
-        #region Comprehension syntax
+            ).Select(list => 0);
+#endregion
+
+#region Comprehension syntax
         static IEnumerable<int> ComprehensionSyntax(string mode) =>
-            ( from list in  ( from pass in Enumerable.Range(0,int.MaxValue)
-                              let counter = Readers.Counter(0)
-                              select from state in gcdStartStates
-                                     where _predicate(pass,counter())
-                                     select state
-                            )
-              where ( from _   in Gcd.Run(list.ToList())
-                      from __  in ConsoleWrite(Prompt(mode))
-                      from c   in ConsoleReadKey()
-                      from ___ in ConsoleWriteLine()
-                      select ToUpper(c.KeyChar) == 'Q' 
-                    ).Invoke()
-              select 0
-            );
-        #endregion
-        #region Comprehension syntax w/ Maybe<T>
-        static IEnumerable<int> ComprehensionSyntax2(string mode) =>
-            from pass in Enumerable.Range(0, int.MaxValue)
+            from pass  in Enumerable.Range(0, int.MaxValue)
             let counter = Readers.Counter(0)
             select ( from state in gcdStartStates
                      where _predicate(pass, counter())
-                     select state ) 
-            into list
-            where ( from _ in Gcd.Run2((Maybe<IList<GcdStart>>)(list.ToList())) | IO<Unit>.Empty
+                     select state )
+            into enumerable
+            where ( from _   in Gcd.Run((Maybe<IList<GcdStart>>)enumerable.ToList()) | IO<Unit>.Empty
                     from __  in ConsoleWrite(Prompt(mode))
                     from c   in ConsoleReadKey()
                     from ___ in ConsoleWriteLine()
-                    select ToUpper(c.KeyChar) == 'Q'
+                    select c.KeyChar.ToUpper() == 'Q' 
                   ).Invoke()
             select 0;
-        #endregion
+#endregion
+    }
+
+    static class Extensions {
+        readonly static CultureInfo cultureInfo = CultureInfo.InvariantCulture;
+
+        public static char ToUpper(this char c) => char.ToUpper(c,cultureInfo);
     }
 }

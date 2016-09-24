@@ -27,87 +27,86 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Linq;
 
-using PGSolutions.Utilities.Monads;
-
-namespace PGSolutions.Utilities.Monads {
+namespace PGSolutions.Monads {
     using static Contract;
 
     /// <summary>Sample instances of the <see cref="Reader"/> monad pattern.</summary>
     public static class Readers {
-    /// <summary>An auto-incrementing zero-baed counter.</summary>
-    public static Func<int>             Counter() {
-        Ensures(Result<Func<int>>() != null);
-        return Counter(0);
+        /// <summary>An auto-incrementing zero-baed counter.</summary>
+        public static Func<int> Counter() {
+            Ensures(Result<Func<int>>() != null);
+            return Counter(0);
+        }
+
+        /// <summary>An auto-incrementing <i>start</i>-based counter.</summary>
+        /// <param name="start">The initial value of the counter.</param>
+        public static Func<int> Counter(int start) {
+            Ensures(Result<Func<int>>() != null);
+
+            var index = start;
+            var reader = new Reader<int, int>(_ => index++);
+            return () => reader(int.MinValue);
+        }
+
+        /// <summary>An auto-incrementing zero-based counter that reports when <paramref name="predicate"/> is true of the counter.</summary>
+        /// <param name="predicate">The condition for when <b>true</b> should be reported.</param>
+        public static Func<bool> MatchCounter(Func<int, bool> predicate) {
+            predicate.ContractedNotNull(nameof(predicate));
+            Ensures(Result<Func<bool>>() != null);
+            return MatchCounter(predicate, 0);
+        }
+
+        /// <summary>An auto-incrementing zero-based counter that reports when <paramref name="predicate"/> is true of the counter.</summary>
+        /// <param name="predicate">The condition for when <b>true</b> should be reported.</param>
+        /// <param name="start">The initial value of the counter.</param>
+        public static Func<bool> MatchCounter(Func<int, bool> predicate, int start) {
+            predicate.ContractedNotNull(nameof(predicate));
+            Ensures(Result<Func<bool>>() != null);
+
+            var index = start;
+            var reader = new Reader<int, bool>(_ => predicate(index++));
+            return () => reader(int.MinValue);
+        }
+
+        /// <summary>A timer that, on each invocation, reports the <see cref="TimeSpan"/> since its creation.</summary>
+        public static Func<TimeSpan> Timer() {
+            Ensures(Result<Func<TimeSpan>>() != null);
+
+            var oldTime = DateTime.Now;
+            var timer = new Reader<DateTime, TimeSpan>(newTime => newTime - oldTime);
+            return () => timer(DateTime.Now);
+        }
+
+        #region  What is Timer() really doing?
+        /// <summary>TODO</summary>
+        public static Func<TimeSpan> Timer2() {
+            Ensures(Result<Func<TimeSpan>>() != null);
+
+            return new _TimerInternals_().Invoke;
+        }
+
+        /// <summary>TODO</summary>
+        private class _TimerInternals_ {
+            public TimeSpan Invoke() { return _timer(DateTime.Now); }
+
+            internal _TimerInternals_() {
+                _oldTime  = DateTime.Now;
+                _timer    = new Reader<DateTime, TimeSpan>(newTime => newTime - _oldTime);
+            }
+            private readonly DateTime _oldTime;
+            private readonly Reader<DateTime, TimeSpan> _timer;
+
+            /// <summary>The invariants enforced by this struct type.</summary>
+            [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+            [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
+            [ContractInvariantMethod]
+            [Pure]private void ObjectInvariant() {
+                Invariant(_timer != null);
+            }
+        }
+        #endregion
     }
-
-    /// <summary>An auto-incrementing <i>start</i>-based counter.</summary>
-    /// <param name="start">The initial value of the counter.</param>
-    public static Func<int>             Counter(int start) {
-        Ensures(Result<Func<int>>() != null);
-
-        var index   = start;
-        var reader  = new Reader<int,int>(_ => index++);
-        return ()   => reader(int.MinValue);
-    }
-
-    /// <summary>An auto-incrementing zero-based counter that reports when <paramref name="predicate"/> is true of the counter.</summary>
-    /// <param name="predicate">The condition for when <b>true</b> should be reported.</param>
-    public static Func<bool>            MatchCounter(Func<int, bool> predicate) {
-        predicate.ContractedNotNull(nameof(predicate));
-        Ensures(Result<Func<bool>>() != null);
-        return MatchCounter(predicate,0);
-    }
-
-    /// <summary>An auto-incrementing zero-based counter that reports when <paramref name="predicate"/> is true of the counter.</summary>
-    /// <param name="predicate">The condition for when <b>true</b> should be reported.</param>
-    /// <param name="start">The initial value of the counter.</param>
-    public static Func<bool>            MatchCounter(Func<int, bool> predicate, int start) {
-        predicate.ContractedNotNull(nameof(predicate));
-        Ensures(Result<Func<bool>>() != null);
-
-        var index   = start;
-        var reader  = new Reader<int, bool>(_ => predicate(index++));
-        return ()   => reader(int.MinValue);
-    }
-
-    /// <summary>A timer that, on each invocation, reports the <see cref="TimeSpan"/> since its creation.</summary>
-    public static Func<TimeSpan>        Timer() {
-        Ensures(Result<Func<TimeSpan>>() != null);
-
-        var oldTime = DateTime.Now;
-        var timer   = new Reader<DateTime,TimeSpan>(newTime => newTime - oldTime);
-        return ()   => timer(DateTime.Now);
-    }
-
-    #region  What is Timer() really doing?
-    public static Func<TimeSpan> Timer2() {
-        Ensures(Result<Func<TimeSpan>>() != null);
-
-        return new _TimerInternals_().Invoke;
-    }
-    private class _TimerInternals_ {
-      public TimeSpan Invoke() { return _timer(DateTime.Now); }
-
-      internal _TimerInternals_() {
-          _oldTime  = DateTime.Now;
-          _timer    = new Reader<DateTime,TimeSpan>(newTime => newTime - _oldTime);
-      }
-      private  readonly DateTime                  _oldTime;
-      private  readonly Reader<DateTime,TimeSpan> _timer;
-
-      /// <summary>The invariants enforced by this struct type.</summary>
-      [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-      [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
-      [ContractInvariantMethod]
-      [Pure]private void ObjectInvariant() {
-          Invariant(_timer != null);
-      }
-    }
-    #endregion
-  }
 }

@@ -30,11 +30,11 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 
-namespace PGSolutions.Utilities.Monads {
+namespace PGSolutions.Monads {
     using static Contract;
 
     /// <summary>An immutable value-type Maybe{T} monad.</summary>
-    /// <typeparam name="T">The base type, which can be either a class or struct type,
+    /// <typeparam name="TValue">The base type, which can be either a class or struct type,
     /// and will have the Equality definition track the default for the base-type:
     /// Value-equality for structs and string, reference equality for other classes.
     /// </typeparam>
@@ -45,13 +45,13 @@ namespace PGSolutions.Utilities.Monads {
     /// that two instances can only be equal when <see cref="HasValue"/> is true
     /// for both instances.
     /// </remarks>
-    public struct Maybe<T> : IEquatable<Maybe<T>> {
+    public struct Maybe<TValue> : IEquatable<Maybe<TValue>> {
         /// <summary>The Invalid data value.</summary>
         [Pure]
-        public static Maybe<T> Nothing { get { return default(Maybe<T>); } }
+        public static Maybe<TValue> Nothing { get { return default(Maybe<TValue>); } }
 
         ///<summary>Create a new Maybe{T}.</summary>
-        private Maybe(T value) : this() {
+        private Maybe(TValue value) : this() {
             Ensures(!HasValue ||  _value != null);
             //Ensures(HasValue.Implies(_value != null));    // works in MayceX.cs, not here.
 
@@ -67,8 +67,9 @@ namespace PGSolutions.Utilities.Monads {
         ///         return @this.Bind(v => projector(v).ToMaybe());
         ///</remarks>
         [Pure]
+        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
         public Maybe<TResult>   Select<TResult>(
-            Func<T, TResult> projector
+            Func<TValue, TResult> projector
         ) {
             projector.ContractedNotNull(nameof(projector));
 
@@ -80,12 +81,14 @@ namespace PGSolutions.Utilities.Monads {
         /// Convenience method - not used by LINQ
         /// </remarks>
         [Pure]
+        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
         public Maybe<TResult>   SelectMany<TResult>(
-            Func<T, Maybe<TResult>> selector
+            Func<TValue, Maybe<TResult>> selector
         ) {
             selector.ContractedNotNull(nameof(selector));
 
-            return ! HasValue ? default(Maybe<TResult>) : selector(_value);
+            var value = _value;
+            return ! HasValue ? default(Maybe<TResult>) : selector(value);
         }
 
         /// <summary>LINQ-compatible implementation of the monadic join operator.</summary>
@@ -93,16 +96,17 @@ namespace PGSolutions.Utilities.Monads {
         /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
         /// </remarks>
         [Pure]
-        public Maybe<TResult>   SelectMany<TIntermediate, TResult>(
-            Func<T, Maybe<TIntermediate>> selector,
-            Func<T, TIntermediate, TResult> projector
+        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
+        public Maybe<TResult>   SelectMany<T, TResult>(
+            Func<TValue, Maybe<T>> selector,
+            Func<TValue, T, TResult> projector
         ) {
             selector.ContractedNotNull(nameof(selector));
             projector.ContractedNotNull(nameof(projector));
 
-            var @this = this;
+            var value = _value;
             return ! HasValue ? default(Maybe<TResult>)
-                              : selector(_value).Select(e => projector(@this._value, e));
+                              : selector(value).Select(e => projector(value, e));
         }
 
         ///<summary>Returns whether this Maybe{T} has a value.</summary>
@@ -110,17 +114,17 @@ namespace PGSolutions.Utilities.Monads {
 
         ///<summary>Extract value of the Maybe{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
         [Pure]
-        public T BitwiseOr(T defaultValue) {
+        public TValue BitwiseOr(TValue defaultValue) {
             defaultValue.ContractedNotNull(nameof(defaultValue));
-            Ensures(Result<T>() != null);
+            Ensures(Result<TValue>() != null);
 
             return ! HasValue ? defaultValue : _value;
         }
         ///<summary>Extract value of the Maybe{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
         [Pure]
-        public static T operator | (Maybe<T> value, T defaultValue) {
+        public static TValue operator | (Maybe<TValue> value, TValue defaultValue) {
             defaultValue.ContractedNotNull(nameof(defaultValue));
-            Ensures(Result<T>() != null);
+            Ensures(Result<TValue>() != null);
 
             return value.BitwiseOr(defaultValue);
         }
@@ -137,34 +141,33 @@ namespace PGSolutions.Utilities.Monads {
 
         ///<summary>Wraps a T as a Maybe{T}.</summary>
         [Pure]
-        public static explicit operator Maybe<T>(T value) => new Maybe<T>(value);
+        public static explicit operator Maybe<TValue>(TValue value) => new Maybe<TValue>(value);
 
-        readonly T _value;
+        readonly TValue _value;
         readonly bool _hasValue;
 
         ///<summary>Returns the type of the underlying type {TValue}.</summary>
         [Pure]
         public Type GetUnderlyingType {
-            get { Ensures(Result<System.Type>() != null);
-                return typeof(T); }
+            get { Ensures(Result<Type>() != null);  return typeof(TValue); }
         }
 
         #region Value Equality with IEquatable<T> and "excluded middle" present w/ either side has no value.
         #region implicit static constructor
-        static readonly bool _valueIsStruct = typeof(ValueType).IsAssignableFrom(typeof(T))
-                                                     || typeof(string).IsAssignableFrom(typeof(T));
-        static readonly Func<T, T, bool> _valEquals = (T lhs, T rhs) => lhs.Equals(rhs);
-        static readonly Func<T, T, bool> _refEquals = (T lhs, T rhs) => ReferenceEquals(lhs, rhs);
-        static readonly Func<T, T, bool> _equals = _valueIsStruct ? _valEquals : _refEquals;
+        static readonly bool _valueIsStruct = typeof(ValueType).IsAssignableFrom(typeof(TValue))
+                                                     || typeof(string).IsAssignableFrom(typeof(TValue));
+        static readonly Func<TValue, TValue, bool> _valEquals = (TValue lhs, TValue rhs) => lhs.Equals(rhs);
+        static readonly Func<TValue, TValue, bool> _refEquals = (TValue lhs, TValue rhs) => ReferenceEquals(lhs, rhs);
+        static readonly Func<TValue, TValue, bool> _equals = _valueIsStruct ? _valEquals : _refEquals;
         #endregion
 
         /// <inheritdoc/>
         [Pure]
-        public override bool Equals(object obj) => (obj as Maybe<T>?)?.Equals(this) ?? false;
+        public override bool Equals(object obj) => (obj as Maybe<TValue>?)?.Equals(this) ?? false;
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]
-        public bool Equals(Maybe<T> other) =>
+        public bool Equals(Maybe<TValue> other) =>
             HasValue ? other.HasValue && _equals(_value, other._value)
                      : !other.HasValue;
 
@@ -174,21 +177,21 @@ namespace PGSolutions.Utilities.Monads {
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]
-        public static bool operator ==(Maybe<T> lhs, Maybe<T> rhs) => lhs.Equals(rhs);
+        public static bool operator ==(Maybe<TValue> lhs, Maybe<TValue> rhs) => lhs.Equals(rhs);
 
         /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]
-        public static bool operator !=(Maybe<T> lhs, Maybe<T> rhs) => !lhs.Equals(rhs);
+        public static bool operator !=(Maybe<TValue> lhs, Maybe<TValue> rhs) => !lhs.Equals(rhs);
 
         ///<summary>Tests value-equality, returning <b>Nothing</b> if either value doesn't exist.</summary>
         [Pure]
-        public bool? AreNonNullEqual(Maybe<T> rhs) =>
+        public bool? AreNonNullEqual(Maybe<TValue> rhs) =>
             HasValue && rhs.HasValue ? _value.Equals(rhs._value)
                                      : null as bool?;
 
         ///<summary>Tests value-inequality, returning <b>Nothing</b> if either value doesn't exist.</summary>
         [Pure]
-        public bool? AreNonNullUnequal(Maybe<T> rhs) =>
+        public bool? AreNonNullUnequal(Maybe<TValue> rhs) =>
             HasValue && rhs.HasValue ? !_value.Equals(rhs._value)
                                      : null as bool?;
         #endregion
@@ -199,13 +202,9 @@ namespace PGSolutions.Utilities.Monads {
             Ensures(Result<string>() != null);
             return SelectMany<string>(v => v.ToString().ToMaybe()) | "";
         }
-
-        //public MaybeX<TValue> AsMaybeX<TValue>() where TValue : class,T =>
-        //    HasValue ? (TValue)_value : default(MaybeX<TValue>);
-        //public MaybeX<object> ToMaybeX<TValue>() where TValue : struct, T =>
-        //    HasValue ? (TValue)(object)_value : default(MaybeX<object>);
     }
 
+    /// <summary>TODO</summary>
     [Pure]
     public static class Maybe {
         ///<summary>Amplifies a reference-type T to a Maybe{T}.</summary>
@@ -213,7 +212,7 @@ namespace PGSolutions.Utilities.Monads {
         public static Maybe<TValue> ToMaybe<TValue>(this TValue @this) =>
             @this == null ? default(Maybe<TValue>) : (Maybe<TValue>)@this;
 
-        ///<summary>Extract value of the Maybe{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
+        ///<summary>Extract value of the Maybe{T}, substituting a defaultValue(<typeparam name="TStruct"/>) as needed.</summary>
         public static Func<TStruct> Extract<TStruct>(this Maybe<Func<TStruct>> @this) where TStruct : struct {
             Ensures(Result<Func<TStruct>>() != null);
             return @this | (() => default(TStruct));

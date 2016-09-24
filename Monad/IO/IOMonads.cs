@@ -31,9 +31,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
 
-using static System.Console;
+namespace PGSolutions.Monads {
+    //using static Contract;
+    using static Console;
 
-namespace PGSolutions.Utilities.Monads {
     /// <summary>TODO</summary>
     /// <remarks>
     /// Adapted from Dixin's Blog:

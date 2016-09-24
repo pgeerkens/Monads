@@ -26,12 +26,9 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
-using System;
 using System.Diagnostics.Contracts;
 
-using PGSolutions.Utilities.Monads;
-
-namespace TrafficLightDemo {
+namespace PGSolutions.Monads.TrafficLightDemo {
     /// <summary>TODO</summary>
     [ContractClass(typeof(ISettableLightContract<>))]
     public interface ISettableLight<T> {
@@ -41,8 +38,11 @@ namespace TrafficLightDemo {
     /// <summary>TODO</summary>
     [ContractClassFor(typeof(ISettableLight<>))]
     public abstract class ISettableLightContract<T> : ISettableLight<T> {
+        private ISettableLightContract() { ; }
+
         public IO<Unit> SetColor(T color) {
-            Contract.Requires(color != null, "colour");
+            color.ContractedNotNull(nameof(color));
+
             return Unit._.ToIO();
         }
     }

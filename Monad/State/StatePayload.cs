@@ -29,68 +29,52 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Globalization;
 
-namespace PGSolutions.Utilities.Monads {
+namespace PGSolutions.Monads {
     using static Contract;
 
-    /// <summary>Class delivered by an instance of the <see cref="State{TState,TValue}"/> monad.</summary>
-    /// <typeparam name="TState">Type of the internal state.</typeparam>
-    /// <typeparam name="TValue">Type of the delivered value.</typeparam>
-    /// <remarks>
-    ///  Minor observed performance penalty for small class vs small struct.
-    /// </remarks>
-    [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible",
-        Justification = "This nested type shares the Generic Type parameters of its parent, and is structurally associated with it.")]
-    public struct StatePayload<TState, TValue> : IEquatable<StatePayload<TState, TValue>> {
-        public StatePayload(TState state, TValue value) : this() {
+    /// <summary>Class factory for StatePayload{TState,TValue}, with conveninece methods that perform constructor type inference.</summary>
+    public static class StatePayload {
+        /// <summary>Expose type inference on the corresponding constructor for StatePayload{TState,TValue}.</summary>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+        public static StatePayload<TState,TValue> New<TState,TValue>(Func<StructTuple<TState, TValue>> valueFactory) {
+            valueFactory.ContractedNotNull(nameof(valueFactory));
+            return new StatePayload<TState,TValue>(valueFactory);
+        }
+        /// <summary>Expose type inference on the corresponding constructor for StatePayload{TState,TValue}.</summary>
+        public static StatePayload<TState,TValue> New<TState,TValue>(StructTuple<TState, TValue> tuple) {
+            return new StatePayload<TState,TValue>(tuple);
+        }
+        /// <summary>Expose type inference on the corresponding constructor for StatePayload{TState,TValue}.</summary>
+        public  static StatePayload<TState,TValue> New<TState,TValue>(TState state, TValue value) {
             state.ContractedNotNull(nameof(state));
             value.ContractedNotNull(nameof(value));
-            Ensures(_state != null);
-            Ensures(_value != null);
+            return new StatePayload<TState,TValue>(state, value);
+        }
+    }
 
-            _state = state;  _value = value;
+    /// <summary>TODO</summary>
+    public struct StatePayload<TState,TValue> {
+        /// <summary>Return a new StatePayload{TState,TValue} instance.</summary>
+        internal StatePayload(Func<StructTuple<TState, TValue>> valueFactory) {
+            valueFactory.ContractedNotNull(nameof(valueFactory));
+
+            _base = new Lazy<StructTuple<TState,TValue>>(valueFactory);
+        }
+        /// <summary>Return a new StatePayload{TState,TValue} instance.</summary>
+        internal StatePayload(StructTuple<TState, TValue> tuple) : this(() => tuple) { ; }
+        /// <summary>Return a new StatePayload{TState,TValue} instance.</summary>
+        internal StatePayload(TState state, TValue value) : this(StructTuple.New(state,value)) {
+            state.ContractedNotNull(nameof(state));
+            value.ContractedNotNull(nameof(value));
         }
 
-        public TState State {
-            get {
-                Ensures((_state != null) == (State != null));
-                return _state;
-            } } readonly TState _state;
-        public TValue Value {
-            get {
-                Ensures((_value != null) == (Value != null));
-                return _value;
-            } } readonly TValue _value;
+        private readonly Lazy<StructTuple<TState,TValue>> _base;
 
-        [Pure]
-        public static explicit operator State<TState,TValue>(StatePayload<TState, TValue> payload) =>
-            new State<TState,TValue>( s => payload );
-        [Pure]
-        public static State<TState, TValue> ToState(StatePayload<TState, TValue> payload) =>
-            new State<TState, TValue>( s => payload );
-
-        /// <summary>Implementation of <i>Bind</i> for an Identity monad.</summary>
-        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
-        [Pure]
-        public StatePayload<TState,TResult> Bind<TResult>(
-            Func<StatePayload<TState,TValue>, StatePayload<TState,TResult>> selector
-        ) {
-            selector.ContractedNotNull(nameof(selector));
-
-            return selector(this);
-        }
-
-        /// <summary>The invariants enforced by this struct type.</summary>
-        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
-        [ContractInvariantMethod]
-        [Pure]private void ObjectInvariant() {
-            Invariant(_state != null);  Invariant((_state != null) == (State != null));
-            Invariant(_value != null);  Invariant((_value != null) == (Value!=null));
-            Invariant( State != null );
-            Invariant( Value != null );
-        }
+        /// <inheritdoc/>
+        public TState State { get { Ensures(Result<TState>() != null);  return _base.Value.State; } }
+        /// <inheritdoc/>
+        public TValue Value { get { Ensures(Result<TValue>() != null);  return _base.Value.Value; } }
 
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
@@ -103,7 +87,7 @@ namespace PGSolutions.Utilities.Monads {
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]
         public bool Equals(StatePayload<TState, TValue> other) =>
-            this.Value.Equals(other.Value) && this.State.Equals(other.State);
+            Value.Equals(other.Value) && State.Equals(other.State);
 
         /// <inheritdoc/>
         [Pure]
@@ -113,7 +97,7 @@ namespace PGSolutions.Utilities.Monads {
         [Pure]
         public override string ToString() {
             Ensures(Result<string>() != null);
-            return String.Format(CultureInfo.InvariantCulture, "({0},{1})",Value, State);
+            return  "({0},{1})".FormatMe(State,Value);
         }
 
         /// <summary>Tests value-equality.</summary>

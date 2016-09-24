@@ -27,12 +27,10 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
-using System.Linq;
 
-namespace PGSolutions.Utilities.Monads.Demos {
+namespace PGSolutions.Monads.Demos {
     /// <summary>TODO</summary>
     public struct GcdResult : IEquatable<GcdResult> {
         /// <summary>TODO</summary>
@@ -41,15 +39,13 @@ namespace PGSolutions.Utilities.Monads.Demos {
         }
 
         /// <summary>TODO</summary>
-        public int      Gcd     { get {return _gcd;  } } private readonly int      _gcd;
+        public int      Gcd     { get {return _gcd;  } } private readonly int _gcd;
 
         #region Value Equality with IEquatable<T>.
         static readonly CultureInfo _culture = CultureInfo.CurrentUICulture;
 
         /// <inheritdoc/>
-        public override string ToString() { 
-            return String.Format(_culture,"    GCD = {0}",Gcd); //, Title);
-        }
+        public override string ToString() =>  "    GCD = {0}".FormatMe(_culture,Gcd);
 
         /// <inheritdoc/>
         [Pure]
@@ -60,7 +56,7 @@ namespace PGSolutions.Utilities.Monads.Demos {
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]
-        public bool Equals(GcdResult other) { return this.Gcd == other.Gcd; }
+        public bool Equals(GcdResult other) { return Gcd == other.Gcd; }
 
         /// <inheritdoc/>
         [Pure]

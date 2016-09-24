@@ -27,12 +27,10 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Linq;
 
-namespace PGSolutions.Utilities.Monads {
+namespace PGSolutions.Monads {
     using static Contract;
 
     /// <summary>Class representing, conceptually, the "type" of <i>void</i>.</summary>
@@ -45,6 +43,18 @@ namespace PGSolutions.Utilities.Monads {
 
         /// <inheritdoc/>
         public int CompareTo(Unit other) { Ensures(Result<int>()==0); return 0; }
+        /// <summary>TODO</summary>
+        public static bool operator <(Unit lhs, Unit rhs) {
+            Ensures(Result<bool>() == false);
+
+            return lhs.CompareTo(rhs) < 0;
+        }
+        /// <summary>TODO</summary>
+        public static bool operator >(Unit lhs, Unit rhs) {
+            Ensures(Result<bool>() == false);
+
+            return lhs.CompareTo(rhs) > 0;
+        }
 
         #region Value Equality with IEquatable<T>.
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
@@ -63,6 +73,7 @@ namespace PGSolutions.Utilities.Monads {
         [Pure]public static bool operator != (Unit lhs, Unit rhs) => ! lhs.Equals(rhs);
         #endregion
 
+        /// <summary>TODO</summary>
         public Func<Unit>     Select(
             Func<Unit, Unit> projector
         ) { 
@@ -73,17 +84,20 @@ namespace PGSolutions.Utilities.Monads {
             return () => projector(@this);
         }
 
+        /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public Func<Unit>     SelectMany(
             Func<Unit, Func<Unit>> selector
         ) {
             selector.ContractedNotNull(nameof(selector));
-            Requires(selector(Unit._) != null);
             Ensures(Result<Func<Unit>>() != null);
 
             var @this = this;
             return () => selector(@this)();
         }
 
+        /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public Func<Unit>     SelectMany<TSelection>(
             Func<Unit, Func<TSelection>> selector,
             Func<Unit,TSelection,Unit> projector
