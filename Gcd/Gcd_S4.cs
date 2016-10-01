@@ -143,17 +143,14 @@ namespace PGSolutions.Monads.Demos {
         private struct Test : ITest {
             /// <summary>TODO</summary>
             public Test(StateRes transform, string title, string name) {
-                _transform = transform; _title = title; _name = name;
+                Transform = transform; Title = title; Name = name;
             }
             /// <summary>TODO</summary>
-            public StateRes Transform { get { return _transform; } }
-            readonly StateRes _transform;
+            public StateRes Transform { get; }
             /// <summary>TODO</summary>
-            public string Title { get { return _title; } }
-            readonly string _title;
+            public string Title { get; }
             /// <summary>TODO</summary>
-            public string Name { get { return _name; } }
-            readonly string _name;
+            public string Name { get; }
         }
 #endregion
 

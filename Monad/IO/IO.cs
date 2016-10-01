@@ -38,8 +38,7 @@ namespace PGSolutions.Monads {
         static readonly Func<TSource> _default = () => default(TSource);
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
-        public static IO<TSource> Empty { get { return _empty; } }
-        readonly static IO<TSource> _empty = new IO<TSource>();//()=>default(TSource));
+        public static IO<TSource> Empty { get; } = new IO<TSource>();
 
         /// <summary>Create a new instance of the class.</summary>
         public IO(Func<TSource> functor) : this() {

@@ -72,9 +72,9 @@ namespace PGSolutions.Monads {
         private readonly Lazy<StructTuple<TState,TValue>> _base;
 
         /// <inheritdoc/>
-        public TState State { get { Ensures(Result<TState>() != null);  return _base.Value.State; } }
+        public TState State { get { Ensures(Result<TState>() != null); var v = _base.Value; v.AssumeInvariant(); return v.State; } }
         /// <inheritdoc/>
-        public TValue Value { get { Ensures(Result<TValue>() != null);  return _base.Value.Value; } }
+        public TValue Value { get { Ensures(Result<TValue>() != null); var v = _base.Value; v.AssumeInvariant(); return v.Value; } }
 
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>

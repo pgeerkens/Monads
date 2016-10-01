@@ -32,7 +32,7 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using Xunit;
 
-namespace PGSolutions.Monads.UnitTests {
+namespace PGSolutions.Monads.MonadTests {
     [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors")]
     [CLSCompliant(false)]
     public static class SafeIntTests {
@@ -127,5 +127,60 @@ namespace PGSolutions.Monads.UnitTests {
             Contract.Ensures(Contract.Result<string>() != null);
             return string.Format(_currentCulture, format, objArray);
         }
+#if false
+        /// <summary>Chaining with LINQ Comprehension syntax: all valid</summary>
+        /// <remarks>
+        /// after Mike Hadlow: http://mikehadlow.blogspot.ca/2011/01/monads-in-c-5-MaybeX.html
+        /// </remarks>
+        [Theory]
+        [InlineData(4, true, "Hello World! 6 ")]
+        [InlineData(0, false, "Nothing")]
+        [InlineData(6, true,  "Hello World! 4 ")]
+        public void MikeHadlowTest(int denominator, bool append, string expected) {
+            if (append) expected = expected + _datetime.ToShortDateString();
+
+            var received = ( from a in "Hello World!".AsMaybeX()
+                             from b in ((SafeInt)24 / denominator).Value.SelectMany(v=>v.ToMaybeX())
+                             from c in ((object)_datetime).AsMaybeX()
+                             let sds = ((DateTime)c).ToShortDateString()
+                             select a + " " +  (int)b + " " + sds
+                           ).ToNothingString();
+
+            Assert.Equal(expected, received);
+        }
+        /// <summary>Chaining with LINQ Comprehension syntax: one invalid</summary>
+        /// <remarks>
+        /// after Mike Hadlow: http://mikehadlow.blogspot.ca/2011/01/monads-in-c-5-maybe.html
+        /// </remarks>
+        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.Int32.ToString")]
+        [Theory]
+        [InlineData(4, true,  "Hello World! 6 ")]
+        [InlineData(0, false, "Nothing")]
+        [InlineData(6, true,  "Hello World! 4 ")]
+        public void MikeHadlowTest(int denominator, bool append, string expected) {
+            if (append) expected = expected + _datetime.ToShortDateString();
+
+            var received = ( from a in "Hello World!".ToMaybe()
+                             from b in ((SafeInt)24 / denominator).Value//.SelectMany<int,int>(v => v.ToMaybe())
+                             from c in _datetime.ToMaybe()
+                             let sds = c.ToShortDateString()
+                             select a + " " + b + " " + sds
+                           ).ToNothingString();
+
+            Assert.Equal(expected, received);
+        }
+
+        /// <summary>Chaining with LINQ Comprehension syntax: all valid</summary>
+        /// <remarks>
+        /// after Wes Dyer: http://blogs.msdn.com/b/wesdyer/archive/2008/01/11/the-marvels-of-monads.aspx
+        /// </remarks>
+        [Theory]
+        [InlineData("12",      7)]
+        [InlineData("Nothing", null)]
+        public static void WesDyerTest(string expected, int? second) {
+            var received = ( from y in second select 5 + y).ToNothingString();
+            Assert.Equal(expected, received);
+        }
+#endif
     }
 }

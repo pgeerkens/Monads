@@ -33,7 +33,7 @@ using System.Globalization;
 
 using Xunit;
 
-namespace PGSolutions.Monads.UnitTests {
+namespace PGSolutions.Monads.MonadTests {
     using static State;
 
     [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors")]

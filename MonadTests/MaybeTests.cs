@@ -34,7 +34,7 @@ using System.Linq;
 
 using Xunit;
 
-namespace PGSolutions.Monads.UnitTests {
+namespace PGSolutions.Monads.MonadTests {
     [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors",
         Justification ="Unit tests require a public default constructor.")]
     [ExcludeFromCodeCoverage] [CLSCompliant(false)]
@@ -117,18 +117,6 @@ namespace PGSolutions.Monads.UnitTests {
             Assert.Equal(7, x());
         }
 
-        /// <summary>Chaining with LINQ Comprehension syntax: all valid</summary>
-        /// <remarks>
-        /// after Wes Dyer: http://blogs.msdn.com/b/wesdyer/archive/2008/01/11/the-marvels-of-monads.aspx
-        /// </remarks>
-        [Theory]
-        [InlineData("12",      7)]
-        [InlineData("Nothing", null)]
-        public static void WesDyerTest(string expected, int? second) {
-            var received = ( from y in second select 5 + y).ToNothingString();
-            Assert.Equal(expected, received);
-        }
-
         /// <summary>Monad law 1: m.Monad().Bind(f) == f(m)</summary>
         [Fact]
         public void MonadLaw1Maybe() {
@@ -160,34 +148,5 @@ namespace PGSolutions.Monads.UnitTests {
             var rhs = M.SelectMany(x => _addOne(x).SelectMany(_addEight));
             Assert.True(lhs == rhs, description);
         }
-
-        /// <summary>Chaining with LINQ Comprehension syntax: one invalid</summary>
-        /// <remarks>
-        /// after Mike Hadlow: http://mikehadlow.blogspot.ca/2011/01/monads-in-c-5-maybe.html
-        /// </remarks>
-        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.Int32.ToString")]
-        [Theory]
-        [InlineData(4, true,  "Hello World! 6 ")]
-        [InlineData(0, false, "Nothing")]
-        [InlineData(6, true,  "Hello World! 4 ")]
-        public void MikeHadlowTest(int denominator, bool append, string expected) {
-            if (append) expected = expected + _datetime.ToShortDateString();
-
-            var received = ( from a in "Hello World!".ToMaybe()
-                             from b in ((SafeInt)24 / denominator).Value.SelectMany(v => v.ToMaybe())
-                             from c in _datetime.ToMaybe()
-                             let sds = c.ToShortDateString()
-                             select a + " " + b + " " + sds
-                           ).ToNothingString();
-
-            Assert.Equal(expected, received);
-        }
-    }
-
-    internal class ExternalState {
-        private int _state;
-
-        public ExternalState() { _state = -1; }
-        public int GetState() { return ++_state; }
     }
 }

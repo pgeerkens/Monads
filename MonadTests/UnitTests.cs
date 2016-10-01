@@ -6,7 +6,7 @@ using System.Linq;
 
 using Xunit;
 
-namespace PGSolutions.Monads.UnitTests {
+namespace PGSolutions.Monads.MonadTests {
 
     [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors",
         Justification = "Unit tests require a public default constructor.")]

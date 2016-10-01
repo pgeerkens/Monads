@@ -73,14 +73,14 @@ namespace PGSolutions.Monads {
         /// <summary>Returns a SafeInt with the sum, or null if the operation fails.</summary>
         public static SafeInt operator + (SafeInt addend1, SafeInt addend2) =>
             addend1._value.SelectMany(l =>
-            addend2._value.SelectMany(r => l.SafeAddition(r)));
+            addend2._value.SelectMany(r => l.SafeAddition(r), Functions.Second), Functions.Second);
         /// <summary><see cref="Add"/></summary>
         public static SafeInt Add(SafeInt lhs, SafeInt rhs) => lhs + rhs;
 
         /// <summary>Returns a SafeInt with the difference, or null if the operation fails.</summary>
         public static SafeInt operator - (SafeInt lhs, SafeInt rhs) =>
             lhs._value.SelectMany(l =>
-            rhs._value.SelectMany(r => l.SafeSubtract(r)));
+            rhs._value.SelectMany(r => l.SafeSubtract(r), Functions.Second), Functions.Second);
 
         /// <summary><see cref="Subtract"/></summary>
         public static SafeInt Subtract(SafeInt minuend, SafeInt subtrahend) =>
@@ -89,14 +89,16 @@ namespace PGSolutions.Monads {
         /// <summary>Returns a SafeInt with the quotient, or null if the operation fails.</summary>
         public static SafeInt operator / (SafeInt dividend, SafeInt divisor) =>
             dividend._value.SelectMany(lhs =>
-            divisor ._value.SelectMany(rhs => lhs.SafeDivide(rhs)));
+            divisor ._value.SelectMany(rhs => lhs.SafeDivide(rhs), Functions.Second), Functions.Second);
 
         /// <summary><see cref="Divide"/></summary>
         public static SafeInt Divide(SafeInt lhs, SafeInt rhs) => lhs / rhs;
 
         /// <inheritdoc/>
         public int? CompareTo(SafeInt other) =>
-            from lhs in _value from rhs in other._value select lhs.CompareTo(rhs);
+            //from lhs in _value from rhs in other._value select lhs.CompareTo(rhs);
+            _value.HasValue && other._value.HasValue ? _value.Value.CompareTo(other._value.Value)
+                                                     : default(int?);
 
         /// <inheritdoc/>
         bool? ISafeEquatable<SafeInt>.Equals(SafeInt other) => AreNonNullEqual(other);
@@ -162,8 +164,9 @@ namespace PGSolutions.Monads {
         public static int? SafeSubtract(this int minuend, int subtrahend) =>
             subtrahend != int.MinValue ? minuend.SafeAddition(-subtrahend)
                         : minuend >= 0 ? default(int?)
-                                       : from e in int.MaxValue.SafeAddition(minuend)
-                                         select e+1;
+                                       : int.MaxValue.SafeAddition(minuend).Select<int,int>(e => e+1);
+                                       //: from e in int.MaxValue.SafeAddition(minuend)
+                                       //  select e+1;
 
         /// <summary>Returns a Nullable{int} with the quotient, or null if the operation fails.</summary>
         public static int? SafeDivide(this int dividend, int divisor) =>

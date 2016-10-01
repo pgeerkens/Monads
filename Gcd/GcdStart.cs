@@ -33,6 +33,8 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 
 namespace PGSolutions.Monads.Demos {
+    using static Contract;
+
 #if GCDStateAsClass
     public class GcdStart : IEquatable<GcdStart> {
 #else
@@ -41,18 +43,21 @@ namespace PGSolutions.Monads.Demos {
 #endif
    
         /// <summary>TODO</summary>
-        public GcdStart(int a, int b) { _a = a; _b = b; }
+        public GcdStart(int a, int b) { A = a; B = b; }
 
         /// <summary>TODO</summary>
-        public int A { get { return _a; } } private readonly int _a;
+        public int A { get; }
         /// <summary>TODO</summary>
-        public int B { get { return _b; } } private readonly int _b;
+        public int B { get; }
 
         #region Value Equality with IEquatable<T>.
         static readonly CultureInfo _culture = CultureInfo.CurrentUICulture;
 
         /// <inheritdoc/>
-        public override string ToString() => "({0,14:N0}, {1,14:N0})".FormatMe(_culture,A,B);
+        public override string ToString() {
+            Ensures(Result<System.String>() != null);
+            return "({0,14:N0}, {1,14:N0})".FormatMe(_culture, A, B);
+        }
 
         /// <inheritdoc/>
         [Pure]
@@ -72,7 +77,7 @@ namespace PGSolutions.Monads.Demos {
 
         /// <inheritdoc/>
         [Pure]
-        public override int GetHashCode() { unchecked { return A ^ B; } }
+        public override int GetHashCode() { unchecked { return A.GetHashCode() ^ B.GetHashCode(); } }
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]

@@ -65,48 +65,74 @@ namespace PGSolutions.Monads {
         public static State<TState,TResult>     Then<TState,TValue,TResult>( this
             State<TState, TValue> @this,
             State<TState, TResult> follower
-        ) {
-            @this.ContractedNotNull(nameof(@this));
-            follower.ContractedNotNull(nameof(follower));
-            Ensures(Result<State<TState,TResult>>() != null);
+        ) => @this == null || follower == null ? (State<TState,TResult>)null
+                                               : s => follower(@this(s).State);
 
-            return s => follower(@this(s).State);
-        }
-
-        /// <summary>TODO</summary>
+        /// <summary>Return the <typeparamref name="TValue"/> value calculated against the supplied <typeparamref name="TState"/> value.</summary>
         /// <param name="this">The start state for this transformation.</param>
-        /// <param name="s">todo: describe s parameter on Value</param>
-        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
-        public static TValue    Value<TState,TValue>(this State<TState,TValue> @this, TState s) {
-            @this.ContractedNotNull(nameof(@this));
-            s.ContractedNotNull(nameof(s));
-            Ensures(Result<TValue>() != null);
+        /// <param name="s">The starting <typeparamref name="TState"/> value for this transformation.</param>
+        /// <typeparam name="TState">The State type for this state-monad instance.</typeparam>
+        /// <typeparam name="TValue">The Value type for this state-monad instance.</typeparam>
+        public static Maybe<TValue>    Value<TState,TValue>(this
+            State<TState,TValue> @this,
+            TState s
+        ) => from value in @this.Run(s.ToMaybe()) select value.Value;
 
-            return @this.Run(s).Value;
-        }
-
-        /// <summary>TODO</summary>
+        /// <summary>Return the <typeparamref name="TState"/> value calculated against the supplied <typeparamref name="TState"/> value.</summary>
         /// <param name="this">The start state for this transformation.</param>
-        /// <param name="s">todo: describe s parameter on State</param>
-        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
-        public static TState    State<TState,TValue>(this State<TState,TValue> @this, TState s) {
-            @this.ContractedNotNull(nameof(@this));
-            s.ContractedNotNull(nameof(s));
-            Ensures(Result<TState>() != null);
+        /// <param name="s">The starting <typeparamref name="TState"/> value for this transformation.</param>
+        /// <typeparam name="TState">The State type for this state-monad instance.</typeparam>
+        /// <typeparam name="TValue">The Value type for this state-monad instance.</typeparam>
+        public static Maybe<TState>    State<TState,TValue>(this
+            State<TState,TValue> @this,
+            TState s
+        ) => from value in @this.Run(s.ToMaybe()) select value.State;
 
-            return @this.Run(s).State;
-        }
+        private static StructTuple<TState,TValue>        Default<TState,TValue>() => default(StructTuple<TState,TValue>);
 
-        /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        private static Maybe<StructTuple<TState,TValue>> Nothing<TState,TValue>() => Default<TState,TValue>().ToMaybe();
+
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        private static Maybe<State<TState,TValue>> NilState<TState,TValue>() => default(State<TState,TValue>).ToMaybe();
+
+        /// <summary>Evaluate this state-monad instance against the supplied <typeparamref name="TState"/> value.</summary>
         /// <param name="this">The start state for this transformation.</param>
-        /// <param name="s">todo: describe s parameter on State</param>
-        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
-        public static StructTuple<TState,TValue> Run<TState, TValue>(this State<TState, TValue> @this, TState s) {
-            @this.ContractedNotNull(nameof(@this));
-            s.ContractedNotNull(nameof(s));
+        /// <param name="state">todo: describe s parameter on State</param>
+        /// <typeparam name="TState">The State type for this state-monad instance.</typeparam>
+        /// <typeparam name="TValue">The Value type for this state-monad instance.</typeparam>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+        public static Maybe<StructTuple<TState,TValue>> Run<TState,TValue>(this
+            State<TState,TValue> @this,
+            TState state
+        ) => @this.Run(state.ToMaybe());
 
-            var newState = @this(s);
-            return newState;
-        }
+        /// <summary>Evaluate this state-monad instance against the supplied <typeparamref name="TState"/> value.</summary>
+        /// <param name="this">The start state for this transformation.</param>
+        /// <param name="state">todo: describe s parameter on State</param>
+        /// <typeparam name="TState">The State type for this state-monad instance.</typeparam>
+        /// <typeparam name="TValue">The Value type for this state-monad instance.</typeparam>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+        public static Maybe<StructTuple<TState,TValue>> Run<TState,TValue>(this
+            State<TState,TValue> @this,
+            Maybe<TState> state
+        ) => from s in state select (@this?.Invoke(s) ?? Default<TState,TValue>());
+    }
+
+    /// <summary>TODO</summary>
+    public static class MaybeStateExtensions {
+        /// <summary>Implementation of <b>then</b>: (>>):  mv1 >> mv2  =  mv1 >>= (\_ -> mv2)</summary>
+        /// <param name="this">The start state for this transformation.</param>
+        /// <param name="follower">todo: describe follower parameter on Then</param>
+        /// <remarks> Optimized implementation of:
+        ///         return @this.Bind(t => follower);
+        /// or
+        ///         return @this.Then(s => follower);
+        /// </remarks>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+        public static Maybe<State<TState,TResult>>     Then<TState,TValue,TResult>( this
+            Maybe<State<TState,TValue>> @this,
+            Maybe<State<TState,TResult>> follower
+        ) => from me in @this from f in follower select me.Then(f);
     }
 }

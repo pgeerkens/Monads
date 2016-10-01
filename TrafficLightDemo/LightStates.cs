@@ -39,9 +39,7 @@ namespace PGSolutions.Monads.TrafficLightDemo {
             where TEnv           : ITrafficLight<TSettableLight,Image> 
     {
         /// <inheritdoc/>
-        protected override FsmTransition Start { get { return _start; } }
-         
-        static readonly FsmTransition _start          = e => _reset.GetState(             500,
+        protected override FsmTransition Start { get; } = e => _reset.GetState(             500,
             from _    in e.UpDownTown.SetColor         (e.Green)
             from __   in e.CrossTown.SetColor          (e.Yellow)
             from ___  in e.UpTownLeftTurn.SetColor     (e.Green)

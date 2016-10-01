@@ -166,4 +166,22 @@ namespace PGSolutions.Monads {
             return s => StructTuple.New(state, Unit._);
         }
     }
+
+    /// <summary>TODO</summary>
+    public static class MaybeXState {
+        /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+        public static MaybeX<State<TState, bool>>   DoWhile<TState>(this
+            MaybeX<State<TState, bool>> @this
+        ) => from me in @this select me.DoWhile();
+    }
+
+    /// <summary>TODO</summary>
+    public static class MaybeState {
+        /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
+        public static MaybeX<State<TState, bool>>    DoWhile<TState>(this
+            MaybeX<State<TState, bool>> @this
+        ) => from me in @this select me.DoWhile();
+    }
 }

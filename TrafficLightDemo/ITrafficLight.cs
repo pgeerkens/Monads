@@ -63,20 +63,20 @@ namespace PGSolutions.Monads.TrafficLightDemo {
         private ITrafficLightContract() { }
 
         /// <inheritdoc/>
-        public T Red    { get {Ensures(Result<T>() != null); return default(T); } }
+        public T Red    { get { Ensures(Result<T>() != null); return default(T); } }
         /// <inheritdoc/>
-        public T Yellow { get {Ensures(Result<T>() != null); return default(T); } }
+        public T Yellow { get { Ensures(Result<T>() != null); return default(T); } }
         /// <inheritdoc/>
-        public T Green  { get {Ensures(Result<T>() != null); return default(T); } }
+        public T Green  { get { Ensures(Result<T>() != null); return default(T); } }
 
         /// <inheritdoc/>
-        public TSettableLight CrossTown        { get {Ensures(Result<ISettableLight<T>>() != null); return default(TSettableLight); } }
+        public TSettableLight CrossTown        { get { Ensures(Result<ISettableLight<T>>() != null); return default(TSettableLight); } }
         /// <inheritdoc/>
-        public TSettableLight UpTownLeftTurn   { get {Ensures(Result<ISettableLight<T>>() != null); return default(TSettableLight); } }
+        public TSettableLight UpTownLeftTurn   { get { Ensures(Result<ISettableLight<T>>() != null); return default(TSettableLight); } }
         /// <inheritdoc/>
-        public TSettableLight DownTownLeftTurn { get {Ensures(Result<ISettableLight<T>>() != null); return default(TSettableLight); } }
+        public TSettableLight DownTownLeftTurn { get { Ensures(Result<ISettableLight<T>>() != null); return default(TSettableLight); } }
         /// <inheritdoc/>
-        public TSettableLight UpDownTown       { get {Ensures(Result<ISettableLight<T>>() != null); return default(TSettableLight); } }
+        public TSettableLight UpDownTown       { get { Ensures(Result<ISettableLight<T>>() != null); return default(TSettableLight); } }
 
         /// <inheritdoc/>
         public CancellationToken CancellationToken { get { return default(CancellationToken); } }

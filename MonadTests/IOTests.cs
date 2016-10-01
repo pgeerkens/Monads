@@ -4,7 +4,7 @@ using System.Diagnostics.Contracts;
 
 using Xunit;
 
-namespace PGSolutions.Monads.UnitTests {
+namespace PGSolutions.Monads.MonadTests {
     [ExcludeFromCodeCoverage]
     public static class IOTests {
         [Fact]

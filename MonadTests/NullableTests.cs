@@ -26,7 +26,6 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -36,28 +35,31 @@ using System.Linq;
 using Xunit;
 
 namespace PGSolutions.Monads.MonadTests {
+    [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors",
+        Justification = "Unit tests require a public default constructor.")]
     [ExcludeFromCodeCoverage] [CLSCompliant(false)]
-    public class MaybeXTests {
-        public MaybeXTests() {
-            _data        = ( from e in new List<string>() { "Percy", null, "George", "Ron", "Ginny" }
-                             select e.AsMaybeX()
+    public class NullableTests {
+        public NullableTests() {
+            _maybeGeorge = 2;
+            _data        = (from e in new List<int?>() { 0, null, 2, 3, 4 }
+                            select e
                            ).ToList().AsReadOnly();
-            _addOne      = x => x + "constant";
-            _addEight    = x => x + "/" + x;
+            _addOne      = x => (x + 1);
+            _addEight    = x => (x + 8);
             _datetime    = DateTime.Now;
         }
 
-        readonly IList<MaybeX<string>>        _data;
-        readonly Func<string, MaybeX<string>> _addOne;
-        readonly Func<string, MaybeX<string>> _addEight;
-        readonly DateTime                     _datetime;
+        readonly int? _maybeGeorge;
+        readonly IList<int?> _data;
+        readonly Func<int, int?> _addOne;
+        readonly Func<int, int?> _addEight;
+        readonly DateTime _datetime;
 
         [Theory]
-        [InlineData("",        "Percy//George/Ron/Ginny")]
-        [InlineData("Nothing", "Percy/Nothing/George/Ron/Ginny")]
-        public void BasicTest(string defaultValue, string expected) {
+        [InlineData(99, "0/99/2/3/4")]
+        public void BasicTest(int defaultValue, string expected) {
             var received = string.Join("/", from e in _data
-                                            select e | defaultValue
+                                            select e ?? defaultValue
                                             );
             Contract.Assert(received != null);
             Assert.Equal(expected, received);
@@ -65,40 +67,41 @@ namespace PGSolutions.Monads.MonadTests {
 
         /// <summary>Verify that == and != are opposites, and are implemented as Equals().</summary>
         [Theory]
-        [InlineData(true, "George")]
-        [InlineData(false, "Percy/Nothing/Ron/Ginny")]
+        [InlineData(true, "2")]
+        [InlineData(false, "0/Nothing/3/4")]
         public void IncludedMiddleTest(bool comparison, string expected) {
             expected.ContractedNotNull(nameof(expected));
-
             var received = string.Join("/", from e in _data
-                                            where e.Equals("George") == comparison
+                                            where e.Equals(_maybeGeorge) == comparison
                                             select e.ToNothingString()
-                                            );
+                                      );
             Assert.True(expected == received);
             Assert.False(ReferenceEquals(expected, received));
 
-            received     = string.Join("/", from e in _data
-                                            where (e == "George") == comparison
-                                            select e.ToNothingString()
-                                            );
+            received     = string.Join("/", from i in ( from e in _data
+                                            where (e == _maybeGeorge) == comparison select e).ToList()
+                                            select i.ToNothingString()
+                                      );
             Assert.Equal(expected, received);
 
-            received     = string.Join("/", from e in _data
-                                            where (e != "George") != comparison
+            received     = string.Join("/", from int? e in _data
+                                            where (e != _maybeGeorge) != comparison
                                             select e.ToNothingString()
-                                            );
+                                      );
             Assert.Equal(expected, received);
         }
 
         [Theory]
-        [InlineData(true,  "George")]
-        [InlineData(false, "Percy/Ron/Ginny")]
-        [InlineData(null,  "Nothing")]
+        [InlineData(true, "2")]
+        [InlineData(false, "0/3/4")]
+        [InlineData(null, "Nothing")]
         public void ExcludedMiddleTest(bool? comparison, string expected) {
-            var received = string.Join("/", from e in _data
-                                            where e.AreNonNullEqual("George") == comparison
-                                            select e.ToNothingString()
-                                            );
+            var received = string.Join("/", //from int? e in _data
+                                            //where e.AreNonNullEqual(_maybeGeorge) == comparison
+                                            //select e.ToNothingString()
+                                            _data.Where(e => e.AreNonNullEqual(_maybeGeorge) == comparison)
+                                                 .Select<int?, string>(e => e.ToNothingString())
+                                      );
             Assert.Equal(expected, received);
         }
 
@@ -115,48 +118,36 @@ namespace PGSolutions.Monads.MonadTests {
             Assert.Equal(7, x());
         }
 
-        /// <summary>Chaining with LINQ Comprehension syntax: all valid</summary>
-        /// <remarks>
-        /// after Wes Dyer: http://blogs.msdn.com/b/wesdyer/archive/2008/01/11/the-marvels-of-monads.aspx
-        /// </remarks>
-        [Theory]
-        [InlineData("Fred Weasley", " Weasley")]
-        [InlineData("Nothing",      null)]
-        public static void WesDyerTest(string expected, string second) {
-            var received = ( from x in "Fred".AsMaybeX()
-                             from y in second.AsMaybeX()
-                             select x + y).ToNothingString();
-            Assert.Equal(expected, received);
-        }
-
         /// <summary>Monad law 1: m.Monad().Bind(f) == f(m)</summary>
         [Fact]
-        public void MonadLaw1() {
+        public void MonadLaw1Maybe() {
             const string description = "Monad law 1: m.Monad().Bind(f) == f(m)";
 
-            var lhs = "1".AsMaybeX().SelectMany(_addOne);
-            var rhs = _addOne("1");
+            var maybe1 = (int?)1;
+            var lhs = maybe1.SelectMany(_addOne);
+            var rhs = _addOne(1);
             Assert.True(lhs == rhs, description);
         }
 
         /// <summary>Monad law 2: M.Bind(Monad) == M</summary>
         [Fact]
-        public static void MonadLaw2() {
+        public static void MonadLaw2Maybe() {
             const string description = "Monad law 2: M.Bind(Monad) == M";
 
-            var M = " four".AsMaybeX();
-            var lhs = M.SelectMany(i => i.AsMaybeX());
+            var maybe4 = (int?)4;
+            var M = maybe4;
+            var lhs = M.SelectMany(NullableLinq.ToNullable);
             var rhs = M;
             Assert.True(lhs == rhs, description);
         }
 
         /// <summary>Monad law 3: M.Bind(f1).Bind(f2) == M.Bind(x => f1(x).Bind(f2))</summary>
         [Fact]
-        public void MonadLaw3() {
+        public void MonadLaw3Maybe() {
             const string description = "Monad law 3: M.Bind(f1).Bind(f2) == M.Bind(x => f1(x).Bind(f2))";
 
-            //Func<string,MaybeX<string>> addOne = x => x + 1;
-            var M = " four".AsMaybeX();
+            var maybe4 = (int?)4;
+            var M = maybe4;
             var lhs = M.SelectMany(_addOne).SelectMany(_addEight);
             var rhs = M.SelectMany(x => _addOne(x).SelectMany(_addEight));
             Assert.True(lhs == rhs, description);

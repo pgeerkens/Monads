@@ -26,37 +26,39 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
-namespace PGSolutions.Monads.UnitTests {
+namespace PGSolutions.Monads.MonadTests {
+    using static Contract;
+
     internal static class MaybeTestsExtensions {
         /// <summary>A string representing the object's value, or "Nothing" if it has no value.</summary>
         public static string ToNothingString<T>(this Maybe<T> @this) {
-            Contract.Ensures(Contract.Result<string>() != null);
-            return @this.SelectMany<string>(v => (Maybe<string>)v.ToString()) | "Nothing";
-        }
-
-        /// <summary>A string representing the object's value, or "Nothing" if it has no value.</summary>
-        public static string ToNothingString<T>(this T? @this) where T:struct {
-            Contract.Ensures(Contract.Result<string>() != null);
-            return @this.HasValue ? @this.Value.ToString() : "Nothing";
+            Ensures(Result<string>() != null);
+            return @this.SelectMany(v => (Maybe<string>)v.ToString()) | "Nothing";
         }
 
         /// <summary>A string representing the object's value, or "Nothing" if it has no value.</summary>
         public static string ToNothingString<T>(this MaybeX<T> @this
         ) where T:class {
-            Contract.Ensures(Contract.Result<string>() != null);
-            return @this.SelectMany<string>(v => v.ToString()) | "Nothing";
+            Ensures(Result<string>() != null);
+            return @this.Select(v => v.ToString()) | "Nothing";
         }
     }
 
     [Pure]
     internal static partial class EnumerableExtensions {
         public static IEnumerable<T> Enumerable<T>(this T value) {
-            Contract.Ensures(Contract.Result<IEnumerable<T>>() != null);
+            Ensures(Result<IEnumerable<T>>() != null);
             yield return value;
         }
+    }
+
+    internal class ExternalState {
+        private int _state;
+
+        public ExternalState() { _state = -1; }
+        public int GetState() { return ++_state; }
     }
 }

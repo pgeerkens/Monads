@@ -31,11 +31,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
-    //using static Contract;
+    using static Contract;
 
     /// <summary>TODO</summary>
     [Pure]
-    public static class Nullable {
+    public static class NullableLinq {
         /// <summary>LINQ-compatible implementation of the monadic map operator.</summary>
         ///<remarks>
         /// Used to implement the LINQ <i>let</i> clause and queries with a single FROM clause.
@@ -43,83 +43,77 @@ namespace PGSolutions.Monads {
         /// Always available from Bind():
         ///         return @this.Bind(v => projector(v).ToMaybe());
         ///</remarks>
-        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "1")]
-        public static TResult?   Select<T, TResult>(this T? @this,
-            Func<T, TResult> projector
-        ) where T : struct where TResult : struct {
-            projector.ContractedNotNull(nameof(projector));
+        public static TResult?      Select<TValue,TResult>(this TValue? @this,
+            Func<TValue,TResult>    projector
+        ) where TValue:struct where TResult:struct 
+            => @this.HasValue ? projector?.Invoke(@this.Value)
+                              : null;
 
-            return !@this.HasValue ? default(TResult?) : projector(@this.Value);
-        }
-
-        ///<summary>The monadic Bind operation of type T to type {TResult?}.</summary>
+        ///<summary>The monadic Bind operation of type T to type MaybeX2{TResult}.</summary>
         /// <remarks>
         /// Convenience method - not used by LINQ
         /// </remarks>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "1")]
-        public static TResult?   SelectMany<T, TResult>(this T? @this,
-            Func<T, TResult?> selector
-        ) where T : struct where TResult : struct {
-            selector.ContractedNotNull(nameof(selector));
-
-            return !@this.HasValue ? default(TResult?) : selector(@this.Value);
-        }
+        public static TResult?      SelectMany<TValue, TResult>(this TValue? @this,
+            Func<TValue, TResult?>  selector
+        ) where TValue : struct where TResult : struct
+            => @this.HasValue ? selector?.Invoke(@this.Value)
+                              : null;
 
         /// <summary>LINQ-compatible implementation of the monadic join operator.</summary>
         /// <remarks>
         /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
         /// </remarks>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "1")]
-        public static TResult?   SelectMany<T, TIntermediate, TResult>(this T? @this,
-            Func<T, TIntermediate?> selector,
-            Func<T, TIntermediate, TResult> projector
-        ) where T : struct where TIntermediate : struct where TResult : struct {
-            selector.ContractedNotNull(nameof(selector));
-            projector.ContractedNotNull(nameof(projector));
-
-            return !@this.HasValue ? default(TResult?)
-                                   : selector(@this.Value).Select(e => projector(@this.Value, e));
-        }
-
-        ///<summary>The monadic Bind operation of type {T?} to type MaybeX{TResult?}.</summary>
+        public static TResult?      SelectMany<TValue,T,TResult>(this TValue? @this,
+            Func<TValue,T?>         selector,
+            Func<TValue,T,TResult>  projector
+        ) where TValue:struct where T:struct where TResult:struct
+            => @this.HasValue ? selector?.Invoke(@this.Value).SelectMany(e => projector?.Invoke(@this.Value,e))
+                              : null;
+        //-------------------------------------------------------------------------------------------------------
+        ///<summary>The monadic Bind operation of type T to type MaybeX2{TResult}.</summary>
         /// <remarks>
         /// Convenience method - not used by LINQ
         /// </remarks>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "1")]
-        public static Maybe<TResult>   SelectMany<T, TResult>(this T? @this,
-            Func<T, Maybe<TResult>> selector
-        ) where T : struct where TResult : struct {
-            selector.ContractedNotNull(nameof(selector));
+        private static MaybeX<TResult>      SelectMany<TValue, TResult>(this TValue? @this,
+            Func<TValue,MaybeX<TResult>>    selector
+        ) where TValue : struct where TResult : class
+            => @this.HasValue ? selector?.Invoke(@this.Value) ?? null
+                              : null;
 
-            return !@this.HasValue ? default(Maybe<TResult>) : selector(@this.Value);
-        }
-
-        ///<summary>The monadic Bind operation of type {T?} to type MaybeX{TResult?}.</summary>
+        /// <summary>LINQ-compatible implementation of the monadic join operator.</summary>
         /// <remarks>
-        /// Convenience method - not used by LINQ
+        /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
         /// </remarks>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "1")]
-        public static MaybeX<TResult>   SelectMany<T, TResult>(this T? @this,
-            Func<T, MaybeX<TResult>> selector
-        ) where T : struct where TResult : class {
-            selector.ContractedNotNull(nameof(selector));
+        public static MaybeX<TResult>   SelectMany<TValue,T,TResult>(this TValue? @this,
+            Func<TValue,MaybeX<T>>      selector,
+            Func<TValue,T,TResult>      projector
+        ) where TValue:struct where T:class where TResult:class
+            => @this.HasValue ? selector?.Invoke(@this.Value).SelectMany<TResult>(e => projector?.Invoke(@this.Value,e)) ?? default(MaybeX<TResult>)
+                              : null;
 
-            return !@this.HasValue ? default(MaybeX<TResult>) : selector(@this.Value);
-        }
-
-        ///<summary>Amplifies a value-type T to a {T}?.</summary>
-        public static T? AsMaybe<T>(this T @this) where T : struct => @this;
-
+        //-------------------------------------------------------------------------------------------------------
         /// <summary>TODO</summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="value"></param>
+        public static TValue? ToNullable<TValue>(this TValue value) where TValue : struct => value;
+
+        //=======================================================================================================
+        /// <summary>A string representing the object's value, or "Nothing" if it has no value.</summary>
+        public static string ToNothingString<T>(this T @this) {
+            Ensures(Result<string>() != null);
+            return @this != null ? @this.ToString() : "Nothing";
+        }
+
+        ///<summary>Tests value-equality, returning <b>Nothing</b> if either value doesn't exist.</summary>
+        public static bool? AreNonNullEqual<TValue>(this TValue lhs, TValue rhs)
+            => lhs != null && rhs != null ? lhs.Equals(rhs) : null as bool?;
+
+       /// <summary>TODO</summary>
+        /// <typeparam name="TValue"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
         /// <param name="this"></param>
-        /// <param name="defaultValue"></param>
         /// <returns></returns>
-        public static T Extract<T>(this T? @this, T defaultValue) where T : struct =>
-            @this.HasValue ? @this.Value : defaultValue;
+        public static TResult Cast<TValue,TResult>(this TValue @this) where TValue:TResult 
+            => @this != null ? @this : default(TResult);
     }
 }

@@ -37,7 +37,6 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace PGSolutions.Monads.Demos {
 #pragma warning disable CA1303
-
     static class Program {
         static readonly CultureInfo  _culture = CultureInfo.InvariantCulture;
 
@@ -94,40 +93,33 @@ namespace PGSolutions.Monads.Demos {
         [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String)")]
         static void WesDyerTest() {
             Console.WriteLine(); {
-                Console.WriteLine( ( from x in 5.ToMaybe()
-                                     from y in 7.ToMaybe()
+                Console.WriteLine( ( from x in 5.ToNullable()
+                                     from y in 7.ToNullable()
                                      select x + y ).ToNothingString() );
 
-                Console.WriteLine( ( from x in 5.ToMaybe()
-                                     from y in default(Maybe<int>)
+                Console.WriteLine( ( from x in 5.ToNullable()
+                                     from y in default(int?)
                                      select x + y
                                    ).ToNothingString() );
 
-                Console.WriteLine(5.ToMaybe().SelectMany(x => default(Maybe<int>), (x, y) => new { x, y })
-                                             .Select(z => z.x + z.y )
-                                             .ToNothingString() );
+                Console.WriteLine(5.ToNullable()
+                                   .SelectMany(x => default(int?), (x, y) => x+y)
+                                   .ToNothingString() );
             }
             Console.WriteLine("_______________________");
-        }
-
-        public static string ToNothingString<T>(this Maybe<T> @this) {
-            Contract.Ensures(Contract.Result<string>() != null);
-            return @this.SelectMany<string>(v => v.ToString().ToMaybe()) | "Nothing";
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String)")]
         private static void ExternalStateTest() {
             Console.WriteLine();
             var state = new ExternalState();
-            var x = ( from a in (Maybe<Func<int>>)(state.GetState)
-                    select a
-                    ).Extract();
+            var x = (from a in state.GetState.AsMaybeX() select a) | (()=>-99);
             var y = x();
 
             for (int i = 0; i++ < 5; ) state.GetState();
-            Console.WriteLine(String.Format(_culture, "{0}", y ));
-            Console.WriteLine(String.Format(_culture, "{0}", state.GetState()));
-            Console.WriteLine(String.Format(_culture, "{0}", x() ));
+            Console.WriteLine("y:     {0} (Expect 1)".FormatMe(_culture, y ));
+            Console.WriteLine("state: {0} (Expect 6)".FormatMe(_culture, state.Value));
+            Console.WriteLine("x():   {0} (Expect 7)".FormatMe(_culture, x() ));
 
             Console.WriteLine("_______________________");
         }
@@ -162,8 +154,9 @@ namespace PGSolutions.Monads.Demos {
         private class ExternalState {
             private  int        _state;
 
-            public ExternalState() { _state = -1;  }
-            public  int GetState() { return ++_state; }
+            public ExternalState() { _state = 0;  }
+            public  Func<int> GetState => () => ++_state; 
+            public int Value  => _state;
         }
     }
     internal struct MyString {

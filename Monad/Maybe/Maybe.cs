@@ -32,7 +32,7 @@ using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
     using static Contract;
-
+#if true
     /// <summary>An immutable value-type Maybe{T} monad.</summary>
     /// <typeparam name="TValue">The base type, which can be either a class or struct type,
     /// and will have the Equality definition track the default for the base-type:
@@ -48,15 +48,15 @@ namespace PGSolutions.Monads {
     public struct Maybe<TValue> : IEquatable<Maybe<TValue>> {
         /// <summary>The Invalid data value.</summary>
         [Pure]
-        public static Maybe<TValue> Nothing { get { return default(Maybe<TValue>); } }
+        public static Maybe<TValue> Nothing { get; } = default(Maybe<TValue>);
 
         ///<summary>Create a new Maybe{T}.</summary>
         private Maybe(TValue value) : this() {
-            Ensures(!HasValue ||  _value != null);
-            //Ensures(HasValue.Implies(_value != null));    // works in MayceX.cs, not here.
+            Ensures(!HasValue ||  Value != null);
+            //Ensures(HasValue.Implies(Value != null));    // works in MayceX.cs, not here.
 
-            _value    = value;
-            _hasValue = _value != null;
+            Value    = value;
+            HasValue = Value != null;
         }
 
         /// <summary>LINQ-compatible implementation of the monadic map operator.</summary>
@@ -73,7 +73,7 @@ namespace PGSolutions.Monads {
         ) {
             projector.ContractedNotNull(nameof(projector));
 
-            return ! HasValue ? default(Maybe<TResult>) : (Maybe<TResult>)projector(_value);
+            return ! HasValue ? default(Maybe<TResult>) : (Maybe<TResult>)projector(Value);
         }
 
         ///<summary>The monadic Bind operation of type T to type Maybe{TResult}.</summary>
@@ -87,7 +87,7 @@ namespace PGSolutions.Monads {
         ) {
             selector.ContractedNotNull(nameof(selector));
 
-            var value = _value;
+            var value = Value;
             return ! HasValue ? default(Maybe<TResult>) : selector(value);
         }
 
@@ -104,13 +104,13 @@ namespace PGSolutions.Monads {
             selector.ContractedNotNull(nameof(selector));
             projector.ContractedNotNull(nameof(projector));
 
-            var value = _value;
+            var value = Value;
             return ! HasValue ? default(Maybe<TResult>)
                               : selector(value).Select(e => projector(value, e));
         }
 
         ///<summary>Returns whether this Maybe{T} has a value.</summary>
-        public bool HasValue { get { return _hasValue; } }
+        public bool HasValue { get; }
 
         ///<summary>Extract value of the Maybe{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
         [Pure]
@@ -118,7 +118,7 @@ namespace PGSolutions.Monads {
             defaultValue.ContractedNotNull(nameof(defaultValue));
             Ensures(Result<TValue>() != null);
 
-            return ! HasValue ? defaultValue : _value;
+            return ! HasValue ? defaultValue : Value;
         }
         ///<summary>Extract value of the Maybe{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
         [Pure]
@@ -135,7 +135,7 @@ namespace PGSolutions.Monads {
         [ContractInvariantMethod]
         [Pure]
         private void ObjectInvariant() {
-            Invariant(_value != null || !HasValue);
+            Invariant(Value != null || !HasValue);
             //Invariant(HasValue.Implies(_value != null));   // works in MayceX.cs, not here.
         }
 
@@ -143,8 +143,7 @@ namespace PGSolutions.Monads {
         [Pure]
         public static explicit operator Maybe<TValue>(TValue value) => new Maybe<TValue>(value);
 
-        readonly TValue _value;
-        readonly bool _hasValue;
+        private TValue Value { get; }
 
         ///<summary>Returns the type of the underlying type {TValue}.</summary>
         [Pure]
@@ -152,14 +151,14 @@ namespace PGSolutions.Monads {
             get { Ensures(Result<Type>() != null);  return typeof(TValue); }
         }
 
-        #region Value Equality with IEquatable<T> and "excluded middle" present w/ either side has no value.
-        #region implicit static constructor
+#region Value Equality with IEquatable<T> and "excluded middle" present w/ either side has no value.
+#region implicit static constructor
         static readonly bool _valueIsStruct = typeof(ValueType).IsAssignableFrom(typeof(TValue))
                                                      || typeof(string).IsAssignableFrom(typeof(TValue));
         static readonly Func<TValue, TValue, bool> _valEquals = (TValue lhs, TValue rhs) => lhs.Equals(rhs);
         static readonly Func<TValue, TValue, bool> _refEquals = (TValue lhs, TValue rhs) => ReferenceEquals(lhs, rhs);
         static readonly Func<TValue, TValue, bool> _equals = _valueIsStruct ? _valEquals : _refEquals;
-        #endregion
+#endregion
 
         /// <inheritdoc/>
         [Pure]
@@ -168,12 +167,12 @@ namespace PGSolutions.Monads {
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]
         public bool Equals(Maybe<TValue> other) =>
-            HasValue ? other.HasValue && _equals(_value, other._value)
+            HasValue ? other.HasValue && _equals(Value, other.Value)
                      : !other.HasValue;
 
         /// <inheritdoc/>
         [Pure]
-        public override int GetHashCode() => HasValue ? _value.GetHashCode() : 0;
+        public override int GetHashCode() => HasValue ? Value.GetHashCode() : 0;
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]
@@ -186,15 +185,15 @@ namespace PGSolutions.Monads {
         ///<summary>Tests value-equality, returning <b>Nothing</b> if either value doesn't exist.</summary>
         [Pure]
         public bool? AreNonNullEqual(Maybe<TValue> rhs) =>
-            HasValue && rhs.HasValue ? _value.Equals(rhs._value)
+            HasValue && rhs.HasValue ? Value.Equals(rhs.Value)
                                      : null as bool?;
 
         ///<summary>Tests value-inequality, returning <b>Nothing</b> if either value doesn't exist.</summary>
         [Pure]
         public bool? AreNonNullUnequal(Maybe<TValue> rhs) =>
-            HasValue && rhs.HasValue ? !_value.Equals(rhs._value)
+            HasValue && rhs.HasValue ? !Value.Equals(rhs.Value)
                                      : null as bool?;
-        #endregion
+#endregion
 
         /// <inheritdoc/>
         [Pure]
@@ -225,4 +224,5 @@ namespace PGSolutions.Monads {
         public static Maybe<T> Cast<T>(this Maybe<object> @this) => //where T : class =>
             from o in @this select (T)o;
     }
+#endif
 }

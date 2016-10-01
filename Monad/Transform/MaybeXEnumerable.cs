@@ -27,10 +27,10 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PGSolutions.Monads {
-    using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
     /// <summary>TODO</summary>
     public static class MaybeXEnumerable {
         /// <summary>LINQ-compatible implementation of the monadic map operator.</summary>

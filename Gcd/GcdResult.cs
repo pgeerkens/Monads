@@ -31,21 +31,24 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 
 namespace PGSolutions.Monads.Demos {
+    using static Contract;
+
     /// <summary>TODO</summary>
     public struct GcdResult : IEquatable<GcdResult> {
         /// <summary>TODO</summary>
-        public GcdResult(int gcd) {
-            _gcd    = gcd;
-        }
+        public GcdResult(int gcd) { Gcd = gcd; }
 
         /// <summary>TODO</summary>
-        public int      Gcd     { get {return _gcd;  } } private readonly int _gcd;
+        public int      Gcd     { get; }
 
         #region Value Equality with IEquatable<T>.
         static readonly CultureInfo _culture = CultureInfo.CurrentUICulture;
 
         /// <inheritdoc/>
-        public override string ToString() =>  "    GCD = {0}".FormatMe(_culture,Gcd);
+        public override string ToString() {
+            Ensures(Result<System.String>() != null);
+            return  "    GCD = {0}".FormatMe(_culture,Gcd);
+        }
 
         /// <inheritdoc/>
         [Pure]

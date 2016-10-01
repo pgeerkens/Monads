@@ -37,8 +37,9 @@ using Xunit;
 
 namespace PGSolutions.Monads.MonadTests {
     [ExcludeFromCodeCoverage] [CLSCompliant(false)]
-    public class MaybeXTests {
-        public MaybeXTests() {
+    public class MaybeX2Tests {
+#if false
+        public MaybeX2Tests() {
             _data        = ( from e in new List<string>() { "Percy", null, "George", "Ron", "Ginny" }
                              select e.AsMaybeX()
                            ).ToList().AsReadOnly();
@@ -155,11 +156,12 @@ namespace PGSolutions.Monads.MonadTests {
         public void MonadLaw3() {
             const string description = "Monad law 3: M.Bind(f1).Bind(f2) == M.Bind(x => f1(x).Bind(f2))";
 
-            //Func<string,MaybeX<string>> addOne = x => x + 1;
+            //Func<string,MaybeX2<string>> addOne = x => x + 1;
             var M = " four".AsMaybeX();
             var lhs = M.SelectMany(_addOne).SelectMany(_addEight);
             var rhs = M.SelectMany(x => _addOne(x).SelectMany(_addEight));
             Assert.True(lhs == rhs, description);
         }
+#endif
     }
 }

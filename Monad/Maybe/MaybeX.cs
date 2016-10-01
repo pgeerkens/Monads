@@ -71,7 +71,6 @@ namespace PGSolutions.Monads {
         /// <remarks>
         /// Convenience method - not used by LINQ
         /// </remarks>
-//        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
         [Pure]
         public  MaybeX<TResult>   SelectMany<TResult>(
@@ -79,15 +78,13 @@ namespace PGSolutions.Monads {
         ) where TResult:class {
             selector.ContractedNotNull(nameof(selector));
 
-            var value = _value;
-            return (value == null) ? default(MaybeX<TResult>) : selector(value);
+            return (_value == null) ? default(MaybeX<TResult>) : selector(_value);
         }
 
         /// <summary>LINQ-compatible implementation of the monadic join operator.</summary>
         /// <remarks>
         /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
         /// </remarks>
-//        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
         public MaybeX<TResult>   SelectMany<TIntermediate, TResult>(
             Func<T, MaybeX<TIntermediate>> selector,
@@ -97,9 +94,27 @@ namespace PGSolutions.Monads {
             projector.ContractedNotNull(nameof(projector));
 
             var value = _value;
-            return (_value == null) ? default(MaybeX<TResult>)
-                                    : selector(value).Select(e => projector(value, e));
+            return (value == null) ? default(MaybeX<TResult>)
+                                   : selector(value).Select(e => projector(value, e));
         }
+        //-------------------------------------------------------------------------------------------------------
+
+        /// <summary>LINQ-compatible implementation of the monadic join operator.</summary>
+        /// <remarks>
+        /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
+        /// </remarks>
+        public TResult? SelectMany<TIntermediate, TResult>(
+            Func<T, TIntermediate?> selector,
+            Func<T, TIntermediate, TResult> projector
+        ) where TIntermediate : struct where TResult : struct {
+            selector.ContractedNotNull(nameof(selector));
+            projector.ContractedNotNull(nameof(projector));
+
+            var value = _value;
+            return (value == null) ? default(TResult?)
+                                   : selector(value).Select(e => projector(value, e));
+        }
+        //-------------------------------------------------------------------------------------------------------
 
         ///<summary>Returns whether this MaybeX{T} has a value.</summary>
         public bool HasValue {
@@ -183,11 +198,18 @@ namespace PGSolutions.Monads {
             Ensures(Result<string>() != null);
             return SelectMany<string>(v => v.ToString()) | "";
         }
+
+        ///// <summary>Converts a <see cref="MaybeX{T}"/> to a <see cref="Maybe{T}"/>.</summary>
+        //public Maybe<T> ToMaybe() => _value.ToMaybe();
     }
 
     /// <summary>TODO</summary>
     [Pure]
     public static class MaybeX {
+        ///<summary>Amplifies a reference-type T to a MaybeX{T}.</summary>
+        ///<remarks>The monad <i>unit</i> function.</remarks>
+        public static MaybeX<T> New<T>(T value) where T:class => value;//.AsMaybeX();
+
         ///<summary>Amplifies a reference-type T to a MaybeX{T}.</summary>
         ///<remarks>The monad <i>unit</i> function.</remarks>
         public static MaybeX<T> AsMaybeX<T>(this T @this) where T:class => @this;
