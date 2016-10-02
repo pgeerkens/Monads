@@ -28,8 +28,10 @@
 #endregion
 using System;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 
 namespace PGSolutions.Monads {
+    using static CultureInfo;
     using static String;
 
     /// <summary>Class factory for StatePayload{TState,TValue}, with conveninece methods that perform constructor type inference.</summary>
@@ -87,7 +89,7 @@ namespace PGSolutions.Monads {
         [Pure]public override int GetHashCode() { unchecked { return Value.GetHashCode() ^ State.GetHashCode(); } }
 
         /// <inheritdoc/>
-        [Pure]public override string ToString() =>  Format("({0},{1})",State,Value) ?? nameof(this.ToString);
+        [Pure]public override string ToString() => Format(InvariantCulture,"({0},{1})",State,Value) ?? nameof(this.ToString);
         #endregion
     }
 }
