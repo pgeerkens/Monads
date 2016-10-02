@@ -73,8 +73,7 @@ namespace PGSolutions.Monads {
         ///<summary>The invariants enforced by this struct type.</summary>
         [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
-        [ContractInvariantMethod]
-        [Pure]
+        [Pure] [ContractInvariantMethod]
         private void ObjectInvariant() { Invariant(HasValue == (Value != null)); }
 
         ///<summary>Amplifies a <typeparamref name="T"/> to a <see cref="X{T}"/>.</summary>
@@ -111,12 +110,12 @@ namespace PGSolutions.Monads {
         ///<summary>Amplifies a reference-type T to an <see cref="X{T}"/>.</summary>
         ///<typeparam name="T">The type of the "contained" object, being amplified to an <see cref="X{T}"/></typeparam>
         ///<remarks>The monad <i>unit</i> function.</remarks>
-        public static X<T> New<T>(T value) where T:class => value;
+        public static X<T>      New<T>(T value) where T:class => value;
 
         ///<summary>Amplifies a reference-type <typeparamref name="T"/> to an <see cref="X{T}"/>.</summary>
         ///<typeparam name="T">The type of the "contained" object, being amplified to an <see cref="X{T}"/></typeparam>
         ///<remarks>The monad <i>unit</i> function.</remarks>
-        public static X<T> AsX<T>(this T @this) where T:class => @this;
+        public static X<T>      AsX<T>(this T @this) where T:class => @this;
 
         ///<summary>"Boxes" a value-type <typeparamref name="T"/>, then amplifies it to an <see cref="X{T}"/>.</summary>
         ///<typeparam name="T">The type of the "contained" object, being amplified to an <see cref="X{T}"/></typeparam>
@@ -125,13 +124,13 @@ namespace PGSolutions.Monads {
 
         ///<summary>Tests value-equality, returning null if either value doesn't exist.</summary>
         ///<typeparam name="T">The type of the "contained" object, being amplified to an <see cref="X{T}"/></typeparam>
-        public static bool? AreNonNullEqual<T>(this X<T> lhs, X<T> rhs) where T:class =>
+        public static bool?     AreNonNullEqual<T>(this X<T> lhs, X<T> rhs) where T:class =>
             lhs.HasValue && rhs.HasValue ? lhs.Value.Equals(rhs.Value) as bool?
                                          : null;
 
         ///<summary>Tests value-equality, returning null if either value doesn't exist.</summary>
         ///<typeparam name="T">The type of the "contained" object, being amplified to an <see cref="X{T}"/></typeparam>
-        public static bool? AreNonNullUnequal<T>(this X<T> lhs, X<T> rhs) where T:class =>
+        public static bool?     AreNonNullUnequal<T>(this X<T> lhs, X<T> rhs) where T:class =>
             lhs.HasValue && rhs.HasValue ? ! lhs.Value.Equals(rhs.Value) as bool?
                                          : null;
 
@@ -139,6 +138,6 @@ namespace PGSolutions.Monads {
         ///<typeparam name="T">The type of the "contained" object, being amplified to an <see cref="X{T}"/></typeparam>
         ///<param name="this">todo: describe this parameter on GetUnderlyingType</param>
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "this")]
-        public static Type GetUnderlyingType<T>(this X<T> @this) where T : class => typeof(T);
+        public static Type      GetUnderlyingType<T>(this X<T> @this) where T : class => typeof(T);
     }
 }

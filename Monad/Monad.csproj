@@ -146,6 +146,7 @@
     <Compile Include="IO\IOExtensions.cs" />
     <Compile Include="IO\IOMonads.cs" />
     <Compile Include="Maybe\LinqExtensions.cs" />
+    <Compile Include="Maybe\MaybeLifted.cs" />
     <Compile Include="Maybe\NullableLinq.cs" />
     <Compile Include="Reader\Fsm.cs" />
     <Compile Include="Reader\ReaderLinq.cs" />

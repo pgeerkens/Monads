@@ -38,7 +38,7 @@ namespace PGSolutions.Monads.Demos {
     using static String;
     using static Syntax;
 
-    enum Syntax { Imperative, Fluent, Query }
+    enum Syntax { Imperative, Fluent, Query, Unknown }
     class Program {
         static string Prompt(string mode) => 
             Format(InvariantCulture,"{0}: Type 'Q' to quit; <Enter> to repeat ... ",mode);
@@ -70,7 +70,8 @@ namespace PGSolutions.Monads.Demos {
         static Syntax syntax = Query;
         static int Main() => ( syntax==Imperative ? ImperativeSyntax("Imperative Syntax")
                              : syntax==Fluent     ? FluentSyntax("Fluent Syntax")
-                                                  : QuerySyntax("Query (Comprehension) Syntax")
+                             : syntax==Query      ? QuerySyntax("Query (Comprehension) Syntax")
+                                                  : new List<int> { 0 }
                              ).FirstOrDefault(); // Doesn't assume result list non-empty
 
         static IEnumerable<int> ImperativeSyntax(string mode) {
@@ -91,7 +92,7 @@ namespace PGSolutions.Monads.Demos {
         static IEnumerable<int> FluentSyntax(string mode) =>
             ( Enumerable.Range(0,int.MaxValue)
                         .Select(pass => new {pass, counter = Readers.Counter(0)})
-                        .Select(_    => gcdStartStates.Where(state => _predicate(_.pass,_.counter()))
+                        .Select(_    => gcdStartStates.Where (state => _predicate(_.pass,_.counter()))
                                                       .Select(state => state)
                                )
             ).Where(enumerable => 
@@ -108,21 +109,22 @@ namespace PGSolutions.Monads.Demos {
             let counter = Readers.Counter(0)
             select ( from state in gcdStartStates
                      where _predicate(pass, counter())
-                     select state )
-            into enumerable
-            where ( from _   in Gcd.Run(enumerable.ToList()).ToIO()
-                    from __  in ConsoleWrite(Prompt(mode))
-                    from c   in ConsoleReadKey()
-                    from ___ in ConsoleWriteLine()
-                    select c.KeyChar.ToUpper() == 'Q' 
+                     select state
+            ) into enumerable
+            where (from _   in Gcd.Run(enumerable.ToList()).ToIO()
+                   from __  in ConsoleWrite(Prompt(mode))
+                   from c   in ConsoleReadKey()
+                   from ___ in ConsoleWriteLine()
+                   select c.KeyChar.ToUpper() == 'Q'
                   ).Invoke()
             select 0;
         #endregion
     }
 
-    static class Extensions {
-        readonly static CultureInfo cultureInfo = CultureInfo.InvariantCulture;
-
-        public static char ToUpper(this char c) => char.ToUpper(c,cultureInfo);
+    public static class CharExtensions {
+        public static char ToLower(this char c) => c.ToLower(InvariantCulture);
+        public static char ToLower(this char c, CultureInfo culture) => char.ToUpper(c,culture);
+        public static char ToUpper(this char c) => c.ToUpper(InvariantCulture);
+        public static char ToUpper(this char c, CultureInfo culture) => char.ToUpper(c,culture);
     }
 }

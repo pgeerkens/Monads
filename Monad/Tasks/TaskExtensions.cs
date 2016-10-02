@@ -33,16 +33,15 @@ using System.Threading.Tasks;
 namespace PGSolutions.Monads {
     using static Contract;
     using static Task;
+    using static TaskContinuationOptions;
 
     /// <summary>LINQ extension methods for <see cref="System.Threading.Tasks.Task"/> and 
     ///          <see cref="System.Threading.Tasks.Task{TResult}"/>.
     /// </summary>
     /// <remarks>IMpure.</remarks>
     public static partial class TaskExtensionsAsync {
-        private const TaskContinuationOptions NotOnCanceled = TaskContinuationOptions.NotOnCanceled;
-
         /// <summary>TODO</summary>
-        public static Task<TResult>             Select<TSource, TResult>(this Task<TSource> source,
+        public static Task<TResult>         Select<TSource, TResult>(this Task<TSource> source,
             Func<TSource, TResult> selector
         ) {
             source.ContractedNotNull(nameof(source));
@@ -53,7 +52,7 @@ namespace PGSolutions.Monads {
         }
 
         /// <summary>TODO</summary>
-        public static Task<TResult>             SelectMany<TSource, TResult>(this Task<TSource> source,
+        public static Task<TResult>         SelectMany<TSource, TResult>(this Task<TSource> source,
             Func<TSource, Task<TResult>> selector
         ) {
             source.ContractedNotNull(nameof(source));
@@ -64,7 +63,7 @@ namespace PGSolutions.Monads {
         }
 
         /// <summary>TODO</summary>
-        public static Task<TResult>             SelectMany<TSource, T, TResult>(this Task<TSource> source,
+        public static Task<TResult>         SelectMany<TSource, T, TResult>(this Task<TSource> source,
             Func<TSource, Task<T>> selector,
             Func<TSource, T, TResult> resultSelector
         ) {
@@ -76,7 +75,7 @@ namespace PGSolutions.Monads {
             return source.Flatten(selector,resultSelector) | DefaultTask<TResult>();
         }
         /// <summary>μ: Task{Task{T}} => Task{T}</summary>
-        public static Task<TResult>             FlatMap<TResult>(this Task<Task<TResult>> source
+        public static Task<TResult>         FlatMap<TResult>(this Task<Task<TResult>> source
         ) {
             source.ContractedNotNull(nameof(source));
             Ensures(Result<Task<TResult>>() != null);
@@ -85,7 +84,7 @@ namespace PGSolutions.Monads {
         }
 
         /// <summary>TODO</summary>
-        public static Task<Unit>                ToTaskUnit(this Task source) {
+        public static Task<Unit>            ToTaskUnit(this Task source) {
             source.ContractedNotNull(nameof(source));
             Ensures(Result<Task<Unit>>() != null);
 
@@ -93,7 +92,7 @@ namespace PGSolutions.Monads {
         }
 
         /// <summary>TODO</summary>
-        private static X<Task<TResult>>    Flatten<TSource, T, TResult>(this Task<TSource> source,
+        private static X<Task<TResult>>     Flatten<TSource, T, TResult>(this Task<TSource> source,
             Func<TSource, Task<T>> selector,
             Func<TSource, T, TResult> resultSelector
         ) {
@@ -107,7 +106,7 @@ namespace PGSolutions.Monads {
         }
 
         /// <summary>TODO</summary>
-        private static X<Task<TResult>>    Flatten<T, TResult>(this Task source,
+        private static X<Task<TResult>>     Flatten<T, TResult>(this Task source,
             Func<Unit, Task<T>> selector,
             Func<Unit, T, TResult> resultSelector
         ) {
@@ -121,13 +120,13 @@ namespace PGSolutions.Monads {
         }
 
         /// <summary>TODO</summary>
-        private static Task<TResult>            DefaultTask<TResult>() {
+        private static Task<TResult>        DefaultTask<TResult>() {
             Ensures(Result<Task<TResult>>() != null);
             return Task(default(TResult));
         }
 
         /// <summary>η: T -> Task{T}</summary>
-        private static Task<TResult>            Task<TResult>(this TResult value) {
+        private static Task<TResult>        Task<TResult>(this TResult value) {
             Ensures(Result<Task<TResult>>() != null);
             var task = FromResult(value); Assume(task != null);
             return task;

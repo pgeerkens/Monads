@@ -35,14 +35,14 @@ namespace PGSolutions.Monads {
     public static class MaybeLinq {
         /// <summary>LINQ-ible implementation of the monadic map operator.</summary>
         ///<remarks>Used by the LINQ <i>let</i> clause and queries with a single FROM clause.</remarks>
-        public static X<TResult> Select<TValue, TResult>(this X<TValue> @this,
+        public static X<TResult>        Select<TValue, TResult>(this X<TValue> @this,
             Func<TValue, TResult> projector
         ) where TValue : class where TResult : class =>
             @this.HasValue ? projector?.Invoke(@this.Value) : null;
 
         ///<summary>The monadic Bind operation of type <typeparamref name="TValue"/> to <typeparamref name="TResult"/>.</summary>
         ///<remarks>Convenient; but not used by LINQ.</remarks>
-        public static X<TResult> SelectMany<TValue, TResult>(this X<TValue> @this,
+        public static X<TResult>        SelectMany<TValue, TResult>(this X<TValue> @this,
             Func<TValue, X<TResult>> selector
         ) where TValue : class where TResult : class =>
             @this.HasValue ? selector?.Invoke(@this.Value) ?? null
@@ -50,24 +50,15 @@ namespace PGSolutions.Monads {
 
         /// <summary>LINQ-ible implementation of the monadic join operator.</summary>
         /// <remarks>Used by LINQ queries with multiple <i>from</i> clauses.</remarks>
-        public static X<TResult> SelectMany<TValue, T, TResult>(this X<TValue> @this,
+        public static X<TResult>        SelectMany<TValue, T, TResult>(this X<TValue> @this,
             Func<TValue, X<T>> selector,
             Func<TValue, T, TResult> projector
         ) where TValue : class where T : class where TResult : class =>
             @this.HasValue ? selector?.Invoke(@this.Value).Select(e =>
                              projector?.Invoke(@this.Value, e)) ?? null
                            : null;
-        //-------------------------------------------------------------------------------------------------------
-        ///<summary>The monadic Bind operation of class-type <typeparamref name="TValue"/> to struct-type <typeparamref name="TResult"/>.</summary>
-        public static TResult? SelectMany<TValue, T, TResult>(this X<TValue> @this,
-            Func<TValue, T?> selector,
-            Func<TValue, T, TResult> projector
-        ) where TValue : class where T : struct where TResult : struct =>
-            @this.HasValue ? selector?.Invoke(@this.Value).SelectMany(e =>
-                             projector?.Invoke(@this.Value, e)) ?? null
-                           : null;
-
         /// <summary>LINQ-ible Cast implementation. Argument is "boxed" if not already a class object.</summary>
-        public static X<T> Cast<T>(this X<object> @this) where T : class => from o in @this select (T)o;
+        public static X<T>              Cast<T>(this X<object> @this) where T : class => 
+            from o in @this select (T)o;
     }
 }

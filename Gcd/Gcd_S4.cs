@@ -69,19 +69,19 @@ namespace PGSolutions.Monads.Demos {
         /// <param name="getAll">Specify true if old implementations desired to run as well as just nes ones.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public static X<IEnumerable<ITest>> GetTests(bool getAll) =>
-            ( from item in typeof(Gcd_S4).GetMethodDescriptions(s => s.Substring(0, 3) =="Run")
-              where getAll
-                 || ( item.Name != nameof(Haskell)+"."+nameof(Haskell.Run1)
-                   && item.Name != nameof(Haskell)+"."+nameof(Haskell.Run2)
-                   && item.Name != nameof(Linq)+"."+nameof(Linq.Run1)
-                   && item.Name != nameof(Linq)+"."+nameof(Linq.Run2)
-              )
-              select new Test(item.Transform, item.Description, item.Name) as ITest
-            ).AsX();
+            from list in typeof(Gcd_S4).GetMethodDescriptions(s => s.Substring(0, 3) =="Run")
+            select ( from item in list
+                     where getAll
+                        || ( item.Name != nameof(Haskell)+"."+nameof(Haskell.Run1)
+                          && item.Name != nameof(Haskell)+"."+nameof(Haskell.Run2)
+                          && item.Name != nameof(Linq)+"."+nameof(Linq.Run1)
+                          && item.Name != nameof(Linq)+"."+nameof(Linq.Run2)
+                           )
+                     select new Test(item.Transform, item.Description, item.Name) as ITest
+                   );
 
         /// <summary>TODO</summary>
-        internal static IList<MethodDescriptor> GetMethodDescriptions(this Type type, Predicate<string> predicate) =>
-            type==null ? new List<MethodDescriptor>().AsReadOnly() :
+        internal static X<IList<MethodDescriptor>> GetMethodDescriptions(this Type type, Predicate<string> predicate) =>
             ( from @class in type?.GetNestedTypes(bindFlags)
               from field  in @class?.GetFields(bindFlags)
               from atts   in field?.CustomAttributes
@@ -121,20 +121,14 @@ namespace PGSolutions.Monads.Demos {
 
         /// <summary>Functor to calculate GCD of two input integers.</summary>
         static readonly Transform<GcdStart> AlgorithmTransform = s => {
-                              var x = s.A; var y = s.B; // explicitly exposes the immutability of s.
-                              return  x > y ? new GcdStart(x - y,   y  )
-                                    : x < y ? new GcdStart(  x,   y - x)
-                                            : s;
-                            };
+                    var x = s.A; var y = s.B;       // explicitly exposes the immutability of s.
+                    return  x > y ? new GcdStart(x - y,   y  )
+                          : x < y ? new GcdStart(  x,   y - x)
+                                  : s;
+                };
         /// <summary>State monad to calculate GCD of two input integers.</summary>
-        static readonly StateBool AlgorithmState = s => {
-                              var x = s.A; var y = s.B; // explicitly exposes the immutability of s.
-                              return Payload.New(
-                                      x > y ? new GcdStart(x - y,   y  )
-                                    : x < y ? new GcdStart(  x,   y - x)
-                                            : s
-                                    , x != y);
-                            };
+        static readonly StateBool AlgorithMonad = s => Payload.New(AlgorithmTransform(s), s.A != s.B);
+
         /// <summary>Extract either member from state as the exposed int value.</summary>
         static readonly StateInt GcdExtract = s => Payload.New(s, s.A);
 
@@ -154,37 +148,30 @@ namespace PGSolutions.Monads.Demos {
 #endregion
 
         /// <summary>TODO</summary>
-        [Pure]
         internal static class Imperative {
 
-            // ~ 0.91 sec
-            /// <summary>TODO</summary>
-            [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
-            [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-            [Description("Fully imperative; w/o substitution.")]
-            public static readonly StateRes Run1 = GetResult(new StateInt(s=>_run1(s)));
-            private static PayloadInt _run1(GcdStart s) {
-                s.ContractedNotNull(nameof(s));
-                while (s.A != s.B) {
-                    s = s.A > s.B ? new GcdStart(s.A - s.B,    s.A   )
-                      : s.A < s.B ? new GcdStart(   s.A,    s.B - s.A)
-                                  : s;
-                }
-                return Payload.New(s, s.A);
-            }
-
-            // ~ 0.60 sec
+            // ~ 0.14 sec
             /// <summary>TODO</summary>
             [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
             [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
             [Description("Fully imperative; w/ substitution.")]
+            public static readonly StateRes Run1 = GetResult(new StateInt(s=>_run1(s)));
+            private static PayloadInt _run1(GcdStart s) {
+                while (s.A != s.B) s = AlgorithmTransform(s);
+                return Payload.New(s, s.A);
+            }
+
+            // ~ 0.04 sec
+            /// <summary>TODO</summary>
+            [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
+            [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
+            [Description("Fully imperative; unrolled w substitution.")]
             public static readonly StateRes Run2 = GetResult(new StateInt(s=>_run2(s)));
             private static PayloadInt _run2(GcdStart s) {
-                s.ContractedNotNull(nameof(s));
                 while (s.A != s.B) {
-                    var x = s.A; var y = s.B;       // explicitly exposes the immutability of s.
-                    s = x > y ? new GcdStart(x-y,  x )
-                      : x < y ? new GcdStart( x,  y-x)
+                    var x = s.A;  var y = s.B;
+                    s = x > y ? new GcdStart(x-y, x )
+                      : x < y ? new GcdStart( x, y-x)
                               : s;
                 }
                 return Payload.New(s, s.A);
@@ -192,7 +179,6 @@ namespace PGSolutions.Monads.Demos {
         }
 
         /// <summary>TODO</summary>
-        [Pure]
         internal static class Haskell {
         #region Older Haskell implementations
               /* from http://mvanier.livejournal.com/5846.html
@@ -233,7 +219,7 @@ namespace PGSolutions.Monads.Demos {
         #endregion
 
               // ~ 1.5 sec
-            private static readonly StateInt _run3 = AlgorithmState.DoWhile().Then(GcdExtract);
+            private static readonly StateInt _run3 = AlgorithMonad.DoWhile().Then(GcdExtract);
             /// <summary>TODO</summary>
             [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
             [Description("Straight Haskel w/ DoWhile().")]
@@ -241,7 +227,6 @@ namespace PGSolutions.Monads.Demos {
         }
 
         /// <summary>TODO</summary>
-        [Pure]
         internal static class Linq {
         #region Older LINQ implementations
               // ~ 3.5 sec
@@ -259,7 +244,7 @@ namespace PGSolutions.Monads.Demos {
 
               // ~ 2.3 sec
             private static readonly StateInt _run2 = new StateBool(start =>
-                          ( from payload in AlgorithmState.Enumerate(start)
+                          ( from payload in AlgorithMonad.Enumerate(start)
                             where !payload.Value
                             select payload
                           ).First()).Then(GcdExtract);
@@ -283,7 +268,6 @@ namespace PGSolutions.Monads.Demos {
 
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
-        [Pure]
         internal static class Best {
               // ~ 1.0 sec
             private static readonly StateInt _run = AlgorithmTransform.DoWhile(s => s.A != s.B)

@@ -32,92 +32,47 @@ using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
     /// <summary>TODO</summary>
-    public struct IO<TSource> : IEquatable<IO<TSource>> {
-        /// <summary>Create a new instance of the class.</summary>
-        public IO(Func<TSource> functor) : this() { _functor = functor; }
-
-        /// <summary>Invokes the internal functor, returning the result.</summary>
-        public TSource Invoke() => (_functor | Default)();
-
-        /// <summary>Returns true exactly when the contained functor is not null.</summary>
-        public bool HasValue => _functor != null;
-
-        X<Func<TSource>> _functor { get; }
-
-        static Func<TSource> Default => ()=>default(TSource);
-
-        #region Value Equality with IEquatable<T>.
-        /// <inheritdoc/>
-        [Pure]public override bool Equals(object obj) => (obj as IO<TSource>?)?.Equals(this) ?? false;
-
-        /// <summary>Tests value-equality.</summary>
-        [Pure]public bool Equals(IO<TSource> other) => _functor.Equals(other._functor);
-
-        /// <summary>Tests value-equality.</summary>
-        [Pure]public static bool operator ==(IO<TSource> lhs, IO<TSource> rhs) => lhs.Equals(rhs);
-
-        /// <summary>Tests value-inequality.</summary>
-        [Pure]public static bool operator !=(IO<TSource> lhs, IO<TSource> rhs) => ! lhs.Equals(rhs);
-
-        /// <inheritdoc/>
-        [Pure]public override int GetHashCode() => _functor.GetHashCode();
-        #endregion
-    }
+    /// <typeparam name="TResult"></typeparam>
+    public delegate TResult IO<out TResult>();
 
     /// <summary>TODO</summary>
     [SuppressMessage("Microsoft.Naming", "CA1724:TypeNamesShouldNotMatchNamespaces")]
     [Pure]
     public static class IO {
-        /// <summary>TODO</summary>
-        public static IO<TSource> ToIO<TSource>( this Func<TSource> source) {
-            source.ContractedNotNull(nameof(source));
-            return new IO<TSource>(source);
-        }
-
         /// <summary>LINQ-compatible implementation of the monadic map operator.</summary>
         /// <remarks>
         /// Used to implement the LINQ <i>let</i> clause.
         /// </remarks>
-        [Pure]
-        public static IO<TResult> Select<TSource,TResult>(this IO<TSource> @this,
+        public static IO<TResult>   Select<TSource,TResult>(this IO<TSource> @this,
             Func<TSource,TResult> projector
         ) =>
-            @this.HasValue && projector!=null
-                 ? New(() => projector(@this.Invoke()))
-                 : Null<TResult>();
+            @this!=null && projector!= null ? () => projector(@this())
+                                            : Null<TResult>();
 
         /// <summary>LINQ-compatible implementation of the monadic bind operator.</summary>
         /// <remarks>
         /// Used for LINQ queries with a single <i>from</i> clause.
         /// </remarks>
-        [Pure]
-        public static IO<TResult> SelectMany<TSource,TResult>(this IO<TSource> @this,
+        public static IO<TResult>   SelectMany<TSource,TResult>(this IO<TSource> @this,
             Func<TSource,IO<TResult>> selector
         ) =>
-            @this.HasValue && selector!=null
-                 ? New(() => selector(@this.Invoke()).Invoke())
-                 : Null<TResult>();
+            @this!=null && selector!=null ? () => selector(@this()).Invoke()
+                                          : Null<TResult>();
 
         /// <summary>LINQ-compatible implementation of the monadic join operator.</summary>
         /// <remarks>
         /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
         /// </remarks>
-        [Pure]
-        public static IO<TResult> SelectMany<TSource,T,TResult>(this IO<TSource> @this,
+        public static IO<TResult>   SelectMany<TSource,T,TResult>(this IO<TSource> @this,
             Func<TSource, IO<T>> selector,
             Func<TSource,T,TResult> projector
         ) =>
-            @this.HasValue && selector!=null && projector!=null
-                 ? New(() => { var s = @this.Invoke(); return projector(s, selector(s).Invoke()); } )
+            @this!=null && selector!=null && projector!=null
+                 ? () => @this.Select(s => projector(s,selector(s)()) ).Invoke()
                  : Null<TResult>();
 
-        /// <summary>COnvenince factory method to provide type inference.</summary>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="functor"></param>
-        /// <returns></returns>
-        public static IO<TResult> New<TResult> (Func<TResult> functor) => new IO<TResult>(functor);
-
-        private static IO<TResult> Null<TResult>() => new IO<TResult>(null);
+        /// <summary>TODO</summary>
+        public static IO<TResult>   Null<TResult>() => null;
     }
 }
 

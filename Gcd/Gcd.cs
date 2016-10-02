@@ -26,18 +26,15 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
-//#define PreventIncalculable
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 
 using PGSolutions.Monads;
 
 namespace PGSolutions.Monads.Demos {
-    using static Contract;
     using static CultureInfo;
     using static IOMonads;
     using static String;
@@ -48,12 +45,14 @@ namespace PGSolutions.Monads.Demos {
     using GcdStartType  = X<GcdStart>;
 
     internal static class Extensions {
+        public const string GcdStartTYpe = "GcdStart as class.";
         public static X<T> ToMaybe<T>(this T gcdStart) where T:class => gcdStart.AsX();
 #else
     using PayloadMaybe  = StructTuple< GcdStart?,  Unit>;
     using GcdStartType  = Nullable<GcdStart>;       // AKA: GcdStart?
 
     internal static class Extensions {
+        public const string GcdStartTYpe = "GcdStart as struct.";
         public static  T?  ToMaybe<T>(this T gcdStart) where T:struct => gcdStart.ToNullable();
 #endif
         public static readonly GcdStartType GcdStartDefault = default(GcdStartType);
@@ -66,57 +65,92 @@ namespace PGSolutions.Monads.Demos {
     public static class Gcd {
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public static Unit? Run(X<IList<GcdStart>> maybeStates) =>
-            maybeStates.SelectMany<IList<GcdStart>,Unit,Unit>(states => 
-                RunInner(states).LastOrDefault(), Functions.Second
+        public static Unit? Run(this X<IList<GcdStart>> maybeStates) =>
+            maybeStates.SelectMany<IList<GcdStart>,Unit>(states =>
+                  states.AsX().ForAllTests().LastOrDefault()
             );
 
-        private static IEnumerable<Unit> RunInner(IList<GcdStart> states) =>
-            from test in Gcd_S4.GetTests(false) | new List<ITest>()
-            let elapsed = Readers.Timer()
+        private static IEnumerable<Unit> ForAllTests(this X<IList<GcdStart>> states) =>
+            from test in  Gcd_S4.GetTests(false) | new List<ITest>()
+            let timer = Readers.Timer()
             let isThird = Readers.MatchCounter(i => i==3, 1)
-            select ( from _   in ConsoleWriteLine("{0}", test.Title)
-                     from __  in RunInner2(test, states, elapsed, isThird).Last()
-                     from ___ in ConsoleWriteLine(@"Elapsed Time: {0:ss\.ff} secs", elapsed())
+            select ( from _   in ConsoleWriteLine("{0} - {1}", GcdStartTYpe, test.Title)
+                     from __  in (
+                            #if !NotComprehensiveSyntax
+                                   states.ForThisTest(test, timer, isThird)
+                                         .SelectMany(e=>e.Last())
+                            #else
+                                   from e in states.ForThisTest(test, timer, isThird)
+                                   from i in e.Last()
+                                   select i
+                            #endif
+                                 )
+                     from ___ in ConsoleWriteLine(@"Elapsed Time: {0:ss\.ff} secs", timer())
                      from _x_ in ConsoleWriteLine()
                      select Unit._
-                   ).Invoke();
+            ).Invoke();
 
-        private static IEnumerable<IO<Unit>> RunInner2(
+        private static X<IEnumerable<IO<Unit>>> ForThisTest2(this IList<GcdStart> startStates, 
             ITest           test, 
-            IList<GcdStart> startStates, 
             Func<TimeSpan>  elapsed, 
             Func<bool>      isThird
-        ) {
-            startStates.ContractedNotNull(nameof(startStates));
-            test.ContractedNotNull(nameof(test));
-            Ensures(Result<IEnumerable<IO<Unit>>>() != null);
+        )=>(from start in startStates
+            select new {
+                Start  = start,
+                Result = from validated in start.ToMaybe().ValidateState().State
+                         select test.Transform(validated).Value
+            } into item
+            select ConsoleWriteLine(
+                @"    GCD = {0,14} for {1}: Elapsed = {2:ss\.fff} secs; {3}",
+                ( from r in item.Result
+            #if true
+                  from s in Format(InvariantCulture,"{0,14:N0}",r.Gcd).AsX()
+                  select s
+                ) | "incalculable",
+            #elif GcdStartAsClass
+                  select Format(InvariantCulture,"{0,14:N0}",r.Gcd)
+                ) | "incalculable",
+            #else
+                  select Format(InvariantCulture,"{0,14:N0}",r.Gcd).AsX()
+                ) ?? "incalculable",
+            #endif
+                item.Start,
+                elapsed(),
+                isThird() ? "I'm third!" : ""
+        ) ).AsX();
 
-            return ( from start in startStates
-                     select new {
-                        Start  = start,
-                        Result = from validated in ValidateState(start.ToMaybe()).State
+        private static X<IEnumerable<IO<Unit>>> ForThisTest(this X<IList<GcdStart>> startStates, 
+            ITest           test, 
+            Func<TimeSpan>  elapsed, 
+            Func<bool>      isThird
+        )=>from states in startStates
+           select ( from state in states
+                    select new {
+                        Start  = state,
+                        Result = from validated in state.ToMaybe().ValidateState().State
                                  select test.Transform(validated).Value
-                     } into item
-                     select ConsoleWriteLine(
-                         @"    GCD = {0,14} for {1}: Elapsed = {2:ss\.fff} secs; {3}",
-                         ( from r in item.Result
-                    #if GcdStartAsClass
-                           select Format(InvariantCulture,"{0,14:N0}",r.Gcd)
-                         ) | "incalculable",
+                    } into item
+                    select ConsoleWriteLine(
+                        @"    GCD = {0,14} for {1}: Elapsed = {2:ss\.fff} secs; {3}",
+                        ( from r in item.Result
+                    #if true
+                          from s in Format(InvariantCulture,"{0,14:N0}",r.Gcd).AsX()
+                          select s
+                        ) | "incalculable",
+                    #elif GcdStartAsClass
+                          select Format(InvariantCulture,"{0,14:N0}",r.Gcd)
+                        ) | "incalculable",
                     #else
-                           select Format(InvariantCulture,"{0,14:N0}",r.Gcd).AsX()
-                         ) ?? "incalculable",
+                          select Format(InvariantCulture,"{0,14:N0}",r.Gcd).AsX()
+                        ) ?? "incalculable",
                     #endif
-                         item.Start,
-                         elapsed(),
-                         isThird() ? "I'm third!" : ""
-                     )
-            );
-        }
+                        item.Start,
+                        elapsed(),
+                        isThird() ? "I'm third!" : ""
+                  ) );
 
         /// <summary>Return a pair of positive integers with the same GCD as the supplied parameters.</summary>
-        private static PayloadMaybe ValidateState(GcdStartType start) {
+        private static PayloadMaybe ValidateState(this GcdStartType start) {
             return new PayloadMaybe(
                 from state in start
                 from x in state.A == 1
@@ -127,11 +161,11 @@ namespace PGSolutions.Monads.Demos {
                         : state.A == int.MinValue ? new GcdStart(Math.Abs(state.A + Math.Abs(state.B)),
                                                                  Math.Abs(state.B)
                                                                 ).ToMaybe()
-#if PreventIncalculable
+                    #if PreventIncalculable
                         : state.B == int.MinValue ? new GcdStart(Math.Abs(state.A),
                                                                  Math.Abs(state.B + Math.Abs(state.A))
                                                                 ).ToMaybe()
-#endif
+                    #endif
                         : GcdStartDefault
                 select x,
                 Unit._);

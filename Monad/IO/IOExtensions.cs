@@ -128,7 +128,7 @@ namespace PGSolutions.Monads {
             action.ContractedNotNull(nameof(action));
         //    Ensures(Result<IO<Unit>>() != null);
 
-            return new IO<Unit>( () => { action(); return Unit._; });
+            return () => { action(); return Unit._; };
         }
 
         /// <summary>TODO</summary>
@@ -138,7 +138,7 @@ namespace PGSolutions.Monads {
             Ensures(Result<Func<T, IO<Unit>>>() != null);
 
             return arg => 
-                new IO<Unit>(() => { action(arg); return Unit._; } );
+                () => { action(arg); return Unit._; };
         }
 
         /// <summary>TODO</summary>
@@ -148,7 +148,7 @@ namespace PGSolutions.Monads {
             Ensures(Result<Func<T1, T2, IO<Unit>>>() != null);
 
             return (arg1, arg2) => 
-                new IO<Unit>(() => { action(arg1, arg2); return Unit._; } );
+                () => { action(arg1, arg2); return Unit._; };
         }
 
         /// <summary>TODO</summary>
@@ -158,7 +158,7 @@ namespace PGSolutions.Monads {
             Ensures(Result<Func<T1, T2, T3, IO<Unit>>>() != null);
 
             return (arg1, arg2, arg3) =>
-                new IO<Unit>(() => { action(arg1, arg2, arg3); return Unit._; } );
+                () => { action(arg1, arg2, arg3); return Unit._; };
         }
 
         /// <summary>TODO</summary>
@@ -168,7 +168,7 @@ namespace PGSolutions.Monads {
             Ensures(Result<Func<T1, T2, T3, T4, IO<Unit>>>() != null);
 
             return (arg1, arg2, arg3, arg4) =>
-                new IO<Unit>(() => { action(arg1, arg2, arg3, arg4); return Unit._; } );
+                () => { action(arg1, arg2, arg3, arg4); return Unit._; };
         }
 
         // ...
@@ -179,7 +179,7 @@ namespace PGSolutions.Monads {
             function.ContractedNotNull(nameof(function));
         //    Ensures(Result<IO<TResult>>() != null);
 
-            return new IO<TResult>(() => function());
+            return () => function();
         }
 
         /// <summary>TODO</summary>
@@ -189,7 +189,7 @@ namespace PGSolutions.Monads {
             Ensures(Result<Func<T, IO<TResult>>>() != null);
 
             return arg =>
-                new IO<TResult>(() => function(arg));
+                () => function(arg);
         }
 
         /// <summary>TODO</summary>
@@ -199,7 +199,7 @@ namespace PGSolutions.Monads {
             Ensures(Result<Func<T1, T2, IO<TResult>>>() != null);
 
             return (arg1, arg2) =>
-                new IO<TResult>(() => function(arg1, arg2));
+                () => function(arg1, arg2);
         }
 
         /// <summary>TODO</summary>
@@ -209,7 +209,7 @@ namespace PGSolutions.Monads {
             Ensures(Result<Func<T1, T2, T3, IO<TResult>>>() != null);
 
             return (arg1, arg2, arg3) =>
-                new IO<TResult>(() => function(arg1, arg2, arg3));
+                () => function(arg1, arg2, arg3);
         }
 
         /// <summary>TODO</summary>
@@ -219,7 +219,7 @@ namespace PGSolutions.Monads {
             Ensures(Result<Func<T1, T2, T3, T4, IO<TResult>>>() != null);
 
             return (arg1, arg2, arg3, arg4) =>
-                new IO<TResult>(() => function(arg1, arg2, arg3, arg4));
+                () => function(arg1, arg2, arg3, arg4);
         }
     }
 }

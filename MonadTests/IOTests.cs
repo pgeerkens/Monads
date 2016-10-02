@@ -13,8 +13,8 @@ namespace PGSolutions.Monads.MonadTests {
             bool isExecuted2 = false;
             bool isExecuted3 = false;
             bool isExecuted4 = false;
-            IO<int> one = new IO<int>( () => { isExecuted1 = true; return 1; });
-            IO<int> two = new IO<int>( () => { isExecuted2 = true; return 2; });
+            IO<int> one = () => { isExecuted1 = true; return 1; };
+            IO<int> two = () => { isExecuted2 = true; return 2; };
             Func<int, IO<int>> addOne = x => { isExecuted3 = true; return (x + 1).ToIO(); };
             Func<int, Func<int, IO<int>>> add = x => y => { isExecuted4 = true; return (x + y).ToIO(); };
 
@@ -48,8 +48,8 @@ namespace PGSolutions.Monads.MonadTests {
             bool isExecuted4 = false;
             bool isExecuted5 = false;
             bool isExecuted6 = false;
-            IO<int> one = new IO<int>(() => { isExecuted1 = true; return 1; });
-            IO<int> two = new IO<int>(() => { isExecuted2 = true; return 2; });
+            IO<int> one = () => { isExecuted1 = true; return 1; };
+            IO<int> two = () => { isExecuted2 = true; return 2; };
             Func<int, IO<int>> addOne = x => { isExecuted3 = true; return (x + 1).ToIO(); };
             Func<int, Func<int, IO<int>>> add = x => y => { isExecuted4 = true; return (x + y).ToIO(); };
 
@@ -60,8 +60,8 @@ namespace PGSolutions.Monads.MonadTests {
                             .Select(X => X.addOne2)
                             ;
 
-            Func<int,IO<int>> Times2 = a => { isExecuted5=true; return new IO<int>(() => 2 * a); };
-            Func<int,IO<int>> Minus1 = a => { isExecuted6=true; return new IO<int>(() => a - 1); };
+            Func<int,IO<int>> Times2 = a => { isExecuted5=true; return () => 2 * a; };
+            Func<int,IO<int>> Minus1 = a => { isExecuted6=true; return () => a - 1; };
 
             var query = query1.SelectMany(Times2).SelectMany(Minus1);
 

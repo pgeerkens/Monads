@@ -46,10 +46,10 @@ namespace PGSolutions.Monads {
         /// <typeparam name="TState">Type of the state to and from which this delegate selects</typeparam>
         /// <typeparam name="TValue">Type of the value which this delegate accepts</typeparam>  
         [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
-        public delegate State<TState,TValue>        Selector<TState,TValue>(TState s);
+        public delegate State<TState,TValue>    Selector<TState,TValue>(TState s);
 
         /// <summary>TODO</summary>
-        public static State<TState,bool>            DoWhile<TState>(this
+        public static State<TState,bool>        DoWhile<TState>(this
             State<TState,bool> @this
         ) {
             Ensures(Result<State<TState,bool>>() != null);
@@ -73,7 +73,7 @@ namespace PGSolutions.Monads {
         }
 
         /// <summary>Optimized implementation of operator (liftM): liftM f m = m >>= (\x -> return (f x)).</summary>
-        public static State<TState, TResult>        Select<TState, TValue, TResult>(this
+        public static State<TState, TResult>    Select<TState, TValue, TResult>(this
             State<TState, TValue> @this,
             Func<TValue, TResult> selector
         ) {
@@ -97,7 +97,7 @@ namespace PGSolutions.Monads {
         ///             return selector(sourceResult.Value)(sourceResult.State);
         ///         };
         /// </remarks>
-        public static State<TState,TResult>         SelectMany<TState,TValue,TResult> (this
+        public static State<TState,TResult>     SelectMany<TState,TValue,TResult> (this
             State<TState,TValue> @this,
             Func<TValue,State<TState,TResult>> selector
         ) {
@@ -117,7 +117,7 @@ namespace PGSolutions.Monads {
         ///             new State{TState,TResult}( s    => 
         ///             new StatePayload{TState,TResult}(s,projector(aval,bval)) ) ) );
         /// </remarks>
-        public static State<TState,TResult>         SelectMany<TState,TValue,T,TResult> (this
+        public static State<TState,TResult>     SelectMany<TState,TValue,T,TResult> (this
             State<TState,TValue> @this,
             Func<TValue, State<TState,T>> selector,
             Func<TValue, T, TResult> projector
@@ -136,7 +136,7 @@ namespace PGSolutions.Monads {
         }
 
         /// <summary>TODO</summary>
-        public static State<TState, TValue>         ToState<TState, TValue>(this TValue @this
+        public static State<TState, TValue>     ToState<TState, TValue>(this TValue @this
         ) {
             Ensures(Result<State<TState, TValue>>() != null);
 
@@ -144,14 +144,14 @@ namespace PGSolutions.Monads {
         }
 
         /// <summary>Get's the current state as both State and Value.</summary>
-        public static State<TState, TState>         Get<TState>() {
+        public static State<TState, TState>     Get<TState>() {
             Ensures(Result<State<TState,TState>>() != null);
 
             return state => StructTuple.New(state, state);
         }
 
         /// <summary>Performs <param name="selector"/> on the result from a Get.</summary>
-        public static State<TState,Unit>            GetCompose<TState>(Selector<TState,Unit> selector) {
+        public static State<TState,Unit>        GetCompose<TState>(Selector<TState,Unit> selector) {
             selector.ContractedNotNull(nameof(selector));
             Ensures(Result<State<TState,Unit>>() != null);
 
@@ -159,7 +159,7 @@ namespace PGSolutions.Monads {
         }
 
         /// <summary>Puts the supplied state, resturning a Unit.</summary>
-        public static State<TState,Unit>            Put<TState>(TState state) {
+        public static State<TState,Unit>        Put<TState>(TState state) {
             state.ContractedNotNull(nameof(state));
             Ensures(Result<State<TState,Unit>>() != null);
 
@@ -167,13 +167,6 @@ namespace PGSolutions.Monads {
         }
     }
 
-    /// <summary>TODO</summary>
-    public static class MaybeXState {
-        /// <summary>TODO</summary>
-        public static X<State<TState, bool>>   DoWhile<TState>(this
-            X<State<TState, bool>> @this
-        ) => from me in @this select me.DoWhile();
-    }
 
     /// <summary>TODO</summary>
     public static class MaybeState {

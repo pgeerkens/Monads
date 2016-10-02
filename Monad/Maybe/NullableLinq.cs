@@ -67,29 +67,7 @@ namespace PGSolutions.Monads {
             => @this.HasValue ? selector?.Invoke(@this.Value).SelectMany(e => 
                                 projector?.Invoke(@this.Value, e))
                               : null;
-        //-----------------------------------------------------------------------------------
-        ///<summary>The monadic Bind operation of type T to type MaybeX2{TResult}.</summary>
-        /// <remarks>
-        /// Convenience method - not used by LINQ
-        /// </remarks>
-        public static X<TResult> SelectMany<TValue, TResult>(this TValue? @this,
-            Func<TValue, X<TResult>> selector
-        ) where TValue : struct where TResult : class
-            => @this.HasValue ? selector?.Invoke(@this.Value) ?? null
-                              : null;
 
-        /// <summary>LINQ-compatible implementation of the monadic join operator.</summary>
-        /// <remarks>
-        /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
-        /// </remarks>
-        public static X<TResult> SelectMany<TValue, T, TResult>(this TValue? @this,
-            Func<TValue, X<T>> selector,
-            Func<TValue, T, TResult> projector
-        ) where TValue : struct where T : class where TResult : class
-            => @this.HasValue ? selector?.Invoke(@this.Value).Select(e => 
-                                projector?.Invoke(@this.Value, e)) ?? null
-                              : null;
-        //-----------------------------------------------------------------------------------
         /// <summary>TODO</summary>
         /// <typeparam name="TValue"></typeparam>
         /// <param name="value"></param>

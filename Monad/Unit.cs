@@ -64,7 +64,7 @@ namespace PGSolutions.Monads {
 
     /// <summary>Class representing, conceptually, the "type" of <i>void</i>.</summary>
     [Pure]
-    public static class UnitExtensionsLinq {
+    public static class UnitLinq {
         readonly static Func<Unit> _nullFunctor = null;
 
         /// <summary>The LINQ-enabling Select method.</summary>

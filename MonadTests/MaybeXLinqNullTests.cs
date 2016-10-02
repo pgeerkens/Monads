@@ -40,43 +40,42 @@ namespace PGSolutions.Monads.MonadTests {
         /// <summary>Unit-test constructor.</summary>
         public MaybeLinqNullTests() { ; }
 
-        static readonly int?    _nullable = 7;
+        static readonly int? _nullable = 7;
 
         [Fact]
         public void NullableSelect() {
-            var received = _nullable.Select<int,int>(null);
+            var received = _nullable.Select((Func<int,int>)null);
             Assert.True(received == null);
         }
         [Fact]
         public static void NullableSelectMany1Arg() {
-            var received = _nullable.SelectMany<int,int>(null);
+            var received = _nullable.SelectMany((Func<int,int?>)null);
             Assert.True(received == null);
         }
         [Fact]
         public static void NullableSelectMany2Arg() {
-            var received = _nullable.SelectMany<int,int,int>(null, Second);
+            var received = _nullable.SelectMany((Func<int,int?>)null, Second);
             Assert.True(received == null, "1st arg null");
 
-            received     = _nullable.SelectMany<int,int,int>(u=>2, null);
+            received     = _nullable.SelectMany(u=>2, (Func<int,int,int>)null);
             Assert.True(received == null, "2nd arg null");
         }
         //----------------------------------------------------------------------
         [Fact]
         public static void NullableMixedSelectMany1Arg() {
-            var received = _nullable.SelectMany<int,string>(null);
+            var received = _nullable.SelectMany((Func<int,X<string>>)null);
             Assert.True(received == null);
         }
         [Fact]
         public static void NullableMixedSelectMany2Arg() {
-            var received = _nullable.SelectMany<int,string,string>(null, Second);
+            var received = _nullable.SelectMany((Func<int,X<string>>)null, Second);
             Assert.True(received == null, "1st arg null");
 
-            received     = _nullable.SelectMany<int,string,string>(u=>"2", null);
+            received     = _nullable.SelectMany(u=>"2", (Func<int,string,string>)null);
             Assert.True(received == null, "2nd arg null");
         }
         //======================================================================
-        static readonly X<string>   _maybe  = "Maybe?";
-
+        static readonly X<string> _maybe  = "Maybe?";
         [Fact]
         public void MaybeXSelect() {
             var received = _maybe.Select<string,string>(null);
@@ -84,24 +83,24 @@ namespace PGSolutions.Monads.MonadTests {
         }
         [Fact]
         public static void MaybeXSelectMany1Arg() {
-            var received = _maybe.SelectMany<string,string>(null);
+            var received = _maybe.SelectMany((Func<string,X<string>>)null);
             Assert.True(received == null);
         }
         [Fact]
         public static void MaybeXSelectMany2Arg() {
-            var received = _maybe.SelectMany<string,string,string>(null, Second);
+            var received = _maybe.SelectMany((Func<string,X<string>>)null, Second);
             Assert.True(received == null, "1st arg null");
 
-            received     = _maybe.SelectMany<string,string,string>(u=>"2", null);
+            received     = _maybe.SelectMany(u=>"2", (Func<string,string,string>)null);
             Assert.True(received == null, "2nd arg null");
         }
         //----------------------------------------------------------------------
         [Fact]
         public static void MaybeMixedSelectMany2Arg() {
-            var received = _maybe.SelectMany<string,int,int>(null, Second);
+            var received = _maybe.SelectMany((Func<string,int?>)null, Second);
             Assert.True(received == null, "1st arg null");
 
-            received     = _maybe.SelectMany<string,int,int>(u=>2, null);
+            received     = _maybe.SelectMany(u=>2, (Func<string,int,int>)null);
             Assert.True(received == null, "2nd arg null");
         }
     }

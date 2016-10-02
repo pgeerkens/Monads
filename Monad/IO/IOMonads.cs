@@ -45,7 +45,7 @@ namespace PGSolutions.Monads {
 
         // η: T -> IO<T>
         /// <summary>TODO</summary>
-        public static IO<T> ToIO<T>(this T value) => new IO<T>(() => value);
+        public static IO<T> ToIO<T>(this T value) => () => value;
 
         /// <summary>Utility method to perform <paramref name="action"/> and then return IO{Unit}.</summary>
         /// <remarks>This simplifies the writing of various Write instances of IOMonad.</remarks>
@@ -57,13 +57,15 @@ namespace PGSolutions.Monads {
         }
 
         /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly IO<int> ConsoleRead = new Func<int>(Read).AsIO();
 
         /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
         public static readonly IO<string> ConsoleReadLine = new Func<string>(ReadLine).AsIO();
 
         /// <summary>TODO</summary>
-        public static IO<ConsoleKeyInfo> ConsoleReadKey() => new IO<ConsoleKeyInfo>(() => ReadKey());
+        public static IO<ConsoleKeyInfo> ConsoleReadKey() => () => ReadKey();
 
         /// <summary>TODO</summary>
         public static IO<Unit> ConsoleWrite(string value) =>
