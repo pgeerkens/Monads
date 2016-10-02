@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 
 namespace PGSolutions.Monads.DIDemo {
+    using static CultureInfo;
     using static String;
     using static System.Diagnostics.Contracts.Contract;
 
@@ -19,7 +21,7 @@ namespace PGSolutions.Monads.DIDemo {
             return (from intDb        in BusinessLogic<TConfig>.GetIntFromDB
                     from netstr       in BusinessLogic<TConfig>.GetStringFromNetwork
                     from writeSuccess in BusinessLogic<TConfig>.WriteStuffToDisk(intDb, netstr)
-                    select writeSuccess ? Format(successMessage,intDb,netstr)
+                    select writeSuccess ? Format(InvariantCulture,successMessage,intDb,netstr)
                                         : errorMessage
             ) (config);
         }
@@ -32,7 +34,7 @@ namespace PGSolutions.Monads.DIDemo {
             Ensures(Result<Reader<TConfig,int>>() != null);
 
             return new Reader<TConfig, int>(config => {
-                config.LogMethod(Format(dbMessage,config.AuthInfo));
+                config.LogMethod(Format(InvariantCulture,dbMessage,config.AuthInfo));
                         // ....
                 return 4;
             } );
@@ -55,7 +57,7 @@ namespace PGSolutions.Monads.DIDemo {
 
             const string diskMessage = "writing\n   {1}\n   {2}\nto disk with credentials: {0}";
             return new Reader<TConfig,bool>(config => {
-                config.LogMethod(Format(diskMessage,config.AuthInfo, i, s));
+                config.LogMethod(Format(InvariantCulture,diskMessage,config.AuthInfo, i, s));
                     // ....
                 return true;
             } );

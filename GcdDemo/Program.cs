@@ -33,16 +33,15 @@ using System.Linq;
 
 namespace PGSolutions.Monads.Demos {
     using static Console;
+    using static CultureInfo;
     using static IOMonads;
     using static String;
     using static Syntax;
 
-    enum Syntax {
-        Imperative, Fluent, Query
-    }
+    enum Syntax { Imperative, Fluent, Query }
     class Program {
         static string Prompt(string mode) => 
-            Format("{0}: Type 'Q' to quit; <Enter> to repeat ... ",mode);
+            Format(InvariantCulture,"{0}: Type 'Q' to quit; <Enter> to repeat ... ",mode);
         #region GCD States
         static readonly IList<GcdStart> gcdStartStates = new List<GcdStart>() {
              new GcdStart(         40,            40)            //  0

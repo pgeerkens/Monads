@@ -43,7 +43,7 @@ namespace PGSolutions.Monads.MonadTests {
     [ExcludeFromCodeCoverage] [CLSCompliant(false)]
     public class MixedMaybeTests {
         #region static fields
-        readonly static string           _maybeGeorge = "George";
+        const           string           _maybeGeorge = "George";
         readonly static string[]         _strings     = { "Percy", null, "George","Ron", "Ginny" };
         readonly static IList<string>    _data        = _strings.ToList().AsReadOnly();
         readonly static Func<int, int?>  _addOne      = x => (x + 1);
@@ -64,7 +64,8 @@ namespace PGSolutions.Monads.MonadTests {
             predicate = s => true;
             received  = Join("/", IsGeorge(defaultValue, predicate) );
             Contract.Assert(received != null);
-            Assert.True(expected?.Equals(received), Format("Value: Expected: '{0}'; Received: '{1}'",expected,received));
+            Assert.True(expected?.Equals(received), 
+                Format(InvariantCulture,"Value: Expected: '{0}'; Received: '{1}'",expected,received));
         }
 
         /// <summary>Verify that == and != are opposites, and are implemented as Equals().</summary>

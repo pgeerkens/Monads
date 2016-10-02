@@ -29,12 +29,14 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 
 using PGSolutions.Monads;
 
 namespace PGSolutions.Monads.Demos {
     using static String;
+    using static CultureInfo;
 
     static class Program {
         static void Main() {
@@ -107,9 +109,9 @@ namespace PGSolutions.Monads.Demos {
             var y = x();
 
             for (int i = 0; i++ < 5; ) state.GetState();
-            Console.WriteLine(Format("y:     {0} (Expect 1)",y ));
-            Console.WriteLine(Format("state: {0} (Expect 6)",state.Value));
-            Console.WriteLine(Format("x():   {0} (Expect 7)",x() ));
+            Console.WriteLine(Format(InvariantCulture,"y:     {0} (Expect 1)",y ));
+            Console.WriteLine(Format(InvariantCulture,"state: {0} (Expect 6)",state.Value));
+            Console.WriteLine(Format(InvariantCulture,"x():   {0} (Expect 7)",x() ));
 
             Console.WriteLine("_______________________");
         }

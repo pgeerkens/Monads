@@ -28,16 +28,17 @@
 #endregion
 using System;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 
 namespace PGSolutions.Monads.Demos {
-    using static Contract;
+    using static CultureInfo;
     using static String;
 
     /// <summary>TODO</summary>
-#if GCDStartAsClass
+#if GcdStartAsClass
     public class  GcdResult : IEquatable<GcdResult>, ISafeToString {
 #else
-    public struct GcdResult : IEquatable<GcdResult> {
+    public struct GcdResult : IEquatable<GcdResult>, ISafeToString {
 #endif
         /// <summary>TODO</summary>
         public GcdResult(int gcd) { Gcd = gcd; }
@@ -48,7 +49,7 @@ namespace PGSolutions.Monads.Demos {
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
         [Pure]
-    #if GCDStartAsClass
+    #if GcdStartAsClass
         public override bool Equals(object obj) => (obj as GcdResult )?.Equals(this) ?? false;
     #else
         public override bool Equals(object obj) => (obj as GcdResult?)?.Equals(this) ?? false;
@@ -67,7 +68,7 @@ namespace PGSolutions.Monads.Demos {
         [Pure]public override int GetHashCode() { unchecked { return Gcd.GetHashCode(); } }
 
         /// <inheritdoc/>
-        public override string ToString() => Format("    GCD = {0}",Gcd);
+        public override string ToString() => Format(InvariantCulture,"    GCD = {0}",Gcd) ?? nameof(this.GetType);
         #endregion
     }
 }

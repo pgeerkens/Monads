@@ -32,7 +32,6 @@ using System.Globalization;
 
 namespace PGSolutions.Monads {
     using static CultureInfo;
-    using static Contract;
 
     /// <summary>TODO</summary>
     /// <typeparam name="T"></typeparam>

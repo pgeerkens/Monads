@@ -28,16 +28,17 @@
 #endregion
 using System;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 
 namespace PGSolutions.Monads.Demos {
-    using static Contract;
+    using static CultureInfo;
     using static String;
 
     /// <summary>TODO</summary>
-#if GCDStartAsClass    // performance improvement of ~20% for functional, decrease of ~50% for imperative!
-    public class GcdStart : IEquatable<GcdStart>, ISafeToString {
+#if GcdStartAsClass    // performance improvement of ~20% for functional, decrease of ~50% for imperative!
+    public class  GcdStart : IEquatable<GcdStart>, ISafeToString {
 #else
-    public struct GcdStart : IEquatable<GcdStart> {
+    public struct GcdStart : IEquatable<GcdStart>, ISafeToString {
 #endif
    
         /// <summary>TODO</summary>
@@ -50,7 +51,7 @@ namespace PGSolutions.Monads.Demos {
 
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
-        #if GCDStartAsClass
+        #if GcdStartAsClass
         [Pure]public override bool Equals(object obj) => (obj as GcdStart )?.Equals(this) ?? false;
         #else
         [Pure]public override bool Equals(object obj) => (obj as GcdStart?)?.Equals(this) ?? false;
@@ -69,7 +70,7 @@ namespace PGSolutions.Monads.Demos {
         [Pure]public override int GetHashCode() { unchecked { return A.GetHashCode() ^ B.GetHashCode(); } }
 
         /// <inheritdoc/>
-        public override string ToString() => Format("({0,14:N0}, {1,14:N0})", A, B) ?? "";
+        public override string ToString() => Format(InvariantCulture,"({0,14:N0}, {1,14:N0})", A, B) ?? nameof(this.GetType);
         #endregion
     }
 }
