@@ -61,30 +61,4 @@ namespace PGSolutions.Monads {
         [Pure]public override int GetHashCode() => 0;
         #endregion
     }
-
-    /// <summary>Class representing, conceptually, the "type" of <i>void</i>.</summary>
-    [Pure]
-    public static class UnitLinq {
-        readonly static Func<Unit> _nullFunctor = null;
-
-        /// <summary>The LINQ-enabling Select method.</summary>
-        public static Func<Unit>     Select(this Unit @this,
-            Func<Unit, Unit> projector
-        ) =>
-            projector!=null ? () => projector(@this) : _nullFunctor;
-
-        /// <summary>The monadic bind method.</summary>
-        public static Func<Unit>     SelectMany(this Unit @this,
-            Func<Unit, Func<Unit>> selector
-        ) =>
-            selector!=null ? () => selector(@this)() : _nullFunctor;
-
-        /// <summary>The LINQ-enabling SelectMany method.</summary>
-        public static Func<Unit>     SelectMany<TSelection>(this Unit @this,
-            Func<Unit, Func<TSelection>> selector,
-            Func<Unit,TSelection,Unit>   projector
-        ) =>
-            selector!=null && projector!=null ? () => projector(@this, selector(@this)() )
-                                              : _nullFunctor ;
-    }
 }

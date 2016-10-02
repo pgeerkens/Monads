@@ -63,29 +63,29 @@ namespace PGSolutions.Monads.MonadTests {
 
     [ExcludeFromCodeCoverage]
     public class UnitLinqNullTests {
-        readonly static Unit _unit = Unit._;
+        readonly static IO<Unit> _unit = Unit._.ToIO();
 
         /// <summary>Unit-test constructor.</summary>
         public UnitLinqNullTests() { ; }
 
         [Fact]
         public static void Select() {
-            var received = _unit.Select(null);
+            var received = _unit.Select<Unit,int>(null);
             Assert.True(received == null);
         }
 
         [Fact]
         public static void SelectMany1Arg() {
-            var received = _unit.SelectMany(null);
+            var received = _unit.SelectMany<Unit,int>(null);
             Assert.True(received == null);
         }
 
         [Fact]
         public static void SelectMany2Arg() {
-            var received = _unit.SelectMany<Unit>(null, Functions.Second);
+            var received = _unit.SelectMany<Unit,int,int>(null, Functions.Second);
             Assert.True(received == null, "A: ");
 
-            received = _unit.SelectMany<Unit>(u=>()=>Unit._, null);
+            received = _unit.SelectMany<Unit,Unit,int>(u=>()=>Unit._, null);
             Assert.True(received == null, "B: ");
         }
     }
