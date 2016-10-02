@@ -52,7 +52,7 @@ namespace PGSolutions.Monads {
     }
 
     /// <summary>TODO</summary>
-    public struct SafeInt : ISafeEquatable<SafeInt>, IEquatable<SafeInt>, ISafeComparable<SafeInt> {
+    public struct SafeInt : ISafeEquatable<SafeInt>, IEquatable<SafeInt>, ISafeComparable<SafeInt>, ISafeToString {
         ///<summary>Create a new Maybe{T}.</summary>
         private SafeInt(int? value) : this() {
             _value    = value;
@@ -103,48 +103,28 @@ namespace PGSolutions.Monads {
                                                      : default(int?);
 
         /// <inheritdoc/>
-        bool? ISafeEquatable<SafeInt>.Equals(SafeInt other) => AreNonNullEqual(other);
+        bool? ISafeEquatable<SafeInt>.Equals(SafeInt other) => this.AreNonNullEqual(other);
 
         #region Value Equality with IEquatable<T>
         /// <inheritdoc/>
-        [Pure]
-        public override bool Equals(object obj) => (obj as SafeInt?)?.Equals(this) ?? false;
+        [Pure]public override bool Equals(object obj) => (obj as SafeInt?)?.Equals(this) ?? false;
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-        [Pure]
-        public bool Equals(SafeInt other) => _value.Equals(other._value);
-
-        ///<summary>Retrieves the hash code of the object returned by the <see cref="_value"/> property.</summary>
-        [Pure]
-        public override int GetHashCode() => (_value == null) ? 0 : _value.GetHashCode();
+        [Pure]public bool Equals(SafeInt other) => _value.Equals(other._value);
 
         /// <summary>Tests value-equality, returning false if either value doesn't exist.</summary>
-        [Pure]
-        public static bool operator ==(SafeInt lhs, SafeInt rhs) => lhs.Equals(rhs);
+        [Pure]public static bool operator ==(SafeInt lhs, SafeInt rhs) => lhs.Equals(rhs);
 
         /// <summary>Tests value-inequality, returning false if either value doesn't exist..</summary>
-        [Pure]
-        public static bool operator !=(SafeInt lhs, SafeInt rhs) => !lhs.Equals(rhs);
+        [Pure]public static bool operator !=(SafeInt lhs, SafeInt rhs) => !lhs.Equals(rhs);
 
-        ///<summary>Tests value-equality, returning null if either value doesn't exist.</summary>
-        [Pure]
-        public bool? AreNonNullEqual(SafeInt rhs) =>
-            _value.HasValue && rhs._value.HasValue ? _value.Equals(rhs._value)
-                                                   : null as bool?;
-
-        ///<summary>Tests value-equality, returning null if either value doesn't exist.</summary>
-        [Pure]
-        public bool? AreNonNullUnequal(SafeInt rhs) =>
-            _value.HasValue && rhs._value.HasValue ? ! _value.Equals(rhs._value)
-                                                   : null as bool?;
-        #endregion
+        ///<summary>Retrieves the hash code of the object returned by the <see cref="_value"/> property.</summary>
+        [Pure]public override int GetHashCode() => (_value == null) ? 0 : _value.GetHashCode();
 
         /// <inheritdoc/>
         [Pure]
-        public override string ToString() {
-            Ensures(Result<string>() != null);
-            return _value?.ToString(InvariantCulture) ?? "";
-        }
+        public override string ToString() => _value?.ToString(InvariantCulture) ?? "";
+        #endregion
     }
 
     /// <summary>TODO</summary>
@@ -152,6 +132,7 @@ namespace PGSolutions.Monads {
     /// courtesy Ivan Stoev: http://w3foverflow.com/question/integer-overflow-detection-c-for-add/
     /// See also <href a="https://www.fefe.de/intof.html">Catching Integer Overflows in C</href>
     /// </remarks>
+    [Pure]
     public static class SafeIntExtensions {
         /// <summary>Returns a Nullable{int} with the sum, or null if the operation fails.</summary>
         public static int? SafeAddition(this int addend1, int addend2) {
@@ -175,5 +156,15 @@ namespace PGSolutions.Monads {
             divisor == 0 || (dividend == int.MinValue && divisor == -1)
                           ? default(int?)
                           : dividend / divisor;
+
+        ///<summary>Tests value-equality, returning null if either value doesn't exist.</summary>
+        public static bool? AreNonNullEqual(this SafeInt lhs, SafeInt rhs) =>
+            lhs.Value.HasValue && rhs.Value.HasValue ? lhs.Value.Equals(rhs.Value)
+                                                     : null as bool?;
+
+        ///<summary>Tests value-equality, returning null if either value doesn't exist.</summary>
+        public static bool? AreNonNullUnequal(this SafeInt lhs, SafeInt rhs) =>
+           lhs. Value.HasValue && rhs.Value.HasValue ? ! lhs.Value.Equals(rhs.Value)
+                                                     : null as bool?;
     }
 }

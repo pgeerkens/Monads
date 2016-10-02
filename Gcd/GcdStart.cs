@@ -26,8 +26,6 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
-#define GCDStateAsClassX    // performance penalty of 30% to 200% for class compared to struct
-
 using System;
 using System.Diagnostics.Contracts;
 
@@ -35,10 +33,10 @@ namespace PGSolutions.Monads.Demos {
     using static Contract;
     using static String;
 
-#if GCDStateAsClass
+    /// <summary>TODO</summary>
+#if GCDStartAsClass    // performance improvement of ~20% for functional, decrease of ~50% for imperative!
     public class GcdStart : IEquatable<GcdStart> {
 #else
-  /// <summary>TODO</summary>
     public struct GcdStart : IEquatable<GcdStart> {
 #endif
    
@@ -52,38 +50,29 @@ namespace PGSolutions.Monads.Demos {
 
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
+        #if GCDStartAsClass
+        [Pure]public override bool Equals(object obj) => (obj as GcdStart )?.Equals(this) ?? false;
+        #else
+        [Pure]public override bool Equals(object obj) => (obj as GcdStart?)?.Equals(this) ?? false;
+        #endif
+
+        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
+        [Pure]public bool Equals(GcdStart other) { return other!=null && A == other.A && B == other.B; }
+
+        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
+        [Pure]public static bool operator ==(GcdStart lhs, GcdStart rhs) { return lhs.Equals(rhs); }
+
+        /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
+        [Pure]public static bool operator !=(GcdStart lhs, GcdStart rhs) { return !lhs.Equals(rhs); }
+
+        /// <inheritdoc/>
+        [Pure]public override int GetHashCode() { unchecked { return A.GetHashCode() ^ B.GetHashCode(); } }
+
+        /// <inheritdoc/>
         public override string ToString() {
             Ensures(Result<string>() != null);
             return Format("({0,14:N0}, {1,14:N0})", A, B) ?? "";
         }
-
-        /// <inheritdoc/>
-        [Pure]
-        public override bool Equals(object obj) {
-        #if GCDStateAsClass
-              var other = obj as GcdStart;
-              return other != null  &&  other.Equals(obj);
-        #else
-              var other = obj as GcdStart?;
-              return other.HasValue && other.Equals(obj);
-        #endif
-        }
-
-        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-        [Pure]
-        public bool Equals(GcdStart other) { return A == other.A && B == other.B; }
-
-        /// <inheritdoc/>
-        [Pure]
-        public override int GetHashCode() { unchecked { return A.GetHashCode() ^ B.GetHashCode(); } }
-
-        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-        [Pure]
-        public static bool operator ==(GcdStart lhs, GcdStart rhs) { return lhs.Equals(rhs); }
-
-        /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
-        [Pure]
-        public static bool operator !=(GcdStart lhs, GcdStart rhs) { return !lhs.Equals(rhs); }
         #endregion
     }
 }

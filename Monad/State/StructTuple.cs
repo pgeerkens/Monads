@@ -45,7 +45,7 @@ namespace PGSolutions.Monads {
     /// <remarks>
     ///  Minor observed performance penalty for small class vs small struct.
     /// </remarks>
-    public struct StructTuple<TState, TValue> : IEquatable<StructTuple<TState, TValue>> {
+    public struct StructTuple<TState, TValue> : IEquatable<StructTuple<TState, TValue>>, ISafeToString {
         /// <summary>Creates a new instance from a <typeparamref name="TState"/> and a <typeparamref name="TValue"/>.</summary>
         public StructTuple(TState state, TValue value) : this() { State = state;  Value = value; }
 
@@ -56,34 +56,28 @@ namespace PGSolutions.Monads {
 
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
-        [Pure]
-        public override bool Equals(object obj) {
+        [Pure]public override bool Equals(object obj) {
             var other = (obj as StructTuple<TState, TValue>?);
             return other.HasValue  &&  this.Equals(other.Value);
         }
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-        [Pure]
-        public bool Equals(StructTuple<TState, TValue> other) =>
+        [Pure]public bool Equals(StructTuple<TState, TValue> other) =>
             Value.Equals(other.Value) && State.Equals(other.State);
 
         /// <summary>Tests value-equality.</summary>
-        [Pure]
-        public static bool operator ==(StructTuple<TState, TValue> lhs, StructTuple<TState, TValue> rhs) =>
+        [Pure]public static bool operator ==(StructTuple<TState, TValue> lhs, StructTuple<TState, TValue> rhs) =>
             lhs.Equals(rhs);
 
         /// <summary>Tests value-inequality.</summary>
-        [Pure]
-        public static bool operator !=(StructTuple<TState, TValue> lhs, StructTuple<TState, TValue> rhs) =>
+        [Pure]public static bool operator !=(StructTuple<TState, TValue> lhs, StructTuple<TState, TValue> rhs) =>
             !lhs.Equals(rhs);
 
         /// <inheritdoc/>
-        [Pure]
-        public override int GetHashCode() { unchecked { return Value.GetHashCode() ^ State.GetHashCode(); } }
+        [Pure]public override int GetHashCode() { unchecked { return Value.GetHashCode() ^ State.GetHashCode(); } }
 
         /// <inheritdoc/>
-        [Pure]
-        public override string ToString() =>  Format("({0},{1})",State,Value) ?? nameof(this.ToString);
+        [Pure]public override string ToString() =>  Format("({0},{1})",State,Value) ?? nameof(this.ToString);
         #endregion
     }
 }

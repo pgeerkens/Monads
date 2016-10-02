@@ -36,10 +36,22 @@ using System.Linq;
 using PGSolutions.Monads;
 
 namespace PGSolutions.Monads.Demos {
-    using PayloadMaybe  = StructTuple<GcdStart?, Unit>;
     using static Contract;
     using static IOMonads;
     using static String;
+
+#if GCDStartAsClass
+    using PayloadMaybe  = StructTuple<X<GcdStart>, Unit>;
+
+    internal static class Extensions {
+        public static X<T> ToMaybe<T>(this T gcdStart) where T:class => gcdStart.AsX();
+#else
+    using PayloadMaybe  = StructTuple<GcdStart?, Unit>;
+
+    internal static class Extensions {
+        public static  T?  ToMaybe<T>(this T gcdStart) where T:struct => gcdStart.ToNullable();
+#endif
+    }
 
     /// <summary>Greatest Common Divisor demo using State Monad.</summary>
     /// <remarks>
@@ -65,9 +77,10 @@ namespace PGSolutions.Monads.Demos {
                    ).Invoke();
 
         private static IEnumerable<IO<Unit>> RunInner2(
-            ITest test, IList<GcdStart> states, 
-            Func<TimeSpan>              elapsed, 
-            Func<bool>                  isThird
+            ITest           test, 
+            IList<GcdStart> states, 
+            Func<TimeSpan>  elapsed, 
+            Func<bool>      isThird
         ) {
             states.ContractedNotNull(nameof(states));
             test.ContractedNotNull(nameof(test));
@@ -76,14 +89,20 @@ namespace PGSolutions.Monads.Demos {
             return ( from start in states
                      select new {
                         Start  = start,
-                        Result = from validated in ValidateState(start.ToNullable()).State
+                        Result = from validated in ValidateState(start.ToMaybe()).State
                                  select test.Transform(validated).Value
                      } into item
                      select ConsoleWriteLine(
                          @"    GCD = {0,14} for {1}: Elapsed = {2:ss\.fff} secs; {3}",
                          ( from r in item.Result
+#if GCDStartAsClass
+                           from s in Format("{0,14:N0}",r.Gcd).AsX()
+                           select s
+                         ) | "incalculable",
+#else
                            select Format("{0,14:N0}",r.Gcd).AsX()
                          ) ?? "incalculable",
+#endif
                          item.Start,
                          elapsed(),
                          isThird() ? "I'm third!" : ""
@@ -92,23 +111,31 @@ namespace PGSolutions.Monads.Demos {
         }
 
     /// <summary>Return a pair of positive integers with the same GCD as the supplied parameters.</summary>
+#if GCDStartAsClass
+    static readonly X<GcdStart> GcdStartDefault = default(X<GcdStart>);
+
+    private static PayloadMaybe ValidateState(X<GcdStart> start) {
+#else
+    static readonly GcdStart? GcdStartDefault = default(GcdStart?);
+
     private static PayloadMaybe ValidateState(GcdStart? start) {
-            return new PayloadMaybe(
+#endif
+        return new PayloadMaybe(
                 from state in start
                 from x in state.A == 1
-                       || state.B == 1 ? new GcdStart(1, 1).ToNullable()
+                       || state.B == 1 ? new GcdStart(1, 1).ToMaybe()
                         : state.A != int.MinValue
-                       && state.B != int.MinValue ? new GcdStart(Math.Abs(state.A), Math.Abs(state.B)).ToNullable()
-                        : state.A == state.B ? new GcdStart(state.A, state.B).ToNullable()
+                       && state.B != int.MinValue ? new GcdStart(Math.Abs(state.A), Math.Abs(state.B)).ToMaybe()
+                        : state.A == state.B ? new GcdStart(state.A, state.B).ToMaybe()
                         : state.A == int.MinValue ? new GcdStart(Math.Abs(state.A + Math.Abs(state.B)),
                                                                  Math.Abs(state.B)
-                                                                ).ToNullable()
+                                                                ).ToMaybe()
 #if PreventIncalculable
                         : state.B == int.MinValue ? new GcdStart(Math.Abs(state.A),
                                                                  Math.Abs(state.B + Math.Abs(state.A))
-                                                                ).ToNullable()
+                                                                ).ToMaybe()
 #endif
-                        : default(GcdStart?)
+                        : GcdStartDefault
                 select x,
                 Unit._);
         }

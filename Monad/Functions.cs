@@ -30,6 +30,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
+    using static Contract;
+
     /// <summary>Constant utility functions of one and two arguments.</summary>
     [Pure]
     public static class Functions {
@@ -43,5 +45,21 @@ namespace PGSolutions.Monads {
         /// <summary>Returns its second argument.</summary>
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "p1")]
         public static TSecond   Second<TFirst,TSecond>(TFirst p1, TSecond p2) => p2;
+    }
+
+    /// <summary>Define an implementable contract guarantees a non-null return.</summary>
+    [ContractClass(typeof(ISafeToStringContracts))]
+    public interface ISafeToString {
+        /// <summary>Returns a String which represents the object instance.</summary>
+        string ToString();
+    }
+
+    /// <summary>Enforceable contracts for <see cref="ISafeToString"/>.</summary>
+    [ContractClassFor(typeof(ISafeToString))]
+    public abstract class ISafeToStringContracts : ISafeToString {
+        private ISafeToStringContracts() { ; }
+
+        /// <inheritdoc/>
+        public new string ToString() { Ensures(Result<string>() != null); return ""; }
     }
 }

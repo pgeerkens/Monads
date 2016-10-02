@@ -44,7 +44,7 @@ namespace PGSolutions.Monads {
 
         X<Func<TSource>> _functor { get; }
 
-        static Func<TSource> Default => null;
+        static Func<TSource> Default => ()=>default(TSource);
 
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>

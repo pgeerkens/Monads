@@ -33,10 +33,10 @@ using System.Diagnostics.Contracts;
 namespace PGSolutions.Monads {
     using static Contract;
 
-    /// <summary>An immutable value-type MaybeX{T} monad.</summary>
-    /// <typeparam name="T">The base type, which can be either a class or struct type,
-    /// and will have the Equality definition track the default for the base-type:
-    /// Value-equality for structs and string, reference equality for other classes.
+    /// <summary>An immutable value-type Maybe{<typeparamref name="T"/>} monad.</summary>
+    /// <typeparam name="T">The base type, which must be a class type, and will have the
+    /// Equality definition track that of the base-type:
+    /// Value-equality for string, reference equality for others except where overridden.
     /// </typeparam>
     /// <remarks>
     /// Being a value-type reduces memory pressure on <see cref="System.GC"/>.
@@ -44,7 +44,7 @@ namespace PGSolutions.Monads {
     /// Equality tracks the base type, with the further proviseo that two instances
     /// can only be equal when <see cref="HasValue"/> is true for both instances.
     /// </remarks>
-    public struct X<T> : IEquatable<X<T>> where T:class {
+    public struct X<T> : IEquatable<X<T>>,ISafeToString where T:class {
         ///<summary>Create a new MaybeX{T}.</summary>
         private X(T value) : this() { Value = value; Assert(HasValue == (Value != null)); }
 
@@ -78,38 +78,30 @@ namespace PGSolutions.Monads {
         private void ObjectInvariant() { Invariant(HasValue == (Value != null)); }
 
         ///<summary>Amplifies a <typeparamref name="T"/> to a <see cref="X{T}"/>.</summary>
-        [Pure]
-        public static implicit operator X<T>(T value) => new X<T>(value);
+        [Pure]public static implicit operator X<T>(T value) => new X<T>(value);
 
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
-        [Pure]
-        public override bool Equals(object obj) => (obj as X<T>?)?.Equals(this) ?? false;
+        [Pure]public override bool Equals(object obj) => (obj as X<T>?)?.Equals(this) ?? false;
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
+        /// <remarks>Value-equality is tested if reference-equality fails but both sides are non-null.</remarks>
         [Pure]
         public bool Equals(X<T> other)  =>
             Value != null ? other.Value != null && (Value == other.Value || Value.Equals(other.Value))
-                           : other.Value == null;
+                          : other.Value == null;
 
         /// <summary>Tests value-equality, returning false if either value doesn't exist.</summary>
-        [Pure]
-        public static bool operator == (X<T> lhs, X<T> rhs) => lhs.Equals(rhs);
+        [Pure]public static bool operator == (X<T> lhs, X<T> rhs) => lhs.Equals(rhs);
 
         /// <summary>Tests value-inequality, returning false if either value doesn't exist..</summary>
-        [Pure]
-        public static bool operator != (X<T> lhs, X<T> rhs) => ! lhs.Equals(rhs);
+        [Pure]public static bool operator != (X<T> lhs, X<T> rhs) => ! lhs.Equals(rhs);
 
-        ///<summary>Returns the hash code of the amplified object.</summary>
-        [Pure]
-        public override int GetHashCode() => (Value == null) ? 0 : Value.GetHashCode();
+        ///<summary>Returns the hash code of the contained object, or zero if that is null.</summary>
+        [Pure]public override int GetHashCode() => Value?.GetHashCode() ?? 0;
 
         /// <inheritdoc/>
-        [Pure]
-        public override string ToString() {
-            Ensures(Result<string>() != null);
-            return this.Select(v => v.ToString()) | "";
-        }
+        [Pure]public override string ToString() => this.Select(v => v.ToString()) | "";
         #endregion
     }
 

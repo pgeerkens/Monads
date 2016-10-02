@@ -34,7 +34,11 @@ namespace PGSolutions.Monads.Demos {
     using static String;
 
     /// <summary>TODO</summary>
+#if GCDStartAsClass
+    public class  GcdResult : IEquatable<GcdResult> {
+#else
     public struct GcdResult : IEquatable<GcdResult> {
+#endif
         /// <summary>TODO</summary>
         public GcdResult(int gcd) { Gcd = gcd; }
 
@@ -43,30 +47,30 @@ namespace PGSolutions.Monads.Demos {
 
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
+        [Pure]
+    #if GCDStartAsClass
+        public override bool Equals(object obj) => (obj as GcdResult )?.Equals(this) ?? false;
+    #else
+        public override bool Equals(object obj) => (obj as GcdResult?)?.Equals(this) ?? false;
+    #endif
+
+        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
+        [Pure]public bool Equals(GcdResult other) => other!=null && Gcd == other.Gcd;
+
+        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
+        [Pure]public static bool operator ==(GcdResult lhs, GcdResult rhs) =>lhs.Equals(rhs);
+
+        /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
+        [Pure]public static bool operator !=(GcdResult lhs, GcdResult rhs) => !lhs.Equals(rhs);
+
+        /// <inheritdoc/>
+        [Pure]public override int GetHashCode() { unchecked { return Gcd.GetHashCode(); } }
+
+        /// <inheritdoc/>
         public override string ToString() {
             Ensures(Result<string>() != null);
             return Format("    GCD = {0}",Gcd);
         }
-
-        /// <inheritdoc/>
-        [Pure]
-        public override bool Equals(object obj) => (obj as GcdResult?)?.Equals(obj) ?? false;
-
-        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-        [Pure]
-        public bool Equals(GcdResult other) => Gcd == other.Gcd;
-
-        /// <inheritdoc/>
-        [Pure]
-        public override int GetHashCode() { unchecked { return Gcd.GetHashCode(); } }
-
-        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-        [Pure]
-        public static bool operator ==(GcdResult lhs, GcdResult rhs) =>lhs.Equals(rhs);
-
-        /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
-        [Pure]
-        public static bool operator !=(GcdResult lhs, GcdResult rhs) => !lhs.Equals(rhs);
         #endregion
     }
 }

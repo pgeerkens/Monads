@@ -39,13 +39,14 @@ namespace PGSolutions.Monads {
         [CLSCompliant(false)]
         public static Unit _ { get { return _this; } } static Unit _this = new Unit();
 
+        #region Comparison with IComparable<T>
         /// <inheritdoc/>
         [Pure]public int CompareTo(Unit other) => 0;
         /// <summary>Returns true exactly when lhs &lt; rhs.</summary>
         [Pure]public static bool operator <(Unit lhs, Unit rhs) => lhs.CompareTo(rhs) < 0;
         /// <summary>Returns true exactly when lhs &gt; rhs.</summary>
         [Pure]public static bool operator >(Unit lhs, Unit rhs) => lhs.CompareTo(rhs) > 0;
-
+        #endregion
         #region Value Equality with IEquatable<T>.
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]public bool Equals(Unit other) => true;
@@ -64,25 +65,26 @@ namespace PGSolutions.Monads {
     /// <summary>Class representing, conceptually, the "type" of <i>void</i>.</summary>
     [Pure]
     public static class UnitExtensionsLinq {
-        readonly static Func<Unit> _nothing = null;
+        readonly static Func<Unit> _nullFunctor = null;
+
         /// <summary>The LINQ-enabling Select method.</summary>
         public static Func<Unit>     Select(this Unit @this,
             Func<Unit, Unit> projector
         ) =>
-            projector==null ? _nothing : () => projector(@this);
+            projector!=null ? () => projector(@this) : _nullFunctor;
 
         /// <summary>The monadic bind method.</summary>
         public static Func<Unit>     SelectMany(this Unit @this,
             Func<Unit, Func<Unit>> selector
         ) =>
-            selector==null ? _nothing : () => selector(@this)();
+            selector!=null ? () => selector(@this)() : _nullFunctor;
 
         /// <summary>The LINQ-enabling SelectMany method.</summary>
         public static Func<Unit>     SelectMany<TSelection>(this Unit @this,
             Func<Unit, Func<TSelection>> selector,
             Func<Unit,TSelection,Unit>   projector
         ) =>
-            selector==null || projector==null ? _nothing 
-                                              : () => projector(@this, selector(@this)() );
+            selector!=null && projector!=null ? () => projector(@this, selector(@this)() )
+                                              : _nullFunctor ;
     }
 }
