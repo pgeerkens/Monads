@@ -36,7 +36,6 @@ using Xunit;
 namespace PGSolutions.Monads.MonadTests {
     using static LazyState;
 
-    [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors")]
     [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses")]
     public class LazyStateTests {
         public LazyStateTests() { }

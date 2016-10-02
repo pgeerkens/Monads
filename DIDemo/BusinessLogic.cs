@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 
 namespace PGSolutions.Monads.DIDemo {
+    using static String;
     using static System.Diagnostics.Contracts.Contract;
 
     public interface IConfig {
@@ -18,7 +19,7 @@ namespace PGSolutions.Monads.DIDemo {
             return (from intDb        in BusinessLogic<TConfig>.GetIntFromDB
                     from netstr       in BusinessLogic<TConfig>.GetStringFromNetwork
                     from writeSuccess in BusinessLogic<TConfig>.WriteStuffToDisk(intDb, netstr)
-                    select writeSuccess ? successMessage.FormatMe(intDb,netstr)
+                    select writeSuccess ? Format(successMessage,intDb,netstr)
                                         : errorMessage
             ) (config);
         }
@@ -31,7 +32,7 @@ namespace PGSolutions.Monads.DIDemo {
             Ensures(Result<Reader<TConfig,int>>() != null);
 
             return new Reader<TConfig, int>(config => {
-                config.LogMethod(dbMessage.FormatMe(config.AuthInfo));
+                config.LogMethod(Format(dbMessage,config.AuthInfo));
                         // ....
                 return 4;
             } );
@@ -54,7 +55,7 @@ namespace PGSolutions.Monads.DIDemo {
 
             const string diskMessage = "writing\n   {1}\n   {2}\nto disk with credentials: {0}";
             return new Reader<TConfig,bool>(config => {
-                config.LogMethod(diskMessage.FormatMe(config.AuthInfo, i, s));
+                config.LogMethod(Format(diskMessage,config.AuthInfo, i, s));
                     // ....
                 return true;
             } );

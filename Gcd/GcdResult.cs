@@ -28,10 +28,10 @@
 #endregion
 using System;
 using System.Diagnostics.Contracts;
-using System.Globalization;
 
 namespace PGSolutions.Monads.Demos {
     using static Contract;
+    using static String;
 
     /// <summary>TODO</summary>
     public struct GcdResult : IEquatable<GcdResult> {
@@ -39,27 +39,22 @@ namespace PGSolutions.Monads.Demos {
         public GcdResult(int gcd) { Gcd = gcd; }
 
         /// <summary>TODO</summary>
-        public int      Gcd     { get; }
+        public int Gcd { get; }
 
         #region Value Equality with IEquatable<T>.
-        static readonly CultureInfo _culture = CultureInfo.CurrentUICulture;
-
         /// <inheritdoc/>
         public override string ToString() {
-            Ensures(Result<System.String>() != null);
-            return  "    GCD = {0}".FormatMe(_culture,Gcd);
+            Ensures(Result<string>() != null);
+            return Format("    GCD = {0}",Gcd);
         }
 
         /// <inheritdoc/>
         [Pure]
-        public override bool Equals(object obj) {
-            var other = obj as GcdResult?;
-            return other.HasValue && other.Equals(obj);
-        }
+        public override bool Equals(object obj) => (obj as GcdResult?)?.Equals(obj) ?? false;
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]
-        public bool Equals(GcdResult other) { return Gcd == other.Gcd; }
+        public bool Equals(GcdResult other) => Gcd == other.Gcd;
 
         /// <inheritdoc/>
         [Pure]
@@ -67,11 +62,11 @@ namespace PGSolutions.Monads.Demos {
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]
-        public static bool operator ==(GcdResult lhs, GcdResult rhs) { return lhs.Equals(rhs); }
+        public static bool operator ==(GcdResult lhs, GcdResult rhs) =>lhs.Equals(rhs);
 
         /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
         [Pure]
-        public static bool operator !=(GcdResult lhs, GcdResult rhs) { return !lhs.Equals(rhs); }
+        public static bool operator !=(GcdResult lhs, GcdResult rhs) => !lhs.Equals(rhs);
         #endregion
     }
 }

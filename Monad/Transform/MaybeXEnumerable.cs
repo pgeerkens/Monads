@@ -40,10 +40,9 @@ namespace PGSolutions.Monads {
         /// Always available from Bind():
         ///         return @this.Bind(v => projector(v).ToMaybe());
         ///</remarks>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public static MaybeX<IEnumerable<TResult>> Select<T, TResult>(this
-            MaybeX<IEnumerable<T>> @this,
-            MaybeX<Func<IEnumerable<T>, IEnumerable<TResult>>> projector
+        public static X<IEnumerable<TResult>> Select<T, TResult>(this
+            X<IEnumerable<T>> @this,
+            X<Func<IEnumerable<T>, IEnumerable<TResult>>> projector
         ) =>
             from e in @this
             from p in projector
@@ -53,10 +52,9 @@ namespace PGSolutions.Monads {
         /// <remarks>
         /// Convenience method - not used by LINQ
         /// </remarks>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public static MaybeX<IEnumerable<TResult>> SelectMany<T, TResult>(this
-            MaybeX<IEnumerable<T>> @this,
-            MaybeX<Func<IEnumerable<T>, MaybeX<IEnumerable<TResult>>>> selector
+        public static X<IEnumerable<TResult>> SelectMany<T, TResult>(this
+            X<IEnumerable<T>> @this,
+            X<Func<IEnumerable<T>, X<IEnumerable<TResult>>>> selector
         ) =>
             from e in @this
             from s in selector
@@ -67,11 +65,10 @@ namespace PGSolutions.Monads {
         /// <remarks>
         /// Used for LINQ queries with multiple FROM clauses or with more complex structure.
         /// </remarks>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public static MaybeX<IEnumerable<TResult>> SelectMany<T, TIntermediate, TResult>(this
-            MaybeX<IEnumerable<T>> @this,
-            MaybeX<Func<IEnumerable<T>, MaybeX<IEnumerable<TIntermediate>>>> selector,
-            MaybeX<Func<IEnumerable<T>, IEnumerable<TIntermediate>, IEnumerable<TResult>>> projector
+        public static X<IEnumerable<TResult>> SelectMany<T, TIntermediate, TResult>(this
+            X<IEnumerable<T>> @this,
+            X<Func<IEnumerable<T>, X<IEnumerable<TIntermediate>>>> selector,
+            X<Func<IEnumerable<T>, IEnumerable<TIntermediate>, IEnumerable<TResult>>> projector
         ) =>
             from e in @this
             from s in selector

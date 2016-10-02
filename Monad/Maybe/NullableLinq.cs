@@ -27,12 +27,9 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
-    using static Contract;
-
     /// <summary>TODO</summary>
     [Pure]
     public static class NullableLinq {
@@ -43,9 +40,9 @@ namespace PGSolutions.Monads {
         /// Always available from Bind():
         ///         return @this.Bind(v => projector(v).ToMaybe());
         ///</remarks>
-        public static TResult?      Select<TValue,TResult>(this TValue? @this,
-            Func<TValue,TResult>    projector
-        ) where TValue:struct where TResult:struct 
+        public static TResult? Select<TValue, TResult>(this TValue? @this,
+            Func<TValue, TResult> projector
+        ) where TValue : struct where TResult : struct
             => @this.HasValue ? projector?.Invoke(@this.Value)
                               : null;
 
@@ -53,8 +50,8 @@ namespace PGSolutions.Monads {
         /// <remarks>
         /// Convenience method - not used by LINQ
         /// </remarks>
-        public static TResult?      SelectMany<TValue, TResult>(this TValue? @this,
-            Func<TValue, TResult?>  selector
+        public static TResult? SelectMany<TValue, TResult>(this TValue? @this,
+            Func<TValue, TResult?> selector
         ) where TValue : struct where TResult : struct
             => @this.HasValue ? selector?.Invoke(@this.Value)
                               : null;
@@ -63,19 +60,20 @@ namespace PGSolutions.Monads {
         /// <remarks>
         /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
         /// </remarks>
-        public static TResult?      SelectMany<TValue,T,TResult>(this TValue? @this,
-            Func<TValue,T?>         selector,
-            Func<TValue,T,TResult>  projector
-        ) where TValue:struct where T:struct where TResult:struct
-            => @this.HasValue ? selector?.Invoke(@this.Value).SelectMany(e => projector?.Invoke(@this.Value,e))
+        public static TResult? SelectMany<TValue, T, TResult>(this TValue? @this,
+            Func<TValue, T?> selector,
+            Func<TValue, T, TResult> projector
+        ) where TValue : struct where T : struct where TResult : struct
+            => @this.HasValue ? selector?.Invoke(@this.Value).SelectMany(e => 
+                                projector?.Invoke(@this.Value, e))
                               : null;
-        //-------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------
         ///<summary>The monadic Bind operation of type T to type MaybeX2{TResult}.</summary>
         /// <remarks>
         /// Convenience method - not used by LINQ
         /// </remarks>
-        private static MaybeX<TResult>      SelectMany<TValue, TResult>(this TValue? @this,
-            Func<TValue,MaybeX<TResult>>    selector
+        public static X<TResult> SelectMany<TValue, TResult>(this TValue? @this,
+            Func<TValue, X<TResult>> selector
         ) where TValue : struct where TResult : class
             => @this.HasValue ? selector?.Invoke(@this.Value) ?? null
                               : null;
@@ -84,36 +82,18 @@ namespace PGSolutions.Monads {
         /// <remarks>
         /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
         /// </remarks>
-        public static MaybeX<TResult>   SelectMany<TValue,T,TResult>(this TValue? @this,
-            Func<TValue,MaybeX<T>>      selector,
-            Func<TValue,T,TResult>      projector
-        ) where TValue:struct where T:class where TResult:class
-            => @this.HasValue ? selector?.Invoke(@this.Value).SelectMany<TResult>(e => projector?.Invoke(@this.Value,e)) ?? default(MaybeX<TResult>)
+        public static X<TResult> SelectMany<TValue, T, TResult>(this TValue? @this,
+            Func<TValue, X<T>> selector,
+            Func<TValue, T, TResult> projector
+        ) where TValue : struct where T : class where TResult : class
+            => @this.HasValue ? selector?.Invoke(@this.Value).Select(e => 
+                                projector?.Invoke(@this.Value, e)) ?? null
                               : null;
-
-        //-------------------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------
         /// <summary>TODO</summary>
         /// <typeparam name="TValue"></typeparam>
         /// <param name="value"></param>
-        public static TValue? ToNullable<TValue>(this TValue value) where TValue : struct => value;
-
-        //=======================================================================================================
-        /// <summary>A string representing the object's value, or "Nothing" if it has no value.</summary>
-        public static string ToNothingString<T>(this T @this) {
-            Ensures(Result<string>() != null);
-            return @this != null ? @this.ToString() : "Nothing";
-        }
-
-        ///<summary>Tests value-equality, returning <b>Nothing</b> if either value doesn't exist.</summary>
-        public static bool? AreNonNullEqual<TValue>(this TValue lhs, TValue rhs)
-            => lhs != null && rhs != null ? lhs.Equals(rhs) : null as bool?;
-
-       /// <summary>TODO</summary>
-        /// <typeparam name="TValue"></typeparam>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="this"></param>
-        /// <returns></returns>
-        public static TResult Cast<TValue,TResult>(this TValue @this) where TValue:TResult 
-            => @this != null ? @this : default(TResult);
+        public static TValue? ToNullable<TValue>(this TValue value) where TValue : struct =>
+            value;
     }
 }

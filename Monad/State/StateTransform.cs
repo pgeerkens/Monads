@@ -35,7 +35,7 @@ namespace PGSolutions.Monads {
     using static Contract;
 
     /// <summary>Core Monadic functionality for State, as Extension methods</summary>
-    public static class State2Transform {
+    public static class StateTransform {
         /// <summary>TODO</summary>
         /// <typeparam name="TState">Type of the state which this delegate transforms.</typeparam>
         [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]

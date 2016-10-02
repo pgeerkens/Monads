@@ -26,27 +26,21 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
-using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 
 namespace PGSolutions.Monads {
-    using static Contract;
+    using static CultureInfo;
 
-    /// <summary>TODO</summary>
+    /// <summary>Convenience extension methods for formatting strings.</summary>
     [Pure]
     public static class StringExtensions {
         /// <summary>Shortcut for string.Format(CultureInfo.InvariantCulture, @this, arg).</summary>
         /// <param name="this">The Format string.</param>
         /// <param name="arg">The arguments to be formatted into the format string.</param>
-        public static string    FormatMe(this string @this, params object[] arg) {
-            @this.ContractedNotNull(nameof(@this));
-            arg.ContractedNotNull(nameof(arg));
-            Ensures(Result<string>() != null);
-
-            return @this.FormatMe(CultureInfo.InvariantCulture, arg);
-        }
+        public static string    FormatMe(this string @this, params object[] arg) =>
+            @this?.FormatMe(InvariantCulture, arg);
 
         /// <summary>Shortcut for string.Format(cultureInfo, @this, arg).</summary>
         /// <param name="this">The Format string.</param>
@@ -55,41 +49,6 @@ namespace PGSolutions.Monads {
         public static string    FormatMe(this string @this,
             IFormatProvider cultureInfo,
             params object[] arg
-        ) {
-            @this.ContractedNotNull(nameof(@this));
-            cultureInfo.ContractedNotNull(nameof(cultureInfo));
-            arg.ContractedNotNull(nameof(arg));
-            Ensures(Result<string>() != null);
-
-            return string.Format(cultureInfo, @this, arg);
-        }
-    }
-
-    /// <summary>Constant utility functions.</summary>
-    [Pure]
-    public static class Functions {
-        /// <summary>The identity function - Returns its argument.</summary>
-        public static TValue    Identity<TValue>(TValue value) {
-            value.ContractedNotNull(nameof(value));
-            Ensures(Result<TValue>() != null);
-            return value;
-        }
-
-        /// <summary>Returns its first argument.</summary>
-        [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "second")]
-        public static TFirst    First<TFirst,TSecond> (TFirst first, TSecond second) {
-            first.ContractedNotNull(nameof(first));
-            Ensures(Result<TFirst>() != null);
-
-            return first;
-        }
-
-        /// <summary>Returns its second argument.</summary>
-        public static TSecond   Second<TFirst,TSecond>(TFirst first, TSecond second) {
-            second.ContractedNotNull(nameof(second));
-            Ensures(Result<TSecond>() != null);
-
-            return second;
-        }
+        ) => @this==null || arg==null ? null : string.Format(cultureInfo, @this, arg);
     }
 }

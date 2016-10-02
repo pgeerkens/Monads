@@ -26,14 +26,14 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
-//#define GCDStateAsClass    // performance penalty of 30% to 200% for class compared to struct
+#define GCDStateAsClassX    // performance penalty of 30% to 200% for class compared to struct
 
 using System;
 using System.Diagnostics.Contracts;
-using System.Globalization;
 
 namespace PGSolutions.Monads.Demos {
     using static Contract;
+    using static String;
 
 #if GCDStateAsClass
     public class GcdStart : IEquatable<GcdStart> {
@@ -51,12 +51,10 @@ namespace PGSolutions.Monads.Demos {
         public int B { get; }
 
         #region Value Equality with IEquatable<T>.
-        static readonly CultureInfo _culture = CultureInfo.CurrentUICulture;
-
         /// <inheritdoc/>
         public override string ToString() {
-            Ensures(Result<System.String>() != null);
-            return "({0,14:N0}, {1,14:N0})".FormatMe(_culture, A, B);
+            Ensures(Result<string>() != null);
+            return Format("({0,14:N0}, {1,14:N0})", A, B) ?? "";
         }
 
         /// <inheritdoc/>

@@ -35,8 +35,6 @@ using System.Linq;
 using Xunit;
 
 namespace PGSolutions.Monads.MonadTests {
-    [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors",
-        Justification = "Unit tests require a public default constructor.")]
     [ExcludeFromCodeCoverage] [CLSCompliant(false)]
     public class NullableTests {
         public NullableTests() {
@@ -46,14 +44,12 @@ namespace PGSolutions.Monads.MonadTests {
                            ).ToList().AsReadOnly();
             _addOne      = x => (x + 1);
             _addEight    = x => (x + 8);
-            _datetime    = DateTime.Now;
         }
 
         readonly int? _maybeGeorge;
         readonly IList<int?> _data;
         readonly Func<int, int?> _addOne;
         readonly Func<int, int?> _addEight;
-        readonly DateTime _datetime;
 
         [Theory]
         [InlineData(99, "0/99/2/3/4")]
@@ -96,11 +92,9 @@ namespace PGSolutions.Monads.MonadTests {
         [InlineData(false, "0/3/4")]
         [InlineData(null, "Nothing")]
         public void ExcludedMiddleTest(bool? comparison, string expected) {
-            var received = string.Join("/", //from int? e in _data
-                                            //where e.AreNonNullEqual(_maybeGeorge) == comparison
-                                            //select e.ToNothingString()
-                                            _data.Where(e => e.AreNonNullEqual(_maybeGeorge) == comparison)
-                                                 .Select<int?, string>(e => e.ToNothingString())
+            var received = string.Join("/", from int? e in _data
+                                            where e.AreNonNullEqual(_maybeGeorge) == comparison
+                                            select e.ToNothingString()
                                       );
             Assert.Equal(expected, received);
         }
@@ -108,7 +102,7 @@ namespace PGSolutions.Monads.MonadTests {
         [Fact]
         public static void LazyEvaluationTest() {
             var state = new ExternalState();
-            var x = (from a in (Maybe<Func<int>>)state.GetState select a).Extract();
+            var x = (from a in (X<Func<int>>)state.GetState select a) | (()=>0);
             var y = x();
 
             for (int i = 0; i++ < 5;) state.GetState();

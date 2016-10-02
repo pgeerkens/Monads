@@ -31,94 +31,36 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
-   // using static Contract;
-
     /// <summary>TODO</summary>
     public struct IO<TSource> : IEquatable<IO<TSource>> {
-        static readonly Func<TSource> _default = () => default(TSource);
-        /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes")]
-        public static IO<TSource> Empty { get; } = new IO<TSource>();
-
         /// <summary>Create a new instance of the class.</summary>
-        public IO(Func<TSource> functor) : this() {
-            _functor = functor;
-        }
+        public IO(Func<TSource> functor) : this() { _functor = functor; }
 
         /// <summary>Invokes the internal functor, returning the result.</summary>
-        public TSource Invoke() => (_functor | _default)();
-        readonly MaybeX<Func<TSource>> _functor;
+        public TSource Invoke() => (_functor | Default)();
 
-        /// <summary>LINQ-compatible implementation of the monadic map operator.</summary>
-        /// <remarks>
-        /// Used to implement the LINQ <i>let</i> clause.
-        /// </remarks>
-        [Pure]
-        public IO<TResult> Select<TResult>(
-            Func<TSource, TResult> projector
-        ) {
-            projector.ContractedNotNull(nameof(projector));
+        /// <summary>Returns true exactly when the contained functor is not null.</summary>
+        public bool HasValue => _functor != null;
 
-            var @this = this;
-            return new IO<TResult>(() => projector(@this.Invoke()));
-        }
+        X<Func<TSource>> _functor { get; }
 
-        /// <summary>LINQ-compatible implementation of the monadic bind operator.</summary>
-        /// <remarks>
-        /// Used for LINQ queries with a single <i>from</i> clause.
-        /// </remarks>
-        [Pure]
-        public IO<TResult> SelectMany<TResult>(
-            Func<TSource, IO<TResult>> selector
-        ) {
-            selector.ContractedNotNull(nameof(selector));
-
-            var @this = this;
-            return new IO<TResult>(() => selector(@this.Invoke()).Invoke());
-        }
-
-        /// <summary>LINQ-compatible implementation of the monadic join operator.</summary>
-        /// <remarks>
-        /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
-        /// </remarks>
-        [Pure]
-        public IO<TResult> SelectMany<T, TResult>(
-            Func<TSource, IO<T>> selector,
-            Func<TSource, T, TResult> projector
-        ) {
-            selector.ContractedNotNull(nameof(selector));
-            projector.ContractedNotNull(nameof(projector));
-
-            var @this = this;
-            return new IO<TResult>(() => {
-                var source = @this.Invoke();
-                return selector(source).Select(t => projector(source, t)).Invoke();
-            } );
-        }
+        static Func<TSource> Default => null;
 
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
-        [Pure]
-        public override bool Equals(object obj) {
-            var other = obj as IO<TSource>?;
-            return other != null && Equals(other.Value);
-        }
+        [Pure]public override bool Equals(object obj) => (obj as IO<TSource>?)?.Equals(this) ?? false;
 
         /// <summary>Tests value-equality.</summary>
-        [Pure]
-        public bool Equals(IO<TSource> other) => _functor.Equals(other._functor);
-
-        /// <inheritdoc/>
-        [Pure]
-        public override int GetHashCode() => _functor.GetHashCode();
+        [Pure]public bool Equals(IO<TSource> other) => _functor.Equals(other._functor);
 
         /// <summary>Tests value-equality.</summary>
-        [Pure]
-        public static bool operator ==(IO<TSource> lhs, IO<TSource> rhs) => lhs.Equals(rhs);
+        [Pure]public static bool operator ==(IO<TSource> lhs, IO<TSource> rhs) => lhs.Equals(rhs);
 
         /// <summary>Tests value-inequality.</summary>
-        [Pure]
-        public static bool operator !=(IO<TSource> lhs, IO<TSource> rhs) => ! lhs.Equals(rhs);
+        [Pure]public static bool operator !=(IO<TSource> lhs, IO<TSource> rhs) => ! lhs.Equals(rhs);
+
+        /// <inheritdoc/>
+        [Pure]public override int GetHashCode() => _functor.GetHashCode();
         #endregion
     }
 
@@ -131,6 +73,51 @@ namespace PGSolutions.Monads {
             source.ContractedNotNull(nameof(source));
             return new IO<TSource>(source);
         }
+
+        /// <summary>LINQ-compatible implementation of the monadic map operator.</summary>
+        /// <remarks>
+        /// Used to implement the LINQ <i>let</i> clause.
+        /// </remarks>
+        [Pure]
+        public static IO<TResult> Select<TSource,TResult>(this IO<TSource> @this,
+            Func<TSource,TResult> projector
+        ) =>
+            @this.HasValue && projector!=null
+                 ? New(() => projector(@this.Invoke()))
+                 : Null<TResult>();
+
+        /// <summary>LINQ-compatible implementation of the monadic bind operator.</summary>
+        /// <remarks>
+        /// Used for LINQ queries with a single <i>from</i> clause.
+        /// </remarks>
+        [Pure]
+        public static IO<TResult> SelectMany<TSource,TResult>(this IO<TSource> @this,
+            Func<TSource,IO<TResult>> selector
+        ) =>
+            @this.HasValue && selector!=null
+                 ? New(() => selector(@this.Invoke()).Invoke())
+                 : Null<TResult>();
+
+        /// <summary>LINQ-compatible implementation of the monadic join operator.</summary>
+        /// <remarks>
+        /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
+        /// </remarks>
+        [Pure]
+        public static IO<TResult> SelectMany<TSource,T,TResult>(this IO<TSource> @this,
+            Func<TSource, IO<T>> selector,
+            Func<TSource,T,TResult> projector
+        ) =>
+            @this.HasValue && selector!=null && projector!=null
+                 ? New(() => { var s = @this.Invoke(); return projector(s, selector(s).Invoke()); } )
+                 : Null<TResult>();
+
+        /// <summary>COnvenince factory method to provide type inference.</summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="functor"></param>
+        /// <returns></returns>
+        public static IO<TResult> New<TResult> (Func<TResult> functor) => new IO<TResult>(functor);
+
+        private static IO<TResult> Null<TResult>() => new IO<TResult>(null);
     }
 }
 

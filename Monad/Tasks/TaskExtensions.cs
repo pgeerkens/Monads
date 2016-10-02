@@ -93,7 +93,7 @@ namespace PGSolutions.Monads {
         }
 
         /// <summary>TODO</summary>
-        private static MaybeX<Task<TResult>>    Flatten<TSource, T, TResult>(this Task<TSource> source,
+        private static X<Task<TResult>>    Flatten<TSource, T, TResult>(this Task<TSource> source,
             Func<TSource, Task<T>> selector,
             Func<TSource, T, TResult> resultSelector
         ) {
@@ -107,7 +107,7 @@ namespace PGSolutions.Monads {
         }
 
         /// <summary>TODO</summary>
-        private static MaybeX<Task<TResult>>    Flatten<T, TResult>(this Task source,
+        private static X<Task<TResult>>    Flatten<T, TResult>(this Task source,
             Func<Unit, Task<T>> selector,
             Func<Unit, T, TResult> resultSelector
         ) {

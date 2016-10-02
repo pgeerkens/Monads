@@ -13,8 +13,8 @@ namespace PGSolutions.Monads.MonadTests {
             bool isExecuted2 = false;
             bool isExecuted3 = false;
             bool isExecuted4 = false;
-            IO<int> one = new IO<int>( () => { isExecuted1 = true; return 1; }); //Contract.Assert(one != null);
-            IO<int> two = new IO<int>( () => { isExecuted2 = true; return 2; }); //Contract.Assert(two != null);
+            IO<int> one = new IO<int>( () => { isExecuted1 = true; return 1; });
+            IO<int> two = new IO<int>( () => { isExecuted2 = true; return 2; });
             Func<int, IO<int>> addOne = x => { isExecuted3 = true; return (x + 1).ToIO(); };
             Func<int, Func<int, IO<int>>> add = x => y => { isExecuted4 = true; return (x + y).ToIO(); };
 
@@ -90,7 +90,7 @@ namespace PGSolutions.Monads.MonadTests {
         [Fact]
         public static void MonadLaw1Test() {
             // Monad law 1: m.Monad().SelectMany(f) == f(m)
-            var lhs = 1.ToIO().SelectMany<int>(addOne3); Contract.Assert(lhs  != null);
+            var lhs = 1.ToIO().SelectMany(addOne3); Contract.Assert(lhs  != null);
             var rhs = addOne3(1);                        //Contract.Assume(rhs != null);
             Assert.Equal(lhs.Invoke(), rhs.Invoke());
         }
@@ -107,7 +107,7 @@ namespace PGSolutions.Monads.MonadTests {
         public static void MonadLaw3Test() {
             // Monad law 3: M.SelectMany(f1).SelectMany(f2) == M.SelectMany(x => f1(x).SelectMany(f2))
             Func<int, IO<int>> addTwo = x => (x + 2).ToIO();
-            var lhs1 = M.SelectMany<int>(addOne3).SelectMany<int>(addTwo);
+            var lhs1 = M.SelectMany(addOne3).SelectMany(addTwo);
             var rhs1 = M.SelectMany(x => addOne3(x).SelectMany(addTwo));
             Assert.Equal(lhs1.Invoke(), rhs1.Invoke());
 

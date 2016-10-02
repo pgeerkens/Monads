@@ -33,7 +33,6 @@ using System.Globalization;
 using Xunit;
 
 namespace PGSolutions.Monads.MonadTests {
-    [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors")]
     [CLSCompliant(false)]
     public static class SafeIntTests {
         #region Addition Tests

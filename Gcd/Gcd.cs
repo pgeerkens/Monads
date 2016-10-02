@@ -31,7 +31,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Globalization;
 using System.Linq;
 
 using PGSolutions.Monads;
@@ -40,30 +39,32 @@ namespace PGSolutions.Monads.Demos {
     using PayloadMaybe  = StructTuple<GcdStart?, Unit>;
     using static Contract;
     using static IOMonads;
+    using static String;
 
     /// <summary>Greatest Common Divisor demo using State Monad.</summary>
     /// <remarks>
     /// Example based on http://mvanier.livejournal.com/5846.html
     /// </remarks>
     public static class Gcd {
-        static readonly CultureInfo _culture = CultureInfo.CurrentUICulture;
-
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public static Maybe<IO<Unit>> Run(Maybe<IList<GcdStart>> maybeStates) =>
-            from states in maybeStates
-            select ( from test in Gcd_S4.GetTests(false) | new List<ITest>()
-                     let elapsed = Readers.Timer()
-                     let isThird = Readers.MatchCounter(i => i==3, 1)
-                     select ( from _   in ConsoleWriteLine("{0}", test.Title)
-                              from __  in RunInner(test, states, elapsed, isThird).Last()
-                              from ___ in ConsoleWriteLine(@"Elapsed Time: {0:ss\.ff} secs", elapsed())
-                              from _x_ in ConsoleWriteLine()
-                              select Unit._
-                            ).Invoke()
-            ).LastOrDefault().ToIO();
+        public static Unit? Run(X<IList<GcdStart>> maybeStates) =>
+            maybeStates.SelectMany<IList<GcdStart>,Unit,Unit>(states => 
+                RunInner(states).LastOrDefault(), Functions.Second
+            );
 
-        private static IEnumerable<IO<Unit>> RunInner(
+        private static IEnumerable<Unit> RunInner(IList<GcdStart> states) =>
+            from test in Gcd_S4.GetTests(false) | new List<ITest>()
+            let elapsed = Readers.Timer()
+            let isThird = Readers.MatchCounter(i => i==3, 1)
+            select ( from _   in ConsoleWriteLine("{0}", test.Title)
+                     from __  in RunInner2(test, states, elapsed, isThird).Last()
+                     from ___ in ConsoleWriteLine(@"Elapsed Time: {0:ss\.ff} secs", elapsed())
+                     from _x_ in ConsoleWriteLine()
+                     select Unit._
+                   ).Invoke();
+
+        private static IEnumerable<IO<Unit>> RunInner2(
             ITest test, IList<GcdStart> states, 
             Func<TimeSpan>              elapsed, 
             Func<bool>                  isThird
@@ -81,7 +82,7 @@ namespace PGSolutions.Monads.Demos {
                      select ConsoleWriteLine(
                          @"    GCD = {0,14} for {1}: Elapsed = {2:ss\.fff} secs; {3}",
                          ( from r in item.Result
-                           select "{0,14:N0}".FormatMe(_culture, r.Gcd).AsMaybeX()
+                           select Format("{0,14:N0}",r.Gcd).AsX()
                          ) ?? "incalculable",
                          item.Start,
                          elapsed(),
@@ -95,15 +96,15 @@ namespace PGSolutions.Monads.Demos {
             return new PayloadMaybe(
                 from state in start
                 from x in state.A == 1
-                       || state.B == 1            ? new GcdStart(1, 1).ToNullable()
+                       || state.B == 1 ? new GcdStart(1, 1).ToNullable()
                         : state.A != int.MinValue
                        && state.B != int.MinValue ? new GcdStart(Math.Abs(state.A), Math.Abs(state.B)).ToNullable()
-                        : state.A == state.B      ? new GcdStart(state.A, state.B).ToNullable()
+                        : state.A == state.B ? new GcdStart(state.A, state.B).ToNullable()
                         : state.A == int.MinValue ? new GcdStart(Math.Abs(state.A + Math.Abs(state.B)),
                                                                  Math.Abs(state.B)
                                                                 ).ToNullable()
 #if PreventIncalculable
-                        : state.B == int.MinValue ? new GcdStart(Math.Abs(state.A), 
+                        : state.B == int.MinValue ? new GcdStart(Math.Abs(state.A),
                                                                  Math.Abs(state.B + Math.Abs(state.A))
                                                                 ).ToNullable()
 #endif

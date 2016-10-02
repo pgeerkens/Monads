@@ -5,6 +5,7 @@ namespace PGSolutions.Monads.DIDemo {
     using static Console;
 
     class DependencyInjectionExample {
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String)")]
         public static int Main() {
             WriteLine(BusinessLogic.Run(ConfigFactory.GetConfig1()));
             WriteLine("==================================================");

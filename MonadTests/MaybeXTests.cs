@@ -40,17 +40,15 @@ namespace PGSolutions.Monads.MonadTests {
     public class MaybeXTests {
         public MaybeXTests() {
             _data        = ( from e in new List<string>() { "Percy", null, "George", "Ron", "Ginny" }
-                             select e.AsMaybeX()
+                             select e.AsX()
                            ).ToList().AsReadOnly();
             _addOne      = x => x + "constant";
             _addEight    = x => x + "/" + x;
-            _datetime    = DateTime.Now;
         }
 
-        readonly IList<MaybeX<string>>        _data;
-        readonly Func<string, MaybeX<string>> _addOne;
-        readonly Func<string, MaybeX<string>> _addEight;
-        readonly DateTime                     _datetime;
+        readonly IList<X<string>>        _data;
+        readonly Func<string, X<string>> _addOne;
+        readonly Func<string, X<string>> _addEight;
 
         [Theory]
         [InlineData("",        "Percy//George/Ron/Ginny")]
@@ -105,7 +103,7 @@ namespace PGSolutions.Monads.MonadTests {
         [Fact]
         public static void LazyEvaluationTest() {
             var state = new ExternalState();
-            var x = (from a in (Maybe<Func<int>>)state.GetState select a).Extract();
+            var x = (from a in (X<Func<int>>)state.GetState select a) | (()=>0);
             var y = x();
 
             for (int i = 0; i++ < 5;) state.GetState();
@@ -123,8 +121,8 @@ namespace PGSolutions.Monads.MonadTests {
         [InlineData("Fred Weasley", " Weasley")]
         [InlineData("Nothing",      null)]
         public static void WesDyerTest(string expected, string second) {
-            var received = ( from x in "Fred".AsMaybeX()
-                             from y in second.AsMaybeX()
+            var received = ( from x in "Fred".AsX()
+                             from y in second.AsX()
                              select x + y).ToNothingString();
             Assert.Equal(expected, received);
         }
@@ -134,7 +132,7 @@ namespace PGSolutions.Monads.MonadTests {
         public void MonadLaw1() {
             const string description = "Monad law 1: m.Monad().Bind(f) == f(m)";
 
-            var lhs = "1".AsMaybeX().SelectMany(_addOne);
+            var lhs = "1".AsX().SelectMany(_addOne);
             var rhs = _addOne("1");
             Assert.True(lhs == rhs, description);
         }
@@ -144,8 +142,8 @@ namespace PGSolutions.Monads.MonadTests {
         public static void MonadLaw2() {
             const string description = "Monad law 2: M.Bind(Monad) == M";
 
-            var M = " four".AsMaybeX();
-            var lhs = M.SelectMany(i => i.AsMaybeX());
+            var M = " four".AsX();
+            var lhs = M.SelectMany(i => i.AsX());
             var rhs = M;
             Assert.True(lhs == rhs, description);
         }
@@ -156,7 +154,7 @@ namespace PGSolutions.Monads.MonadTests {
             const string description = "Monad law 3: M.Bind(f1).Bind(f2) == M.Bind(x => f1(x).Bind(f2))";
 
             //Func<string,MaybeX<string>> addOne = x => x + 1;
-            var M = " four".AsMaybeX();
+            var M = " four".AsX();
             var lhs = M.SelectMany(_addOne).SelectMany(_addEight);
             var rhs = M.SelectMany(x => _addOne(x).SelectMany(_addEight));
             Assert.True(lhs == rhs, description);

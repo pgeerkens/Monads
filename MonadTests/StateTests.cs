@@ -36,14 +36,13 @@ using Xunit;
 namespace PGSolutions.Monads.MonadTests {
     using static State;
 
-    [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors")]
     [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses")]
     public class StateTests {
         public StateTests() { }
 
-        readonly static State<string,int>           _monad = 1.State<string,int>();
+        readonly static State<X<string>,int>           _monad = 1.State<X<string>,int>();
         readonly static Func<int,int>               _addOneX = x => (x + 1);
-        readonly static Func<int,State<string,int>> _addOne  = x => (x + 1).State<string,int>();
+        readonly static Func<int,State<X<string>,int>> _addOne  = x => (x + 1).State<X<string>,int>();
         readonly static Func<int,int,int>           _second  = (u,v) => v;
 
         [Fact]
@@ -90,7 +89,7 @@ namespace PGSolutions.Monads.MonadTests {
         /// <summary>Monad law 3: M.Bind(f1).Bind(f2) == M.Bind(x => f1(x).Bind(f2))</summary>
         [Fact]
         public static void MonadLaw3Select() {
-            Func<int,State<string,int>> addTwo = x => (x + 2).State<string,int>();
+            Func<int,State<X<string>,int>> addTwo = x => (x + 2).State<X<string>,int>();
             var received = _monad.SelectMany(_addOne).Select(addTwo)("a");
             var expected = _monad.Select(x => _addOne(x).SelectMany(addTwo)(""))("a");
 
@@ -116,7 +115,7 @@ namespace PGSolutions.Monads.MonadTests {
         /// <summary>Monad law 2: M.Bind(Monad) == M</summary>
         [Fact]
         public static void MonadLaw2SelectMany() {
-            var received = _monad.SelectMany(StateExtensions.State<string,int>);
+            var received = _monad.SelectMany(StateExtensions.State<X<string>,int>);
             var expected = _monad;
             Assert.Equal(received.Value("a"), expected.Value("a"));
             Assert.Equal(received.State("a"), expected.State("a"));
@@ -125,7 +124,7 @@ namespace PGSolutions.Monads.MonadTests {
         /// <summary>Monad law 3: M.Bind(f1).Bind(f2) == M.Bind(x => f1(x).Bind(f2))</summary>
         [Fact]
         public static void MonadLaw3SelectMany() {
-            Func<int, State<string,int>> addTwo = x => (x + 2).State<string,int>();
+            Func<int, State<X<string>,int>> addTwo = x => (x + 2).State<X<string>,int>();
             var received = _monad.SelectMany(_addOne).SelectMany(addTwo);
             var expected = _monad.SelectMany(x => _addOne(x).SelectMany(addTwo));
             Assert.Equal(expected.Value("a"), received.Value("a"));
@@ -146,7 +145,7 @@ namespace PGSolutions.Monads.MonadTests {
         /// <summary>Monad law 2: M.Bind(Monad) == M</summary>
         [Fact]
         public static void MonadLaw2SelectMany2() {
-            var received = _monad.SelectMany(StateExtensions.State<string,int>,_second);
+            var received = _monad.SelectMany(StateExtensions.State<X<string>,int>,_second);
             var expected = _monad;
             Assert.Equal(received.Value("a"), expected.Value("a"));
             Assert.Equal(received.State("a"), expected.State("a"));
@@ -155,7 +154,7 @@ namespace PGSolutions.Monads.MonadTests {
         /// <summary>Monad law 3: M.Bind(f1).Bind(f2) == M.Bind(x => f1(x).Bind(f2))</summary>
         [Fact]
         public static void MonadLaw3SelectMany2() {
-            Func<int,State<string,int>> addTwo = x => (x + 2).State<string,int>();
+            Func<int,State<X<string>,int>> addTwo = x => (x + 2).State<X<string>,int>();
             var received = _monad.SelectMany(_addOne,_second).SelectMany(addTwo,_second);
             var expected = _monad.SelectMany(x => _addOne(x).SelectMany(addTwo,_second),_second);
             Assert.Equal(expected.Value("a"), received.Value("a"));

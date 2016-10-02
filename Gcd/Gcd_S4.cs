@@ -37,27 +37,16 @@ using System.Reflection;
 using PGSolutions.Monads;
 
 namespace PGSolutions.Monads.Demos {
-#if !false
     using StateBool     = State<GcdStart,bool>;
     using StateInt      = State<GcdStart,int>;
     using StateRes      = State<GcdStart,GcdResult>;
 
     using Payload       = StructTuple;
     using PayloadInt    = StructTuple<GcdStart,int>;
-    using static State;
-    using static StateExtensions;
-    using static State2Transform;
-#else
-    using StateBool     = State<GcdStart,bool>;
-    using StateInt      = State<GcdStart,int>;
-    using StateRes      = State<GcdStart,GcdResult>;
 
-    using Payload       = StatePayload;
-    using PayloadInt    = StatePayload<GcdStart,int>;
     using static State;
     using static StateExtensions;
     using static StateTransform;
-#endif
 
     /// <summary>TODO</summary>
     public interface ITest {
@@ -79,37 +68,46 @@ namespace PGSolutions.Monads.Demos {
         /// <summary>TODO</summary>
         /// <param name="getAll">Specify true if old implementations desired to run as well as just nes ones.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public static MaybeX<IEnumerable<ITest>> GetTests(bool getAll) =>
-            ( from @class in typeof(Gcd_S4).GetNestedTypes(bindFlags)
-              from field  in @class.GetFields(bindFlags)
-              from atts   in field.CustomAttributes
-              where field.Name.Substring(0, 3) == "Run"
-                 && atts.AttributeType.Name =="DescriptionAttribute"
-              select new {
-                  Name        = @class.Name + "." + field.Name,
-                  Description = atts.ConstructorArguments[0].Value as string,
-                  Transform   = field.GetValue(null) as StateRes
-              }
-              into item
+        public static X<IEnumerable<ITest>> GetTests(bool getAll) =>
+            ( from item in typeof(Gcd_S4).GetMethodDescriptions(s => s.Substring(0, 3) =="Run")
               where getAll
                  || ( item.Name != nameof(Haskell)+"."+nameof(Haskell.Run1)
                    && item.Name != nameof(Haskell)+"."+nameof(Haskell.Run2)
-                   //&& item.Name != nameof(Haskell)+"."+nameof(Haskell.Run3)
                    && item.Name != nameof(Linq)+"."+nameof(Linq.Run1)
                    && item.Name != nameof(Linq)+"."+nameof(Linq.Run2)
-                   //&& item.Name != nameof(Linq)+"."+nameof(Linq.Run3)
-                   //&& item.Name != nameof(Best)+"."+nameof(Best.Run)
               )
               select new Test(item.Transform, item.Description, item.Name) as ITest
-            )
-            .AsMaybeX();
+            ).AsX();
 
         /// <summary>TODO</summary>
-        public static MaybeX<ITest> GetTest(string name) {
+        internal static IList<MethodDescriptor> GetMethodDescriptions(this Type type, Predicate<string> predicate) =>
+            ( from @class in type?.GetNestedTypes(bindFlags)
+              from field  in @class?.GetFields(bindFlags)
+              from atts   in field?.CustomAttributes
+              where predicate(field?.Name ?? "") //?? false
+                 && atts?.AttributeType.Name == "DescriptionAttribute"
+              select new MethodDescriptor {
+                    Name        = @class?.Name + "." + field?.Name,
+                    Description = atts?.ConstructorArguments[0].Value as string,
+                    Transform   = field?.GetValue(null) as StateRes
+            } ).ToList().AsReadOnly();
+
+        /// <summary>TODO</summary>
+        internal class MethodDescriptor {
+            /// <summary>TODO</summary>
+            public string   Name        { get; internal set; }
+            /// <summary>TODO</summary>
+            public string   Description { get; internal set; }
+            /// <summary>TODO</summary>
+            public StateRes Transform   { get; internal set; }
+        }
+
+        /// <summary>TODO</summary>
+        public static X<ITest> GetTest(string name) {
             return ( from test in GetTests(true) | new List<ITest>()
                      where test.Name == name
                      select test
-                   ).FirstOrDefault().AsMaybeX();
+                   ).FirstOrDefault().AsX();
         }
 
 #region Utilities
@@ -194,7 +192,7 @@ namespace PGSolutions.Monads.Demos {
         /// <summary>TODO</summary>
         [Pure]
         internal static class Haskell {
-#region Older Haskell implementations
+        #region Older Haskell implementations
               /* from http://mvanier.livejournal.com/5846.html
                   gcd_s3 :: State GCDState Int
                   gcd_s3 = 
@@ -230,7 +228,7 @@ namespace PGSolutions.Monads.Demos {
             [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
             [Description("Straight Haskel w/ Modify() instead of Get.Compose(s => Put(transform(s))).")]
             public static readonly StateRes Run2 = GetResult(_run2);
-#endregion
+        #endregion
 
               // ~ 1.5 sec
             private static readonly StateInt _run3 = AlgorithmState.DoWhile().Then(GcdExtract);
@@ -243,7 +241,7 @@ namespace PGSolutions.Monads.Demos {
         /// <summary>TODO</summary>
         [Pure]
         internal static class Linq {
-#region Older LINQ implementations
+        #region Older LINQ implementations
               // ~ 3.5 sec
             private static readonly StateInt _run1 = new StateInt(start =>
                           ( from s in AlgorithmTransform.Enumerate(start)
@@ -267,7 +265,7 @@ namespace PGSolutions.Monads.Demos {
             [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
             [Description("Better LINQ w/ Enumerate(State<TState,TValue>, TState).")]
             public static readonly StateRes Run2 = GetResult(_run2); 
-#endregion
+        #endregion
 
                // ~ 1.5 sec
             private static readonly StateInt _run3 = new StateInt(start =>
@@ -284,7 +282,7 @@ namespace PGSolutions.Monads.Demos {
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
         [Pure]
-        public static class Best {
+        internal static class Best {
               // ~ 1.0 sec
             private static readonly StateInt _run = AlgorithmTransform.DoWhile(s => s.A != s.B)
                                                                       .Then(GcdExtract);
@@ -293,5 +291,9 @@ namespace PGSolutions.Monads.Demos {
             [Description("Optimized DoWhile().")]
             public static readonly StateRes Run = GetResult(_run);
         }
+
+        /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
+        public static readonly StateRes BestRun = s => Best.Run(s);
     }
 }

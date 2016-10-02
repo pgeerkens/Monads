@@ -26,33 +26,29 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
-using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 
-namespace PGSolutions.Monads.MonadTests {
-    using static Contract;
-
-    internal static class MaybeTestsExtensions {
-        /// <summary>A string representing the object's value, or "Nothing" if it has no value.</summary>
-        public static string ToNothingString<T>(this X<T> @this
-        ) where T:class {
-            Ensures(Result<string>() != null);
-            return @this.Select(v => v.ToString()) | "Nothing";
-        }
-    }
-
+namespace PGSolutions.Monads {
+    /// <summary>TODO</summary>
     [Pure]
-    internal static partial class EnumerableExtensions {
-        public static IEnumerable<T> Enumerable<T>(this T value) {
-            Ensures(Result<IEnumerable<T>>() != null);
-            yield return value;
+    public static class LinqExtensions {
+        //=======================================================================================================
+        /// <summary>A string representing the object's value, or "Nothing" if it has no value.</summary>
+        public static string ToNothingString<T>(this T @this) {
+            Contract.Ensures(Contract.Result<string>() != null);
+            return @this != null ? @this.ToString() : "Nothing";
         }
-    }
 
-    internal class ExternalState {
-        private int _state;
+        ///<summary>Tests value-equality, returning <b>Nothing</b> if either value doesn't exist.</summary>
+        public static bool? AreNonNullEqual<TValue>(this TValue lhs, TValue rhs)
+            => lhs != null && rhs != null ? lhs.Equals(rhs) : null as bool?;
 
-        public ExternalState() { _state = -1; }
-        public int GetState() { return ++_state; }
+       /// <summary>TODO</summary>
+        /// <typeparam name="TValue"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="this"></param>
+        /// <returns></returns>
+        public static TResult Cast<TValue,TResult>(this TValue @this) where TValue:TResult 
+            => @this != null ? @this : default(TResult);
     }
 }

@@ -32,14 +32,14 @@ using System.Drawing;
 namespace PGSolutions.Monads.TrafficLightDemo {
     using ISettableLight = ISettableLight<Image>;
 
-    /// <summary>TODO</summary>
+    /// <summary>The Traffic LIght Finite-State-Machine.</summary>
     [Pure]
     public class LightStates<TSettableLight,TEnv> : FsmTask<TEnv> 
             where TSettableLight : ISettableLight
             where TEnv           : ITrafficLight<TSettableLight,Image> 
     {
         /// <inheritdoc/>
-        protected override FsmTransition Start { get; } = e => _reset.GetState(             500,
+        protected override FsmTransition Start { get; } = e => _reset.GetState(          500,
             from _    in e.UpDownTown.SetColor         (e.Green)
             from __   in e.CrossTown.SetColor          (e.Yellow)
             from ___  in e.UpTownLeftTurn.SetColor     (e.Green)

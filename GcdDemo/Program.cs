@@ -64,7 +64,7 @@ namespace PGSolutions.Monads.Demos {
                     passNo == 0  ?  i < 13
                                  :  i < 2 || 11 < i;
 
-        static int i = 0;
+        static int i = 2;
         static int Main() => ( i==0 ? ImperativeSyntax("Imperative")
                              : i==1 ? FluentSyntax("Fluent")
                                     : ComprehensionSyntax("Comprehension")
@@ -74,12 +74,9 @@ namespace PGSolutions.Monads.Demos {
             for(int pass=0; pass < int.MaxValue; pass++) {
                 var counter = 0;
                 var enumerable = gcdStartStates.Where(state => _predicate(pass, counter++));
-#if true
-                var list = enumerable.ToList();
-                Gcd.Run((Maybe<IList<GcdStart>>)(list));
-#else
-                Gcd.Run2((Maybe<IList<GcdStart>>)(enumerable.ToList()));
-#endif
+
+                Gcd.Run(enumerable.ToList());
+
                 Write(Prompt(mode));
                 var c = ReadKey();
                 WriteLine();
@@ -87,7 +84,7 @@ namespace PGSolutions.Monads.Demos {
                 if (c.KeyChar.ToUpper() == 'Q') yield return 0;
             }
         }
-#region Fluent syntax
+        #region Fluent syntax
         static IEnumerable<int> FluentSyntax(string mode) =>
             ( Enumerable.Range(0,int.MaxValue)
                         .Select(pass => new {pass, counter = Readers.Counter(0)})
@@ -95,15 +92,14 @@ namespace PGSolutions.Monads.Demos {
                                                       .Select(state => state)
                                )
             ).Where(enumerable => 
-               ( (Gcd.Run((Maybe<IList<GcdStart>>)enumerable.ToList()) | IO<Unit>.Empty)
+               ( (Gcd.Run(enumerable.ToList()) ).ToIO()
                     .SelectMany(_ => ConsoleWrite(Prompt(mode)),(_,__) => new {})
                     .SelectMany(_ => ConsoleReadKey(),          (_, c) => new {c})
                     .SelectMany(_ => ConsoleWriteLine(),        (_,__) => _.c.KeyChar.ToUpper() == 'Q')
                ).Invoke()
             ).Select(list => 0);
-#endregion
-
-#region Comprehension syntax
+        #endregion
+        #region Comprehension syntax
         static IEnumerable<int> ComprehensionSyntax(string mode) =>
             from pass  in Enumerable.Range(0, int.MaxValue)
             let counter = Readers.Counter(0)
@@ -111,14 +107,14 @@ namespace PGSolutions.Monads.Demos {
                      where _predicate(pass, counter())
                      select state )
             into enumerable
-            where ( from _   in Gcd.Run((Maybe<IList<GcdStart>>)enumerable.ToList()) | IO<Unit>.Empty
+            where ( from _   in Gcd.Run(enumerable.ToList()).ToIO()
                     from __  in ConsoleWrite(Prompt(mode))
                     from c   in ConsoleReadKey()
                     from ___ in ConsoleWriteLine()
                     select c.KeyChar.ToUpper() == 'Q' 
                   ).Invoke()
             select 0;
-#endregion
+        #endregion
     }
 
     static class Extensions {

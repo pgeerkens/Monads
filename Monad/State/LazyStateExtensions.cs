@@ -44,7 +44,6 @@ namespace PGSolutions.Monads {
         /// <remarks> Optimized implementation of:
         ///         return this.Bind(t => follower(t.Item2));
         /// </remarks>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public static LazyState<TState,TResult>     Compose<TState,TValue,TResult> ( this
             LazyState<TState, TValue> @this,
             Func<TState, LazyState<TState,TResult>> follower
@@ -77,11 +76,8 @@ namespace PGSolutions.Monads {
         /// <summary>TODO</summary>
         /// <param name="this">The start state for this transformation.</param>
         /// <param name="s">todo: describe s parameter on Value</param>
-        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
-        public static TValue    Value<TState, TValue>(this LazyState<TState, TValue> @this, TState s) {
+        public static TValue    Value<TState, TValue>(this LazyState<TState,TValue> @this, TState s) {
             @this.ContractedNotNull(nameof(@this));
-            s.ContractedNotNull(nameof(s));
-            Ensures(Result<TValue>() != null);
 
             return @this.Run(s).Value;
         }
@@ -89,11 +85,8 @@ namespace PGSolutions.Monads {
         /// <summary>TODO</summary>
         /// <param name="this">The start state for this transformation.</param>
         /// <param name="s">todo: describe s parameter on State</param>
-        [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
-        public static TState    State<TState, TValue>(this LazyState<TState, TValue> @this, TState s) {
+        public static TState    State<TState, TValue>(this LazyState<TState,TValue> @this, TState s) {
             @this.ContractedNotNull(nameof(@this));
-            s.ContractedNotNull(nameof(s));
-            Ensures(Result<TState>() != null);
 
             return @this.Run(s).State;
         }
@@ -104,10 +97,8 @@ namespace PGSolutions.Monads {
         [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
         public static StatePayload<TState,TValue> Run<TState, TValue>(this LazyState<TState, TValue> @this, TState s) {
             @this.ContractedNotNull(nameof(@this));
-            s.ContractedNotNull(nameof(s));
 
-            var newState = @this(s);
-            return newState;
+            return  @this(s);;
         }
     }
 }

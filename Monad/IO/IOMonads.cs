@@ -32,7 +32,6 @@ using System.Diagnostics.Contracts;
 using System.IO;
 
 namespace PGSolutions.Monads {
-    //using static Contract;
     using static Console;
 
     /// <summary>TODO</summary>

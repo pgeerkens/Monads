@@ -44,7 +44,6 @@ namespace PGSolutions.Monads {
         public static IO<Unit> Action
           (Action action) {
             action.ContractedNotNull(nameof(action));
-        //    Ensures(Result<IO<Unit>>() != null);
             return action.AsIO();
         }
 

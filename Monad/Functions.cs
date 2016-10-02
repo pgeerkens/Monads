@@ -26,33 +26,22 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
-using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 
-namespace PGSolutions.Monads.MonadTests {
-    using static Contract;
-
-    internal static class MaybeTestsExtensions {
-        /// <summary>A string representing the object's value, or "Nothing" if it has no value.</summary>
-        public static string ToNothingString<T>(this X<T> @this
-        ) where T:class {
-            Ensures(Result<string>() != null);
-            return @this.Select(v => v.ToString()) | "Nothing";
-        }
-    }
-
+namespace PGSolutions.Monads {
+    /// <summary>Constant utility functions of one and two arguments.</summary>
     [Pure]
-    internal static partial class EnumerableExtensions {
-        public static IEnumerable<T> Enumerable<T>(this T value) {
-            Ensures(Result<IEnumerable<T>>() != null);
-            yield return value;
-        }
-    }
+    public static class Functions {
+        /// <summary>The identity function - Returns its argument.</summary>
+        public static TValue    Identity<TValue>(TValue value) => value;
 
-    internal class ExternalState {
-        private int _state;
+        /// <summary>Returns its first argument.</summary>
+        [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "p2")]
+        public static TFirst    First<TFirst,TSecond> (TFirst p1, TSecond p2) => p1;
 
-        public ExternalState() { _state = -1; }
-        public int GetState() { return ++_state; }
+        /// <summary>Returns its second argument.</summary>
+        [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "p1")]
+        public static TSecond   Second<TFirst,TSecond>(TFirst p1, TSecond p2) => p2;
     }
 }

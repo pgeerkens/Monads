@@ -89,13 +89,13 @@ namespace PGSolutions.Monads {
 
         /// <summary>ι: TUnit -> Reader&lt;TEnvironment, TUnit></summary>
         /// <typeparam name="TEnvironment"></typeparam>
-        /// <param name="unit"></param>
+        /// <param name="u"></param>
         /// <returns></returns>
-        public static Reader<TEnvironment,Unit>       Unit<TEnvironment>(Unit unit)
+        public static Reader<TEnvironment,Unit>       Unit<TEnvironment>(Unit u)
         {
             Ensures(Result<Reader<TEnvironment,Unit>>() != null);
 
-            return unit.ToReader<TEnvironment, Unit>();
+            return u.ToReader<TEnvironment, Unit>();
         }
     }
 }

@@ -31,83 +31,58 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
-    using static Contract;
-
     /// <summary>Class representing, conceptually, the "type" of <i>void</i>.</summary>
     public struct Unit : IEquatable<Unit>, IComparable<Unit> {
         /// <summary>The single instance of <see cref="Unit"/></summary>
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "_")]
         [SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [CLSCompliant(false)]
-        public static Unit _ { get {return _this;} } static Unit _this = new Unit();
+        public static Unit _ { get { return _this; } } static Unit _this = new Unit();
 
         /// <inheritdoc/>
-        public int CompareTo(Unit other) { Ensures(Result<int>()==0); return 0; }
-        /// <summary>TODO</summary>
-        public static bool operator <(Unit lhs, Unit rhs) {
-            Ensures(Result<bool>() == false);
-
-            return lhs.CompareTo(rhs) < 0;
-        }
-        /// <summary>TODO</summary>
-        public static bool operator >(Unit lhs, Unit rhs) {
-            Ensures(Result<bool>() == false);
-
-            return lhs.CompareTo(rhs) > 0;
-        }
+        [Pure]public int CompareTo(Unit other) => 0;
+        /// <summary>Returns true exactly when lhs &lt; rhs.</summary>
+        [Pure]public static bool operator <(Unit lhs, Unit rhs) => lhs.CompareTo(rhs) < 0;
+        /// <summary>Returns true exactly when lhs &gt; rhs.</summary>
+        [Pure]public static bool operator >(Unit lhs, Unit rhs) => lhs.CompareTo(rhs) > 0;
 
         #region Value Equality with IEquatable<T>.
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]public bool Equals(Unit other) => true;
-
         /// <inheritdoc/>
         [Pure]public override bool Equals(object obj) => obj is Unit;
+        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
+        [Pure]public static bool operator ==(Unit lhs, Unit rhs) => lhs.Equals(rhs);
+        /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
+        [Pure]public static bool operator !=(Unit lhs, Unit rhs) => !lhs.Equals(rhs);
 
         /// <inheritdoc/>
-        [Pure]public override int  GetHashCode() { Ensures(Result<int>()==0); return 0; }
-
-        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-        [Pure]public static bool operator == (Unit lhs, Unit rhs) =>lhs.Equals(rhs);
-
-        /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
-        [Pure]public static bool operator != (Unit lhs, Unit rhs) => ! lhs.Equals(rhs);
+        [Pure]public override int GetHashCode() => 0;
         #endregion
+    }
 
-        /// <summary>TODO</summary>
-        public Func<Unit>     Select(
+    /// <summary>Class representing, conceptually, the "type" of <i>void</i>.</summary>
+    [Pure]
+    public static class UnitExtensionsLinq {
+        readonly static Func<Unit> _nothing = null;
+        /// <summary>The LINQ-enabling Select method.</summary>
+        public static Func<Unit>     Select(this Unit @this,
             Func<Unit, Unit> projector
-        ) { 
-            projector.ContractedNotNull(nameof(projector));
-            Ensures(Result<Func<Unit>>() != null);
+        ) =>
+            projector==null ? _nothing : () => projector(@this);
 
-            var @this = this;
-            return () => projector(@this);
-        }
-
-        /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public Func<Unit>     SelectMany(
+        /// <summary>The monadic bind method.</summary>
+        public static Func<Unit>     SelectMany(this Unit @this,
             Func<Unit, Func<Unit>> selector
-        ) {
-            selector.ContractedNotNull(nameof(selector));
-            Ensures(Result<Func<Unit>>() != null);
+        ) =>
+            selector==null ? _nothing : () => selector(@this)();
 
-            var @this = this;
-            return () => selector(@this)();
-        }
-
-        /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public Func<Unit>     SelectMany<TSelection>(
+        /// <summary>The LINQ-enabling SelectMany method.</summary>
+        public static Func<Unit>     SelectMany<TSelection>(this Unit @this,
             Func<Unit, Func<TSelection>> selector,
-            Func<Unit,TSelection,Unit> projector
-        ) {
-            selector.ContractedNotNull(nameof(selector));
-            projector.ContractedNotNull(nameof(projector));
-            Ensures(Result<Func<Unit>>() != null);
-
-            var @this = this;
-            return () => projector(@this, selector(@this)() );
-        }
+            Func<Unit,TSelection,Unit>   projector
+        ) =>
+            selector==null || projector==null ? _nothing 
+                                              : () => projector(@this, selector(@this)() );
     }
 }

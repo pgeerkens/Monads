@@ -36,8 +36,6 @@ using Xunit;
 
 namespace PGSolutions.Monads.MonadTests {
 
-    [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors",
-        Justification = "Unit tests require a public default constructor.")]
     [ExcludeFromCodeCoverage]
     public class ReaderTests {
         [Fact]
@@ -71,8 +69,6 @@ namespace PGSolutions.Monads.MonadTests {
         }
     }
 
-    [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors",
-        Justification = "Unit tests require a public default constructor.")]
     public class MonadLawTests {
         static Reader<Tuple<bool, string>, int> M = c => 2 + c.Item2.Length;
         static Func<int, Reader<Tuple<bool, string>, int>> addOne = x => c => x + 1;
@@ -108,8 +104,6 @@ namespace PGSolutions.Monads.MonadTests {
         }
     }
 
-    [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors",
-        Justification = "Unit tests require a public default constructor.")]
     public class TomAndJerryDependencyInjectionTest {
         [Fact]
         public static void TomAndJerryTest() {

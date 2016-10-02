@@ -41,11 +41,10 @@ namespace PGSolutions.Monads {
     public static partial class MaybeTaskExtensions {
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
-        public delegate MaybeX<Task<TSource>> MaybeTask<TSource>();
+        public delegate X<Task<TSource>> MaybeTask<TSource>();
 
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public static MaybeX<Task<TResult>>  Select<TSource, TResult>(this MaybeX<Task<TSource>> source,
+        public static X<Task<TResult>>  Select<TSource, TResult>(this X<Task<TSource>> source,
             Func<TSource, TResult> selector
         ) {
             selector.ContractedNotNull(nameof(selector));
@@ -54,9 +53,8 @@ namespace PGSolutions.Monads {
         }
 
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public static MaybeX<Task<TResult>>  SelectMany<TSource, TResult>(this MaybeX<Task<TSource>> source,
-            Func<TSource, MaybeX<Task<TResult>>> selector
+        public static X<Task<TResult>>  SelectMany<TSource, TResult>(this X<Task<TSource>> source,
+            Func<TSource, X<Task<TResult>>> selector
         ) {
             selector.ContractedNotNull(nameof(selector));
 
@@ -64,9 +62,8 @@ namespace PGSolutions.Monads {
         }
 
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public static MaybeX<Task<TResult>>  SelectMany<TSource, T, TResult>(this MaybeX<Task<TSource>> source,
-            Func<TSource, MaybeX<Task<T>>> selector,
+        public static X<Task<TResult>>  SelectMany<TSource, T, TResult>(this X<Task<TSource>> source,
+            Func<TSource, X<Task<T>>> selector,
             Func<TSource, T, TResult> resultSelector
         ) {
             selector.ContractedNotNull(nameof(selector));
@@ -84,13 +81,12 @@ namespace PGSolutions.Monads {
         //}
 
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public static MaybeX<Task<Unit>>     ToTaskUnit(this MaybeX<Task> source) =>
+        public static X<Task<Unit>>     ToTaskUnit(this X<Task> source) =>
             source.Flatten(value => value.Task(), Functions.Second);
 
         /// <summary>TODO</summary>
-        private static MaybeX<Task<TResult>> Flatten<TSource, T, TResult>(this MaybeX<Task<TSource>> source,
-            Func<TSource, MaybeX<Task<T>>> selector,
+        private static X<Task<TResult>> Flatten<TSource, T, TResult>(this X<Task<TSource>> source,
+            Func<TSource, X<Task<T>>> selector,
             Func<TSource, T, TResult> resultSelector
         ) {
             selector.ContractedNotNull(nameof(selector));
@@ -102,8 +98,8 @@ namespace PGSolutions.Monads {
         }
 
         /// <summary>TODO</summary>
-        private static MaybeX<Task<TResult>> Flatten<T, TResult>(this MaybeX<Task> source,
-            Func<Unit, MaybeX<Task<T>>> selector,
+        private static X<Task<TResult>> Flatten<T, TResult>(this X<Task> source,
+            Func<Unit, X<Task<T>>> selector,
             Func<Unit, T, TResult> resultSelector
         ) {
             selector.ContractedNotNull(nameof(selector));
@@ -115,7 +111,7 @@ namespace PGSolutions.Monads {
         }
 
         /// <summary>η: T -> Task{T}</summary>
-        private static MaybeX<Task<TResult>> Task<TResult>(this TResult value) => FromResult(value).AsMaybeX();
+        private static X<Task<TResult>> Task<TResult>(this TResult value) => FromResult(value);
 
         //// φ: Lazy<Task<T1>, Task<T2>> => Task<Lazy<T1, T2>>
         //public static Task<Lazy<T1, T2>> Binary2<T1, T2>

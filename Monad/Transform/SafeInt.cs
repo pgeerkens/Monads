@@ -28,8 +28,10 @@
 #endregion
 using System;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 
 namespace PGSolutions.Monads {
+    using static CultureInfo;
     using static Contract;
 
     /// <summary>TODO</summary>
@@ -141,7 +143,7 @@ namespace PGSolutions.Monads {
         [Pure]
         public override string ToString() {
             Ensures(Result<string>() != null);
-            return _value.HasValue ? _value.ToString() : "";
+            return _value?.ToString(InvariantCulture) ?? "";
         }
     }
 

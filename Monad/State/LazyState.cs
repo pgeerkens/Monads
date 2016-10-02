@@ -62,7 +62,6 @@ namespace PGSolutions.Monads {
         }
 
         /// <summary>Generates an unending stream of successive StructTuple{TState,T} objects.</summary>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public static IEnumerable<StatePayload<TState,TValue>>  Enumerate<TState,TValue>(this
             LazyState<TState,TValue> @this,
             TState startState
@@ -98,7 +97,6 @@ namespace PGSolutions.Monads {
         ///             return selector(sourceResult.Value)(sourceResult.State);
         ///         };
         /// </remarks>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public static LazyState<TState,TResult>         SelectMany<TState,TValue,TResult> (this
             LazyState<TState,TValue> @this,
             Func<TValue,LazyState<TState,TResult>> selector
@@ -119,7 +117,6 @@ namespace PGSolutions.Monads {
         ///             new State{TState,TResult}( s    => 
         ///             new StatePayload{TState,TResult}(s,projector(aval,bval)) ) ) );
         /// </remarks>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public static LazyState<TState,TResult>         SelectMany<TState,TValue,T,TResult> (this
             LazyState<TState,TValue> @this,
             Func<TValue, LazyState<TState,T>> selector,

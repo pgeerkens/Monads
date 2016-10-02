@@ -29,7 +29,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>MonadTests.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -38,7 +38,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>MonadTests.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -80,8 +80,7 @@
   <ItemGroup>
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IOTests.cs" />
-    <Compile Include="MaybeTests.cs" />
-    <Compile Include="MaybeX2Tests.cs" />
+    <Compile Include="MaybeXLinqNullTests.cs" />
     <Compile Include="MaybeXTests.cs" />
     <Compile Include="MixedMaybeTests.cs" />
     <Compile Include="NullableTests.cs" />
@@ -97,6 +96,7 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="Monads.snk" />
+    <None Include="MonadTests.ruleset" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

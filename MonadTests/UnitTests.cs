@@ -8,8 +8,6 @@ using Xunit;
 
 namespace PGSolutions.Monads.MonadTests {
 
-    [SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors",
-        Justification = "Unit tests require a public default constructor.")]
     [ExcludeFromCodeCoverage]
     public partial class EnumerableTests {
         [Fact]
@@ -60,6 +58,35 @@ namespace PGSolutions.Monads.MonadTests {
             var received = _enumerable2.SelectMany(_plusOne).SelectMany(_timesTwo).ToList();
 
             Assert.Equal(expected, received);
+        }
+    }
+
+    [ExcludeFromCodeCoverage]
+    public class UnitLinqNullTests {
+        readonly static Unit _unit = Unit._;
+
+        /// <summary>Unit-test constructor.</summary>
+        public UnitLinqNullTests() { ; }
+
+        [Fact]
+        public static void Select() {
+            var received = _unit.Select(null);
+            Assert.True(received == null);
+        }
+
+        [Fact]
+        public static void SelectMany1Arg() {
+            var received = _unit.SelectMany(null);
+            Assert.True(received == null);
+        }
+
+        [Fact]
+        public static void SelectMany2Arg() {
+            var received = _unit.SelectMany<Unit>(null, Functions.Second);
+            Assert.True(received == null, "A: ");
+
+            received = _unit.SelectMany<Unit>(u=>()=>Unit._, null);
+            Assert.True(received == null, "B: ");
         }
     }
 }
