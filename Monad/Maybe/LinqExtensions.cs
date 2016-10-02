@@ -32,7 +32,6 @@ namespace PGSolutions.Monads {
     /// <summary>TODO</summary>
     [Pure]
     public static class LinqExtensions {
-        //=======================================================================================================
         /// <summary>A string representing the object's value, or "Nothing" if it has no value.</summary>
         public static string ToNothingString<T>(this T @this) {
             Contract.Ensures(Contract.Result<string>() != null);
@@ -43,7 +42,7 @@ namespace PGSolutions.Monads {
         public static bool? AreNonNullEqual<TValue>(this TValue lhs, TValue rhs)
             => lhs != null && rhs != null ? lhs.Equals(rhs) : null as bool?;
 
-       /// <summary>TODO</summary>
+        /// <summary>LINQ-ible Cast implementation for a class object.</summary>
         /// <typeparam name="TValue"></typeparam>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="this"></param>
