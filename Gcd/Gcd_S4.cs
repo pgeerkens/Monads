@@ -81,6 +81,7 @@ namespace PGSolutions.Monads.Demos {
 
         /// <summary>TODO</summary>
         internal static IList<MethodDescriptor> GetMethodDescriptions(this Type type, Predicate<string> predicate) =>
+            type==null ? new List<MethodDescriptor>().AsReadOnly() :
             ( from @class in type?.GetNestedTypes(bindFlags)
               from field  in @class?.GetFields(bindFlags)
               from atts   in field?.CustomAttributes
@@ -163,7 +164,7 @@ namespace PGSolutions.Monads.Demos {
             [Description("Fully imperative; w/o substitution.")]
             public static readonly StateRes Run1 = GetResult(new StateInt(s=>_run1(s)));
             private static PayloadInt _run1(GcdStart s) {
-                if (s==null) return Payload.New(s, 0);
+                s.ContractedNotNull(nameof(s));
                 while (s.A != s.B) {
                     s = s.A > s.B ? new GcdStart(s.A - s.B,    s.A   )
                       : s.A < s.B ? new GcdStart(   s.A,    s.B - s.A)
@@ -179,10 +180,9 @@ namespace PGSolutions.Monads.Demos {
             [Description("Fully imperative; w/ substitution.")]
             public static readonly StateRes Run2 = GetResult(new StateInt(s=>_run2(s)));
             private static PayloadInt _run2(GcdStart s) {
-                if (s==null) return Payload.New(s, 0);
+                s.ContractedNotNull(nameof(s));
                 while (s.A != s.B) {
-                    var x = s.A; var y = s.B;   // explicitly exposes the immutability of s.
-
+                    var x = s.A; var y = s.B;       // explicitly exposes the immutability of s.
                     s = x > y ? new GcdStart(x-y,  x )
                       : x < y ? new GcdStart( x,  y-x)
                               : s;

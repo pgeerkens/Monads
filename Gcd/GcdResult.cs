@@ -35,7 +35,7 @@ namespace PGSolutions.Monads.Demos {
 
     /// <summary>TODO</summary>
 #if GCDStartAsClass
-    public class  GcdResult : IEquatable<GcdResult> {
+    public class  GcdResult : IEquatable<GcdResult>, ISafeToString {
 #else
     public struct GcdResult : IEquatable<GcdResult> {
 #endif
@@ -67,10 +67,7 @@ namespace PGSolutions.Monads.Demos {
         [Pure]public override int GetHashCode() { unchecked { return Gcd.GetHashCode(); } }
 
         /// <inheritdoc/>
-        public override string ToString() {
-            Ensures(Result<string>() != null);
-            return Format("    GCD = {0}",Gcd);
-        }
+        public override string ToString() => Format("    GCD = {0}",Gcd);
         #endregion
     }
 }

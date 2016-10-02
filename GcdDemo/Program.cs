@@ -35,7 +35,11 @@ namespace PGSolutions.Monads.Demos {
     using static Console;
     using static IOMonads;
     using static String;
+    using static Syntax;
 
+    enum Syntax {
+        Imperative, Fluent, Query
+    }
     class Program {
         static string Prompt(string mode) => 
             Format("{0}: Type 'Q' to quit; <Enter> to repeat ... ",mode);
@@ -64,10 +68,10 @@ namespace PGSolutions.Monads.Demos {
                     passNo == 0  ?  i < 13
                                  :  i < 2 || 11 < i;
 
-        static int i = 2;
-        static int Main() => ( i==0 ? ImperativeSyntax("Imperative")
-                             : i==1 ? FluentSyntax("Fluent")
-                                    : ComprehensionSyntax("Comprehension")
+        static Syntax syntax = Query;
+        static int Main() => ( syntax==Imperative ? ImperativeSyntax("Imperative Syntax")
+                             : syntax==Fluent     ? FluentSyntax("Fluent Syntax")
+                                                  : QuerySyntax("Query (Comprehension) Syntax")
                              ).FirstOrDefault(); // Doesn't assume result list non-empty
 
         static IEnumerable<int> ImperativeSyntax(string mode) {
@@ -100,7 +104,7 @@ namespace PGSolutions.Monads.Demos {
             ).Select(list => 0);
         #endregion
         #region Comprehension syntax
-        static IEnumerable<int> ComprehensionSyntax(string mode) =>
+        static IEnumerable<int> QuerySyntax(string mode) =>
             from pass  in Enumerable.Range(0, int.MaxValue)
             let counter = Readers.Counter(0)
             select ( from state in gcdStartStates

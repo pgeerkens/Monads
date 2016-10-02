@@ -35,7 +35,7 @@ namespace PGSolutions.Monads.Demos {
 
     /// <summary>TODO</summary>
 #if GCDStartAsClass    // performance improvement of ~20% for functional, decrease of ~50% for imperative!
-    public class GcdStart : IEquatable<GcdStart> {
+    public class GcdStart : IEquatable<GcdStart>, ISafeToString {
 #else
     public struct GcdStart : IEquatable<GcdStart> {
 #endif
@@ -57,7 +57,7 @@ namespace PGSolutions.Monads.Demos {
         #endif
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-        [Pure]public bool Equals(GcdStart other) { return other!=null && A == other.A && B == other.B; }
+        [Pure]public bool Equals(GcdStart other) => other!=null && A==other.A && B==other.B;
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]public static bool operator ==(GcdStart lhs, GcdStart rhs) { return lhs.Equals(rhs); }
@@ -69,10 +69,7 @@ namespace PGSolutions.Monads.Demos {
         [Pure]public override int GetHashCode() { unchecked { return A.GetHashCode() ^ B.GetHashCode(); } }
 
         /// <inheritdoc/>
-        public override string ToString() {
-            Ensures(Result<string>() != null);
-            return Format("({0,14:N0}, {1,14:N0})", A, B) ?? "";
-        }
+        public override string ToString() => Format("({0,14:N0}, {1,14:N0})", A, B) ?? "";
         #endregion
     }
 }

@@ -78,15 +78,15 @@ namespace PGSolutions.Monads.Demos {
 
         private static IEnumerable<IO<Unit>> RunInner2(
             ITest           test, 
-            IList<GcdStart> states, 
+            IList<GcdStart> startStates, 
             Func<TimeSpan>  elapsed, 
             Func<bool>      isThird
         ) {
-            states.ContractedNotNull(nameof(states));
+            startStates.ContractedNotNull(nameof(startStates));
             test.ContractedNotNull(nameof(test));
             Ensures(Result<IEnumerable<IO<Unit>>>() != null);
 
-            return ( from start in states
+            return ( from start in startStates
                      select new {
                         Start  = start,
                         Result = from validated in ValidateState(start.ToMaybe()).State
@@ -123,10 +123,10 @@ namespace PGSolutions.Monads.Demos {
         return new PayloadMaybe(
                 from state in start
                 from x in state.A == 1
-                       || state.B == 1 ? new GcdStart(1, 1).ToMaybe()
+                       || state.B == 1            ? new GcdStart(1, 1).ToMaybe()
                         : state.A != int.MinValue
                        && state.B != int.MinValue ? new GcdStart(Math.Abs(state.A), Math.Abs(state.B)).ToMaybe()
-                        : state.A == state.B ? new GcdStart(state.A, state.B).ToMaybe()
+                        : state.A ==      state.B ? new GcdStart(state.A, state.B).ToMaybe()
                         : state.A == int.MinValue ? new GcdStart(Math.Abs(state.A + Math.Abs(state.B)),
                                                                  Math.Abs(state.B)
                                                                 ).ToMaybe()
