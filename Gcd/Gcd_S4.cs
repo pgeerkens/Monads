@@ -47,6 +47,7 @@ namespace PGSolutions.Monads.Demos {
     using static State;
     using static StateExtensions;
     using static StateTransform;
+    using static BindingFlags;
 
     /// <summary>TODO</summary>
     public interface ITest {
@@ -63,45 +64,22 @@ namespace PGSolutions.Monads.Demos {
     [Pure]
     public static class Gcd_S4 { // Beware! - These must be declared & initialized in this order
 
-        const BindingFlags bindFlags = BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
-
         /// <summary>TODO</summary>
         /// <param name="getAll">Specify true if old implementations desired to run as well as just nes ones.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public static X<IEnumerable<ITest>> GetTests(bool getAll) =>
-            from list in typeof(Gcd_S4).GetMethodDescriptions(s => s.Substring(0, 3) =="Run")
+            from list in typeof(Gcd_S4).GetMethodDescriptions(s => s.Substring(0, 3) == "Run", 
+                                                              Static | NonPublic | Public,
+                                                              f => f?.GetValue(null) as StateRes)
             select ( from item in list
                      where getAll
                         || ( item.Name != nameof(Haskell)+"."+nameof(Haskell.Run1)
                           && item.Name != nameof(Haskell)+"."+nameof(Haskell.Run2)
-                          && item.Name != nameof(Linq)+"."+nameof(Linq.Run1)
-                          && item.Name != nameof(Linq)+"."+nameof(Linq.Run2)
+                          && item.Name != nameof(Linq)   +"."+nameof(Linq.Run1)
+                          && item.Name != nameof(Linq)   +"."+nameof(Linq.Run2)
                            )
-                     select new Test(item.Transform, item.Description, item.Name) as ITest
-                   );
-
-        /// <summary>TODO</summary>
-        internal static X<IList<MethodDescriptor>> GetMethodDescriptions(this Type type, Predicate<string> predicate) =>
-            ( from @class in type?.GetNestedTypes(bindFlags)
-              from field  in @class?.GetFields(bindFlags)
-              from atts   in field?.CustomAttributes
-              where predicate(field?.Name ?? "") //?? false
-                 && atts?.AttributeType.Name == "DescriptionAttribute"
-              select new MethodDescriptor {
-                    Name        = @class?.Name + "." + field?.Name,
-                    Description = atts?.ConstructorArguments[0].Value as string,
-                    Transform   = field?.GetValue(null) as StateRes
-            } ).ToList().AsReadOnly();
-
-        /// <summary>TODO</summary>
-        internal class MethodDescriptor {
-            /// <summary>TODO</summary>
-            public string   Name        { get; internal set; }
-            /// <summary>TODO</summary>
-            public string   Description { get; internal set; }
-            /// <summary>TODO</summary>
-            public StateRes Transform   { get; internal set; }
-        }
+                     select new Test(item.Details, item.Description, item.Name) as ITest
+            );
 
         /// <summary>TODO</summary>
         public static X<ITest> GetTest(string name) {
@@ -117,7 +95,7 @@ namespace PGSolutions.Monads.Demos {
 
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        static readonly ResultExtractor GetResult = (s) => from gcd in s select new GcdResult(gcd);
+        static readonly ResultExtractor GetResult = s => from gcd in s select new GcdResult(gcd);
 
         /// <summary>Functor to calculate GCD of two input integers.</summary>
         static readonly Transform<GcdStart> AlgorithmTransform = s => {
@@ -155,8 +133,9 @@ namespace PGSolutions.Monads.Demos {
             [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
             [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
             [Description("Fully imperative; w/ substitution.")]
-            public static readonly StateRes Run1 = GetResult(new StateInt(s=>_run1(s)));
+            public static readonly StateRes Run1 = GetResult(new StateInt(_run1));
             private static PayloadInt _run1(GcdStart s) {
+                s.ContractedNotNull (nameof(s));
                 while (s.A != s.B) s = AlgorithmTransform(s);
                 return Payload.New(s, s.A);
             }
@@ -166,8 +145,9 @@ namespace PGSolutions.Monads.Demos {
             [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
             [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
             [Description("Fully imperative; unrolled w substitution.")]
-            public static readonly StateRes Run2 = GetResult(new StateInt(s=>_run2(s)));
+            public static readonly StateRes Run2 = GetResult(new StateInt(_run2));
             private static PayloadInt _run2(GcdStart s) {
+                s.ContractedNotNull (nameof(s));
                 while (s.A != s.B) {
                     var x = s.A;  var y = s.B;
                     s = x > y ? new GcdStart(x-y, x )

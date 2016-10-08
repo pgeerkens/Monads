@@ -43,8 +43,7 @@ namespace PGSolutions.Monads {
     public static partial class IOMonads {
         private const string nullFormat = "format is null";
 
-        // η: T -> IO<T>
-        /// <summary>TODO</summary>
+        /// <summary>η: T -> IO{T}</summary>
         public static IO<T> ToIO<T>(this T value) => () => value;
 
         /// <summary>Utility method to perform <paramref name="action"/> and then return IO{Unit}.</summary>
@@ -82,12 +81,12 @@ namespace PGSolutions.Monads {
 
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.Write(System.String,System.Object,System.Object)")]
-        public static IO<Unit> ConsoleWrite(string format, object arg1, object arg2) =>
+        public static IO<Unit> ConsoleWrite<T1,T2>(string format, T1 arg1, T2 arg2) =>
              ReturnIOUnit(() => Write(format ?? nullFormat, arg1, arg2));
 
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.Write(System.String,System.Object,System.Object,System.Object)")]
-        public static IO<Unit> ConsoleWrite(string format, object arg1, object arg2, object arg3) =>
+        public static IO<Unit> ConsoleWrite<T1,T2,T3>(string format, T1 arg1, T2 arg2, T3 arg3) =>
              ReturnIOUnit(() => Write(format ?? nullFormat, arg1, arg2, arg3));
 
         /// <summary>TODO</summary>
@@ -110,12 +109,12 @@ namespace PGSolutions.Monads {
 
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String,System.Object,System.Object)")]
-        public static IO<Unit> ConsoleWriteLine(string format, object arg1, object arg2) =>
+        public static IO<Unit> ConsoleWriteLine<T1,T2>(string format, T1 arg1, T2 arg2) =>
              ReturnIOUnit(() => WriteLine(format ?? nullFormat, arg1, arg2));
 
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String,System.Object,System.Object,System.Object)")]
-        public static IO<Unit> ConsoleWriteLine(string format, object arg1, object arg2, object arg3) =>
+        public static IO<Unit> ConsoleWriteLine<T1,T2,T3>(string format, T1 arg1, T2 arg2, T3 arg3) =>
              ReturnIOUnit(() => WriteLine(format ?? nullFormat, arg1, arg2, arg3));
 
         /// <summary>TODO</summary>

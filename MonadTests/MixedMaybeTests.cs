@@ -48,7 +48,7 @@ namespace PGSolutions.Monads.MonadTests {
         readonly static IList<string>    _data        = _strings.ToList().AsReadOnly();
         readonly static Func<int, int?>  _addOne      = x => (x + 1);
         readonly static Func<int, int?>  _addEight    = x => (x + 8);
-        readonly static Func<int,string> _concatEight = i => Format(InvariantCulture,"{0}eight",i);
+        readonly static Func<int,string> _concatEight = i => Format(InvariantCulture,$"{i}eight");
 
         readonly Func<string,Func<string,bool>,IEnumerable<string>> IsGeorge = (s,test) => 
                 from e in _data where test(e) select e ?? s;
@@ -65,10 +65,10 @@ namespace PGSolutions.Monads.MonadTests {
             received  = Join("/", IsGeorge(defaultValue, predicate) );
             Contract.Assert(received != null);
             Assert.True(expected?.Equals(received), 
-                Format(InvariantCulture,"Value: Expected: '{0}'; Received: '{1}'",expected,received));
+                Format(InvariantCulture,$"Value: Expected: '{expected}'; Received: '{received}'"));
         }
 
-        /// <summary>Verify that == and != are opposites, and are implemented as Equals().</summary>
+        /// <summary>Verify that == and != are opposites, and the former implemented as Equals().</summary>
         [Theory]
         [InlineData(true,  "George")]
         [InlineData(false, "Percy/Nothing/Ron/Ginny")]
@@ -92,10 +92,9 @@ namespace PGSolutions.Monads.MonadTests {
         [InlineData(null,  "Nothing")]
         public void ExcludedMiddleTest(bool? comparison, string expected) {
             Func<string,bool> predicate;
-            string received;
 
-            predicate = s => s.AreNonNullEqual(_maybeGeorge) == comparison;
-            received  = Join("/", IsGeorge("Nothing", predicate) );
+            predicate     = s => s.AreNonNullEqual(_maybeGeorge) == comparison;
+            var received  = Join("/", IsGeorge("Nothing", predicate) );
             Assert.Equal(expected, received);
         }
 

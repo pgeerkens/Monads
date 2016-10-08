@@ -89,7 +89,7 @@ namespace PGSolutions.Monads {
         [Pure]public override int GetHashCode() { unchecked { return Value.GetHashCode() ^ State.GetHashCode(); } }
 
         /// <inheritdoc/>
-        [Pure]public override string ToString() => Format(InvariantCulture,"({0},{1})",State,Value) ?? nameof(this.ToString);
+        [Pure]public override string ToString() => Format(InvariantCulture,$"({State},{Value})") ?? nameof(this.ToString);
         #endregion
     }
 }

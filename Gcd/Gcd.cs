@@ -104,14 +104,14 @@ namespace PGSolutions.Monads.Demos {
                 @"    GCD = {0,14} for {1}: Elapsed = {2:ss\.fff} secs; {3}",
                 ( from r in item.Result
             #if true
-                  from s in Format(InvariantCulture,"{0,14:N0}",r.Gcd).AsX()
+                  from s in Format(InvariantCulture,$"{r.Gcd,14:N0}").AsX()
                   select s
                 ) | "incalculable",
             #elif GcdStartAsClass
-                  select Format(InvariantCulture,"{0,14:N0}",r.Gcd)
+                  select Format(InvariantCulture,$"{r.Gcd,14:N0}")
                 ) | "incalculable",
             #else
-                  select Format(InvariantCulture,"{0,14:N0}",r.Gcd).AsX()
+                  select Format(InvariantCulture,$"{r.Gcd,14:N0}").AsX()
                 ) ?? "incalculable",
             #endif
                 item.Start,
@@ -134,14 +134,14 @@ namespace PGSolutions.Monads.Demos {
                         @"    GCD = {0,14} for {1}: Elapsed = {2:ss\.fff} secs; {3}",
                         ( from r in item.Result
                     #if true
-                          from s in Format(InvariantCulture,"{0,14:N0}",r.Gcd).AsX()
+                          from s in Format(InvariantCulture,$"{r.Gcd,14:N0}").AsX()
                           select s
                         ) | "incalculable",
                     #elif GcdStartAsClass
-                          select Format(InvariantCulture,"{0,14:N0}",r.Gcd)
+                          select Format(InvariantCulture,$"{r.Gcd,14:N0}")
                         ) | "incalculable",
                     #else
-                          select Format(InvariantCulture,"{0,14:N0}",r.Gcd).AsX()
+                          select Format(InvariantCulture,$"{r.Gcd,14:N0}").AsX()
                         ) ?? "incalculable",
                     #endif
                         item.Start,

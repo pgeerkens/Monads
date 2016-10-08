@@ -46,26 +46,22 @@ namespace PGSolutions.Monads {
     /// </remarks>
     public struct X<T> : IEquatable<X<T>>,ISafeToString where T:class {
         ///<summary>Create a new MaybeX{T}.</summary>
-        private X(T value) : this() { Value = value; Assert(HasValue == (Value != null)); }
+        private X(T value) : this() { Value = value; Assume(HasValue == (Value != null)); }
 
         ///<summary>Returns whether this MaybeX{T} has a value.</summary>
         public bool HasValue => Value != null;
         internal  T Value { get; }
 
         ///<summary>Extract value of the MaybeX{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
-        [Pure]
-        public T BitwiseOr(T defaultValue) {
-            defaultValue.ContractedNotNull(nameof(defaultValue));
-            Ensures(Result<T>() != null);
+        [Pure]public T BitwiseOr(T defaultValue) {
+            Ensures((defaultValue==null) || (Result<T>() != null));
 
             return Value ?? defaultValue;
         }
         ///<summary>Extract value of the <see cref="X{T}"/>, substituting <paramref name="defaultValue"/> as needed.</summary>
         ///<remarks>Substitutes for the ?? operator, which is unavailable for overload.</remarks>
-        [Pure]
-        public static T operator | (X<T> value, T defaultValue) {
-            defaultValue.ContractedNotNull(nameof(defaultValue));
-            Ensures(Result<T>() != null);
+        [Pure]public static T operator | (X<T> value, T defaultValue) {
+            Ensures((defaultValue==null) || (Result<T>() != null));
 
             return value.BitwiseOr(defaultValue);
         }
@@ -100,7 +96,7 @@ namespace PGSolutions.Monads {
         [Pure]public override int GetHashCode() => Value?.GetHashCode() ?? 0;
 
         /// <inheritdoc/>
-        [Pure]public override string ToString() => this.Select(v => v.ToString()) | "";
+        [Pure]public override string ToString() => this.Select(v => v.ToString()) | "Nothing!";
         #endregion
     }
 
@@ -131,7 +127,7 @@ namespace PGSolutions.Monads {
         ///<summary>Tests value-equality, returning null if either value doesn't exist.</summary>
         ///<typeparam name="T">The type of the "contained" object, being amplified to an <see cref="X{T}"/></typeparam>
         public static bool?     AreNonNullUnequal<T>(this X<T> lhs, X<T> rhs) where T:class =>
-            lhs.HasValue && rhs.HasValue ? ! lhs.Value.Equals(rhs.Value) as bool?
+            lhs.HasValue && rhs.HasValue ? !lhs.Value.Equals(rhs.Value) as bool?
                                          : null;
 
         ///<summary>Returns the type of the underlying type {TValue}.</summary>

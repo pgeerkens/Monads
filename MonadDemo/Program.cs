@@ -109,9 +109,9 @@ namespace PGSolutions.Monads.Demos {
             var y = x();
 
             for (int i = 0; i++ < 5; ) state.GetState();
-            Console.WriteLine(Format(InvariantCulture,"y:     {0} (Expect 1)",y ));
-            Console.WriteLine(Format(InvariantCulture,"state: {0} (Expect 6)",state.Value));
-            Console.WriteLine(Format(InvariantCulture,"x():   {0} (Expect 7)",x() ));
+            Console.WriteLine(Format(InvariantCulture,$"y:     {y} (Expect 1)"));
+            Console.WriteLine(Format(InvariantCulture,$"state: {state.Value} (Expect 6)"));
+            Console.WriteLine(Format(InvariantCulture,$"x():   {x()} (Expect 7)"));
 
             Console.WriteLine("_______________________");
         }

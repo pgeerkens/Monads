@@ -142,6 +142,7 @@
     <Compile Include="GcdResult.cs" />
     <Compile Include="GcdStart.cs" />
     <Compile Include="Gcd_S4.cs" />
+    <Compile Include="MethodDetails.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

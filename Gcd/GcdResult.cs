@@ -68,7 +68,7 @@ namespace PGSolutions.Monads.Demos {
         [Pure]public override int GetHashCode() { unchecked { return Gcd.GetHashCode(); } }
 
         /// <inheritdoc/>
-        public override string ToString() => Format(InvariantCulture,"    GCD = {0}",Gcd) ?? nameof(this.GetType);
+        public override string ToString() => Format(InvariantCulture,$"    GCD = {Gcd}") ?? nameof(this.GetType);
         #endregion
     }
 }
