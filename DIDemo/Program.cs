@@ -28,7 +28,7 @@ namespace PGSolutions.Monads.DIDemo {
             public static Config GetConfig1() {
                 return new Config() {
                     AuthInfo  = "'pgeerkens'",
-                    LogMethod = (str =>  WriteLine("! " + str + " !")),
+                    LogMethod = (str =>  WriteLine($"! {str} !")),
                 };
             }
             /// <summary>What we are injecting into all our methods.</summary>
@@ -41,7 +41,7 @@ namespace PGSolutions.Monads.DIDemo {
             public static Config GetConfig2() {
                 return new Config() {
                     AuthInfo  = "'Pieter'",
-                    LogMethod = (str => WriteLine("!?! " + str + " !?!")),
+                    LogMethod = (str => WriteLine($"!?! {str} !?!")),
                 };
             }
 

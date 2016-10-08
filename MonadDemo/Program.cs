@@ -37,6 +37,7 @@ using PGSolutions.Monads;
 namespace PGSolutions.Monads.Demos {
     using static String;
     using static CultureInfo;
+    using static Console;
 
     static class Program {
         static void Main() {
@@ -53,67 +54,66 @@ namespace PGSolutions.Monads.Demos {
             Gcd_S4.BestRun(start).ToNullable().SelectMany(result => {
                 var value = result.Value;
                 var title = Gcd_S4.GetTest("Best.Run");
-                Console.WriteLine("    GCD = {0} for {1} - {2}", value.Gcd, start, title);
-                Console.WriteLine("_______________________");
-                Console.WriteLine("Hit ENTER to close.");
+                WriteLine($"    GCD = {value.Gcd} for {start} - {title}");
+                WriteLine("_______________________");
+                WriteLine("Hit ENTER to close.");
                 return Unit._.ToNullable();
             });
 
-            Console.ReadLine();
+            ReadLine();
         }
 
         static void BasicTest() {
             var data = ( from e in new List<string>() { "Fred", "George", null, "Ron", null }
                          select e.AsX() ).ToList().AsReadOnly();
-            Console.WriteLine(Join("/", from e in data
-                                        select e.ToString() ) + "/" );
+            WriteLine(Join("/", from e in data
+                                select e.ToString() ) + "/" );
 
-            Console.WriteLine(Join("/", from e in data
-                                        select e.ToNothingString() ) + "/" );
+            WriteLine(Join("/", from e in data
+                                select e.ToNothingString() ) + "/" );
 
             // Equivalent code in first "Fluent" and then "Comprehension" syntax:
-            Console.WriteLine(Join("/", from e in data
-                                        where e.HasValue
-                                        select e.ToString()
-                                         ) + "/" );
+            WriteLine(Join("/", from e in data
+                                where e.HasValue
+                                select e.ToString()
+                            ) + "/" );
 
-            Console.WriteLine(Join("/", data.Where (e => e.HasValue)
+            WriteLine(Join("/", data.Where (e => e.HasValue)
                                             .Select(e => e.ToString())
                                          ) + "/" );
-            Console.WriteLine("_______________________");
+            WriteLine("_______________________");
         }
 
         // after Wes Dyer: http://blogs.msdn.com/b/wesdyer/archive/2008/01/11/the-marvels-of-monads.aspx
         static void WesDyerTest() {
-            Console.WriteLine(); {
-                Console.WriteLine( ( from x in 5.ToNullable()
-                                     from y in 7.ToNullable()
-                                     select x + y ).ToNothingString() );
+            WriteLine();
+            WriteLine( ( from x in 5.ToNullable()
+                         from y in 7.ToNullable()
+                         select x + y ).ToNothingString() );
 
-                Console.WriteLine( ( from x in 5.ToNullable()
-                                     from y in (int?)null
-                                     select x + y
-                                   ).ToNothingString() );
+            WriteLine( ( from x in 5.ToNullable()
+                         from y in (int?)null
+                         select x + y
+                     ).ToNothingString() );
 
-                Console.WriteLine(5.ToNullable()
-                                   .SelectMany(x => (int?)null, (x, y) => x+y)
-                                   .ToNothingString() );
-            }
-            Console.WriteLine("_______________________");
+            WriteLine(5.ToNullable()
+                       .SelectMany(x => (int?)null, (x, y) => x+y)
+                       .ToNothingString() );
+           
+            WriteLine("_______________________");
         }
 
         private static void ExternalStateTest() {
-            Console.WriteLine();
+            WriteLine();
             var state = new ExternalState();
             var x = (from a in state.GetState.AsX() select a) | (()=>-99);
             var y = x();
 
             for (int i = 0; i++ < 5; ) state.GetState();
-            Console.WriteLine(Format(InvariantCulture,$"y:     {y} (Expect 1)"));
-            Console.WriteLine(Format(InvariantCulture,$"state: {state.Value} (Expect 6)"));
-            Console.WriteLine(Format(InvariantCulture,$"x():   {x()} (Expect 7)"));
-
-            Console.WriteLine("_______________________");
+            WriteLine(Format(InvariantCulture,$"y:     {y} (Expect 1)"));
+            WriteLine(Format(InvariantCulture,$"state: {state.Value} (Expect 6)"));
+            WriteLine(Format(InvariantCulture,$"x():   {x()} (Expect 7)"));
+            WriteLine("_______________________");
         }
 
         private static void GcdTest1(IList<int> list) {
@@ -125,23 +125,13 @@ namespace PGSolutions.Monads.Demos {
                   select gcd = Gcd_S4.BestRun(new GcdStart(n, gcd)).Value.Gcd
                 ).LastOrDefault();
 
-                Console.WriteLine("    GCD = {0} for {1}", gcd, list.FormatList());
-                Console.WriteLine();
+                WriteLine($"    GCD = {gcd} for {list.FormatList()??""}");
+                WriteLine();
             }
         }
 
-        private static string FormatList<T>(this IList<T> list) {
-            list.ContractedNotNull(nameof(list));
-
-            return "(" + Join(", ",list) + ")";
-            //var result = new System.Text.StringBuilder("(");
-            //if (list.Any()) {
-            //    result.Append(list[0]);
-            //    for(var i=1; i<list.Count; i++) 
-            //        result.Append(", ").Append(list[i]);
-            //}
-            //return result.Append(")").ToString();
-        }
+        private static string FormatList<T>(this IList<T> list) =>
+            list!=null ? "(" + Join(", ",list) + ")" : null;
 
         private class ExternalState {
             private  int        _state;
