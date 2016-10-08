@@ -32,7 +32,7 @@ using System.Diagnostics.Contracts;
 namespace PGSolutions.Monads {
     using static Contract;
 
-    /// <summary>TODO</summary>
+    /// <summary>Useful delegates for the <see cref="IO{T}"/> monad.</summary>
     /// <remarks>
     /// This pretty much comes straight from Dixin's Blog:
     ///     https://weblogs.asp.net/dixin/category-theory-via-c-sharp-18-more-monad-io-monad
