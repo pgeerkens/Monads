@@ -44,15 +44,12 @@ namespace PGSolutions.Monads {
     /// <summary>TODO</summary>
     public abstract class FsmTask<TEnv> where TEnv : ICancellableTask {
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
         public delegate FsmReader           FsmState();
 
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
         public delegate Task<FsmState>      FsmReader(TEnv e);
 
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
         public delegate FsmReader           FsmTransition(TEnv e);
 
         /// <summary>TODO</summary>

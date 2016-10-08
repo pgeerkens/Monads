@@ -40,7 +40,6 @@ namespace PGSolutions.Monads {
     /// <remarks>IMpure.</remarks>
     public static partial class MaybeTaskExtensions {
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
         public delegate X<Task<TSource>> MaybeTask<TSource>();
 
         /// <summary>TODO</summary>

@@ -45,7 +45,6 @@ namespace PGSolutions.Monads {
         /// <summary>TODO</summary>
         /// <typeparam name="TState">Type of the state to and from which this delegate selects</typeparam>
         /// <typeparam name="TValue">Type of the value which this delegate accepts</typeparam>
-        [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
         public delegate LazyState<TState,TValue>        Selector<TState,TValue>(TState s);
 
         /// <summary>TODO</summary>

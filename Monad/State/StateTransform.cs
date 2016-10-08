@@ -38,7 +38,6 @@ namespace PGSolutions.Monads {
     public static class StateTransform {
         /// <summary>TODO</summary>
         /// <typeparam name="TState">Type of the state which this delegate transforms.</typeparam>
-        [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
         public delegate TState Transform<TState>(TState s);
 
         /// <summary>TODO</summary>
