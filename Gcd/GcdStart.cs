@@ -67,7 +67,7 @@ namespace PGSolutions.Monads.Demos {
         [Pure]public static bool operator !=(GcdStart lhs, GcdStart rhs) { return !lhs.Equals(rhs); }
 
         /// <inheritdoc/>
-        [Pure]public override int GetHashCode() { unchecked { return A.GetHashCode() ^ B.GetHashCode(); } }
+        [Pure]public override int GetHashCode() => unchecked(A.GetHashCode() ^ B.GetHashCode());
 
         /// <inheritdoc/>
         public override string ToString() => Format(InvariantCulture,$"({A,14:N0}, {B,14:N0})") ?? nameof(this.GetType);

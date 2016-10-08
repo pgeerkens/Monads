@@ -57,6 +57,7 @@ namespace PGSolutions.Monads {
             @this.HasValue ? selector?.Invoke(@this.Value).Select(e =>
                              projector?.Invoke(@this.Value, e)) ?? null
                            : null;
+
         /// <summary>LINQ-ible Cast implementation. Argument is "boxed" if not already a class object.</summary>
         public static X<T>              Cast<T>(this X<object> @this) where T : class => 
             from o in @this select (T)o;

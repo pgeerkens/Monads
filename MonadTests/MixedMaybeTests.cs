@@ -149,10 +149,10 @@ namespace PGSolutions.Monads.MonadTests {
         public void MonadLaw3MaybeMixed() {
             const string description = "Monad law 3: M.Bind(f1).Bind(f2) == M.Bind(x => f1(x).Bind(f2))";
 
-            var M = 4 as int?;
+            var M       = 4 as int?;
             var addOneX = X.New<Func<int,int>>(i => i+1);
-            var lhs = from m in M from a in addOneX select _concatEight(a(m));
-            var rhs = from m in M select from a in addOneX select _concatEight(a(m));
+            var lhs     = from m in M from a in addOneX select _concatEight(a(m));
+            var rhs     = from m in M select from a in addOneX select _concatEight(a(m));
             Assert.True(lhs == rhs, description);
 
             lhs = M.SelectMany(a => addOneX, (m,a) => _concatEight(a(m)));

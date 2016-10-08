@@ -77,7 +77,7 @@ namespace PGSolutions.Monads {
             !lhs.Equals(rhs);
 
         /// <inheritdoc/>
-        [Pure]public override int GetHashCode() { unchecked { return Value.GetHashCode() ^ State.GetHashCode(); } }
+        [Pure]public override int GetHashCode() => unchecked(Value.GetHashCode() ^ State.GetHashCode());
 
         /// <inheritdoc/>
         [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object,System.Object)")]
