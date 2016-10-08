@@ -27,6 +27,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 
@@ -79,7 +80,9 @@ namespace PGSolutions.Monads {
         [Pure]public override int GetHashCode() { unchecked { return Value.GetHashCode() ^ State.GetHashCode(); } }
 
         /// <inheritdoc/>
-        [Pure]public override string ToString() => Format(InvariantCulture,$"({State},{Value})") ?? nameof(this.ToString);
+        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object,System.Object)")]
+        [Pure]public override string ToString() => Format(InvariantCulture,$"({State},{Value})")
+                                                ?? nameof(this.ToString);
         #endregion
     }
 }

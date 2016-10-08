@@ -27,6 +27,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 
@@ -71,25 +72,28 @@ namespace PGSolutions.Monads {
 
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
-        [Pure]public override bool Equals(object obj) => (obj as StatePayload<TState,TValue>?)?.Equals(this) ?? false;
+        [Pure]public override bool Equals(object obj) => 
+                (obj as StatePayload<TState,TValue>?)?.Equals(this) ?? false;
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         [Pure]public bool Equals(StatePayload<TState, TValue> other) =>
             Value.Equals(other.Value) && State.Equals(other.State);
 
         /// <summary>Tests value-equality.</summary>
-        [Pure]public static bool operator ==(StatePayload<TState, TValue> lhs, StatePayload<TState, TValue> rhs) =>
+        [Pure]public static bool operator ==(StatePayload<TState,TValue> lhs, StatePayload<TState,TValue> rhs) =>
             lhs.Equals(rhs);
 
         /// <summary>Tests value-inequality.</summary>
-        [Pure]public static bool operator !=(StatePayload<TState, TValue> lhs, StatePayload<TState, TValue> rhs) =>
+        [Pure]public static bool operator !=(StatePayload<TState,TValue> lhs, StatePayload<TState,TValue> rhs) =>
             !lhs.Equals(rhs);
 
         /// <inheritdoc/>
         [Pure]public override int GetHashCode() { unchecked { return Value.GetHashCode() ^ State.GetHashCode(); } }
 
         /// <inheritdoc/>
-        [Pure]public override string ToString() => Format(InvariantCulture,$"({State},{Value})") ?? nameof(this.ToString);
+        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object,System.Object)")]
+        [Pure]public override string ToString() => Format(InvariantCulture,$"({State},{Value})")
+                                                ?? nameof(this.ToString);
         #endregion
     }
 }

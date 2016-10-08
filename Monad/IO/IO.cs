@@ -31,28 +31,21 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
-    /// <summary>TODO</summary>
+    /// <summary>THE IO monad, for encapsulating side-effects only visible externally.</summary>
     /// <typeparam name="TResult"></typeparam>
     public delegate TResult IO<out TResult>();
 
-    /// <summary>TODO</summary>
-    [SuppressMessage("Microsoft.Naming", "CA1724:TypeNamesShouldNotMatchNamespaces")]
+    /// <summary>THe LINQ-extension methods for <see cref="IO{DateTimeResult}"/>.</summary>
     [Pure]
-    public static class IO {
+    public static class IOLinq {
         /// <summary>LINQ-compatible implementation of the monadic map operator.</summary>
-        /// <remarks>
-        /// Used to implement the LINQ <i>let</i> clause.
-        /// </remarks>
         public static IO<TResult>   Select<TSource,TResult>(this IO<TSource> @this,
             Func<TSource,TResult> projector
         ) =>
             @this!=null && projector!= null ? () => projector(@this())
                                             : Null<TResult>();
 
-        /// <summary>LINQ-compatible implementation of the monadic bind operator.</summary>
-        /// <remarks>
-        /// Used for LINQ queries with a single <i>from</i> clause.
-        /// </remarks>
+        /// <summary>The monadic bind operator; unused by LINQ</summary>
         public static IO<TResult>   SelectMany<TSource,TResult>(this IO<TSource> @this,
             Func<TSource,IO<TResult>> selector
         ) =>
@@ -60,9 +53,6 @@ namespace PGSolutions.Monads {
                                           : Null<TResult>();
 
         /// <summary>LINQ-compatible implementation of the monadic join operator.</summary>
-        /// <remarks>
-        /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
-        /// </remarks>
         public static IO<TResult>   SelectMany<TSource,T,TResult>(this IO<TSource> @this,
             Func<TSource, IO<T>> selector,
             Func<TSource,T,TResult> projector
@@ -71,8 +61,8 @@ namespace PGSolutions.Monads {
                  ? () => @this.Select(s => projector(s,selector(s)()) ).Invoke()
                  : Null<TResult>();
 
-        /// <summary>TODO</summary>
-        public static IO<TResult>   Null<TResult>() => null;
+        /// <summary>A typed null, for convenience.</summary>
+        private static IO<TResult>   Null<TResult>() => null;
     }
 }
 
