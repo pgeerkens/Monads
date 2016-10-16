@@ -79,10 +79,11 @@ namespace PGSolutions.Monads {
             selector.ContractedNotNull(nameof(selector));
             Ensures(Result<State<TState, TResult>>() != null);
 
-            return s => {
-                var sourceResult = @this(s);
-                return StructTuple.New(sourceResult.State,selector(sourceResult.Value));
-            };
+            return @this.SelectMany<TState,TValue,TResult>(x => s => StructTuple.New(s,selector(x)));
+            //return s => {
+            //    var sourceResult = @this(s);
+            //    return StructTuple.New(sourceResult.State,selector(sourceResult.Value));
+            //};
         }
 
         /// <summary>Implementation of Bind operator: (>>=): m a -> (a -> m b) -> m b.</summary>
@@ -103,10 +104,11 @@ namespace PGSolutions.Monads {
             selector.ContractedNotNull(nameof(selector));
             Ensures(Result<State<TState, TResult>>() != null);
 
-            return s => {
-                var sourceResult = @this(s);
-                return selector(sourceResult.Value)(sourceResult.State);
-            };
+            return @this.SelectMany(selector, Functions.Second);
+            //return s => {
+            //    var sourceResult = @this(s);
+            //    return selector(sourceResult.Value)(sourceResult.State);
+            //};
         }
 
         /// <summary>LINQ-compatible alias for join.</summary>

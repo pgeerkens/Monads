@@ -164,6 +164,10 @@
       <Project>{1d5fe5a9-de3b-4663-b140-1b9bb0373c9e}</Project>
       <Name>Monad</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PGSolutions.Maybe\PGSolutions.Maybe.csproj">
+      <Project>{5a425536-481e-48d4-a96d-09d442e4c335}</Project>
+      <Name>PGSolutions.Maybe</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <DontImportCodeContracts>True</DontImportCodeContracts>

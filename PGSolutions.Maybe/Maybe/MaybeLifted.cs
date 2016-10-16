@@ -71,42 +71,5 @@ namespace PGSolutions.Monads {
                                 projector?.Invoke(@this.Value, e)) ?? null
                               : null;
         #endregion
-
-        #region X<TValue> lifted to IO<TResult>
-        //================================================================================
-        ///<summary>The monadic Bind operation of class-type <typeparamref name="TValue"/> to struct-type <typeparamref name="TResult"/>.</summary>
-        public static IO<TResult>       SelectMany<TValue, TResult>(this X<TValue> @this,
-            Func<TValue, IO<TResult>> selector
-        ) where TValue : class where TResult : struct =>
-            @this.HasValue ? selector?.Invoke(@this.Value) ?? null
-                           : null;
-
-        ///<summary>The monadic Bind operation of class-type <typeparamref name="TValue"/> to struct-type <typeparamref name="TResult"/>.</summary>
-        public static IO<TResult>       SelectMany<TValue, T, TResult>(this X<TValue> @this,
-            Func<TValue, IO<T>> selector,
-            Func<TValue, T, TResult> projector
-        ) where TValue : class where T : struct where TResult : struct =>
-            @this.HasValue ? selector?.Invoke(@this.Value).SelectMany(e =>
-                                 projector?.Invoke(@this.Value, e).ToIO() ?? null
-                             ) ?? null
-                           : null;
-        #endregion
-        #region IO<TSource. lifted to X<TResut>
-        ///<summary>The monadic Bind operation of class-type <typeparamref name="TValue"/> to struct-type <typeparamref name="TResult"/>.</summary>
-        public static X<TResult>        SelectMany<TValue, TResult>(this IO<TValue> @this,
-            Func<TValue, X<TResult>> selector
-        ) where TResult : class =>
-            @this!=null ? selector?.Invoke(@this.Invoke()) ?? default(TResult)
-                        : null;
-
-        ///<summary>The monadic Bind operation of class-type <typeparamref name="TValue"/> to struct-type <typeparamref name="TResult"/>.</summary>
-        public static X<TResult>        SelectMany<TValue, T, TResult>(this IO<TValue> @this,
-            Func<TValue, X<T>> selector,
-            Func<TValue, T, TResult> projector
-        ) where T : class where TResult : class =>
-            @this!=null ? selector?.Invoke(@this.Invoke()).SelectMany(e =>
-                          projector?.Invoke(@this.Invoke(), e).AsX()) ?? null
-                        : null;
-        #endregion
     }
 }

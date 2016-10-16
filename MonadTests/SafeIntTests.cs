@@ -107,7 +107,7 @@ namespace PGSolutions.Monads.MonadTests {
         }
     }
 
-    public static class StringExtensions {
+    public static partial class StringExtensions {
         static readonly CultureInfo _invariantCulture = CultureInfo.InvariantCulture;
         static readonly CultureInfo _currentCulture   = CultureInfo.CurrentUICulture;
 

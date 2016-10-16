@@ -37,7 +37,7 @@ namespace PGSolutions.Monads {
 
     /// <summary>TODO</summary>
     public static class StructTuple {
-        /// <summary>Expose type inference on the corresponding constructor for StatePayload{TState,TValue}.</summary>
+        /// <summary>Expose type inference on the corresponding constructor for <see cref="StructTuple{TState,TValue}"/>.</summary>
         public  static StructTuple<TState,TValue> New<TState,TValue>(TState state, TValue value) =>
             new StructTuple<TState,TValue>(state, value);
     }
@@ -77,12 +77,12 @@ namespace PGSolutions.Monads {
             !lhs.Equals(rhs);
 
         /// <inheritdoc/>
-        [Pure]public override int GetHashCode() => unchecked(Value.GetHashCode() ^ State.GetHashCode());
+        [Pure]public override int GetHashCode() => Value.GetHashCode() ^ State.GetHashCode();
 
         /// <inheritdoc/>
-        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object,System.Object)")]
-        [Pure]public override string ToString() => Format(InvariantCulture,$"({State},{Value})")
-                                                ?? nameof(this.ToString);
+        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider",
+            MessageId = "System.String.Format(System.String,System.Object,System.Object)")]
+        [Pure]public override string ToString() => Format(InvariantCulture,$"({State},{Value})",new object[0]);
         #endregion
     }
 }

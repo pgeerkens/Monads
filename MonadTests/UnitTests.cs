@@ -6,6 +6,8 @@ using System.Linq;
 
 using Xunit;
 
+using PGSolutions.Monads;
+
 namespace PGSolutions.Monads.MonadTests {
 
     [ExcludeFromCodeCoverage]

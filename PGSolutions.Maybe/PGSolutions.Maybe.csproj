@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{041F2DA2-B6C1-4702-930E-4717EDE65987}</ProjectGuid>
+    <ProjectGuid>{5A425536-481E-48D4-A96D-09D442E4C335}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PGSolutions.Monads</RootNamespace>
-    <AssemblyName>Monad</AssemblyName>
+    <RootNamespace>PGSolutions.Maybe</RootNamespace>
+    <AssemblyName>PGSolutions.Maybe</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <CodeContractsAssemblyMode>1</CodeContractsAssemblyMode>
@@ -19,7 +19,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
@@ -45,7 +45,7 @@
     <CodeContractsSuggestAssumptionsForCallees>True</CodeContractsSuggestAssumptionsForCallees>
     <CodeContractsSuggestRequires>True</CodeContractsSuggestRequires>
     <CodeContractsNecessaryEnsures>True</CodeContractsNecessaryEnsures>
-    <CodeContractsSuggestObjectInvariants>False</CodeContractsSuggestObjectInvariants>
+    <CodeContractsSuggestObjectInvariants>True</CodeContractsSuggestObjectInvariants>
     <CodeContractsSuggestReadonly>True</CodeContractsSuggestReadonly>
     <CodeContractsRunInBackground>True</CodeContractsRunInBackground>
     <CodeContractsShowSquigglies>True</CodeContractsShowSquigglies>
@@ -60,20 +60,18 @@
     <CodeContractsBaseLineFile />
     <CodeContractsCacheAnalysisResults>True</CodeContractsCacheAnalysisResults>
     <CodeContractsSkipAnalysisIfCannotConnectToCache>False</CodeContractsSkipAnalysisIfCannotConnectToCache>
-    <CodeContractsFailBuildOnWarnings>True</CodeContractsFailBuildOnWarnings>
+    <CodeContractsFailBuildOnWarnings>False</CodeContractsFailBuildOnWarnings>
     <CodeContractsBeingOptimisticOnExternal>True</CodeContractsBeingOptimisticOnExternal>
     <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
     <CodeContractsReferenceAssembly>Build</CodeContractsReferenceAssembly>
     <CodeContractsAnalysisWarningLevel>3</CodeContractsAnalysisWarningLevel>
-    <DocumentationFile>bin\Debug\Monad.XML</DocumentationFile>
-    <CodeAnalysisRuleSet>Monad.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;CODE_ANALYSIS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
@@ -114,14 +112,13 @@
     <CodeContractsBaseLineFile />
     <CodeContractsCacheAnalysisResults>True</CodeContractsCacheAnalysisResults>
     <CodeContractsSkipAnalysisIfCannotConnectToCache>False</CodeContractsSkipAnalysisIfCannotConnectToCache>
-    <CodeContractsFailBuildOnWarnings>True</CodeContractsFailBuildOnWarnings>
+    <CodeContractsFailBuildOnWarnings>False</CodeContractsFailBuildOnWarnings>
     <CodeContractsBeingOptimisticOnExternal>True</CodeContractsBeingOptimisticOnExternal>
     <CodeContractsRuntimeCheckingLevel>Preconditions</CodeContractsRuntimeCheckingLevel>
     <CodeContractsReferenceAssembly>Build</CodeContractsReferenceAssembly>
     <CodeContractsAnalysisWarningLevel>3</CodeContractsAnalysisWarningLevel>
-    <CodeAnalysisRuleSet>Monad.ruleset</CodeAnalysisRuleSet>
-    <DocumentationFile>bin\Release\Monad.XML</DocumentationFile>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <DocumentationFile>bin\Release\PGSolutions.Maybe.XML</DocumentationFile>
+    <CodeAnalysisRuleSet>..\Monad\Monad.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -140,33 +137,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="IO\IO.cs" />
-    <Compile Include="IO\IOExtensions.cs" />
-    <Compile Include="IO\IOMonads.cs" />
-    <Compile Include="IO\MaybeIO.cs" />
-    <Compile Include="Reader\Fsm.cs" />
-    <Compile Include="Reader\ReaderLinq.cs" />
-    <Compile Include="State\LazyStateTransform.cs" />
-    <Compile Include="State\State.cs" />
-    <Compile Include="State\StateExtensions.cs" />
-    <Compile Include="State\StateTransform.cs" />
-    <Compile Include="Tasks\MaybeTask.cs" />
-    <Compile Include="Transform\MaybeXEnumerable.cs" />
+    <Compile Include="ContractExtensions.cs" />
+    <Compile Include="Functions.cs" />
+    <Compile Include="Maybe\LinqExtensions.cs" />
+    <Compile Include="Maybe\Maybe.cs" />
+    <Compile Include="Maybe\MaybeLifted.cs" />
+    <Compile Include="Maybe\MaybeLinq.cs" />
+    <Compile Include="Maybe\NullableLinq.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Reader\Reader.cs" />
-    <Compile Include="Reader\Readers.cs" />
-    <Compile Include="Transform\SafeInt.cs" />
-    <Compile Include="State\LazyState.cs" />
-    <Compile Include="State\LazyStateExtensions.cs" />
-    <Compile Include="State\StatePayload.cs" />
-    <Compile Include="State\StructTuple.cs" />
-    <Compile Include="Tasks\TaskExtensions.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Monad.ruleset" />
-    <None Include="Monads.snk" />
-    <None Include="packages.config" />
+    <Compile Include="Unit.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\CustomDictionary.xml">
@@ -174,10 +153,7 @@
     </CodeAnalysisDictionary>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PGSolutions.Maybe\PGSolutions.Maybe.csproj">
-      <Project>{5a425536-481e-48d4-a96d-09d442e4c335}</Project>
-      <Name>PGSolutions.Maybe</Name>
-    </ProjectReference>
+    <None Include="Monads.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

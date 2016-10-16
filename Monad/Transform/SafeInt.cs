@@ -135,11 +135,9 @@ namespace PGSolutions.Monads {
     public static class SafeIntExtensions {
         /// <summary>Returns a Nullable{int} with the sum, or null if the operation fails.</summary>
         public static int? SafeAddition(this int addend1, int addend2) {
-            unchecked {
-                var c = addend1 + addend2;
-                return ((addend1 ^ addend2) >= 0) & ((addend1 ^ c) < 0) ? default(int?)
-                                                                        : c;
-            }
+            var c = addend1 + addend2;
+            return ((addend1 ^ addend2) >= 0) & ((addend1 ^ c) < 0) ? default(int?)
+                                                                    : c;
         }
 
         /// <summary>Returns a Nullable{int} with the difference, or null if the operation fails.</summary>

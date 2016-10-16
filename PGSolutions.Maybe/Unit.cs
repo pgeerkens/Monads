@@ -48,13 +48,13 @@ namespace PGSolutions.Monads {
         [Pure]public static bool operator >(Unit lhs, Unit rhs) => lhs.CompareTo(rhs) > 0;
         #endregion
         #region Value Equality with IEquatable<T>.
-        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-        [Pure]public bool Equals(Unit other) => true;
         /// <inheritdoc/>
         [Pure]public override bool Equals(object obj) => obj is Unit;
-        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
+        /// <summary>Returns true, as all Unit instances are equal.</summary>
+        [Pure]public bool Equals(Unit other) => true;
+        /// <summary>Returns true, as all Unit instances are equal.</summary>
         [Pure]public static bool operator ==(Unit lhs, Unit rhs) => lhs.Equals(rhs);
-        /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
+        /// <summary>Returns false, as all Unit instances are equal.</summary>
         [Pure]public static bool operator !=(Unit lhs, Unit rhs) => !lhs.Equals(rhs);
 
         /// <inheritdoc/>

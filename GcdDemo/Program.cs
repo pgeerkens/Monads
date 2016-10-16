@@ -40,8 +40,10 @@ namespace PGSolutions.Monads.Demos {
 
     enum Syntax { Imperative, Fluent, Query, Unknown }
     class Program {
-        static string Prompt(string mode) => 
-            Format(InvariantCulture,$"{mode}: Type 'Q' to quit; <Enter> to repeat ... ");
+        static string Prompt(string mode) =>
+            Format(InvariantCulture, $"{mode}: Type 'Q' to quit; <Enter> to repeat ... ");
+        static string Prompt1(string mode) =>
+            Format(InvariantCulture, "{0}: Type 'Q' to quit; <Enter> to repeat ... ", mode);
         #region GCD States
         static readonly IList<GcdStart> gcdStartStates = new List<GcdStart>() {
              new GcdStart(         40,            40)            //  0
@@ -69,7 +71,7 @@ namespace PGSolutions.Monads.Demos {
 
         static Syntax syntax = Query;
         static int Main() => ( syntax==Imperative ? ImperativeSyntax("Imperative Syntax")
-                             : syntax==Fluent     ? FluentSyntax("Fluent Syntax")
+                             : syntax==Fluent     ? FluentSyntax("Fluent (Method) Syntax")
                              : syntax==Query      ? QuerySyntax("Query (Comprehension) Syntax")
                                                   : new List<int> { 0 }
                              ).FirstOrDefault(); // Doesn't assume result list non-empty

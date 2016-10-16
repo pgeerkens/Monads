@@ -72,7 +72,7 @@ namespace PGSolutions.Monads.Demos {
 
         private static IEnumerable<Unit> ForAllTests(this X<IList<GcdStart>> states) =>
             from test in  Gcd_S4.GetTests(false) | new List<ITest>()
-            let timer = Readers.Timer()
+            let timer   = Readers.Timer()
             let isThird = Readers.MatchCounter(i => i==3, 1)
             select ( from _   in ConsoleWriteLine("{0} - {1}", GcdStartTYpe, test.Title)
                      from __  in (

@@ -35,33 +35,25 @@ namespace PGSolutions.Monads {
     using static CultureInfo;
     using static String;
 
-    /// <summary>Class factory for StatePayload{TState,TValue}, with conveninece methods that perform constructor type inference.</summary>
+    /// <summary>Class factory for <see cref="StatePayload{TState,TValue}"/>, with conveninece methods that perform constructor type inference.</summary>
     public static class StatePayload {
-        /// <summary>Expose type inference on the corresponding constructor for StatePayload{TState,TValue}.</summary>
-        public static StatePayload<TState,TValue> New<TState,TValue>(Func<StructTuple<TState, TValue>> valueFactory) {
-            valueFactory.ContractedNotNull(nameof(valueFactory));
-            return new StatePayload<TState,TValue>(valueFactory);
-        }
-        /// <summary>Expose type inference on the corresponding constructor for StatePayload{TState,TValue}.</summary>
-        public static StatePayload<TState,TValue> New<TState,TValue>(StructTuple<TState, TValue> tuple) {
-            return new StatePayload<TState,TValue>(tuple);
-        }
-        /// <summary>Expose type inference on the corresponding constructor for StatePayload{TState,TValue}.</summary>
-        public  static StatePayload<TState,TValue> New<TState,TValue>(TState state, TValue value) {
-            return new StatePayload<TState,TValue>(state, value);
-        }
+        /// <summary>Expose type inference on the corresponding constructor for <see cref="StatePayload{TState,TValue}"/>.</summary>
+        public static StatePayload<TState,TValue> New<TState,TValue>(TState state, TValue value) =>
+            new StatePayload<TState,TValue>(state, value);
     }
 
     /// <summary>TODO</summary>
+    /// <typeparam name="TState">Type of the internal state.</typeparam>
+    /// <typeparam name="TValue">Type of the delivered value.</typeparam>
     public struct StatePayload<TState,TValue> : ISafeToString {
-        /// <summary>Return a new StatePayload{TState,TValue} instance.</summary>
-        internal StatePayload(Func<StructTuple<TState, TValue>> valueFactory) {
+        /// <summary>Return a new object instance.</summary>
+        internal StatePayload(TState state, TValue value) : this(StructTuple.New(state,value)) { ; }
+        /// <summary>Return a new object instance.</summary>
+        private StatePayload(StructTuple<TState, TValue> tuple) : this(() => tuple) { ; }
+        /// <summary>Return a new object instance.</summary>
+        private StatePayload(Func<StructTuple<TState, TValue>> valueFactory) {
             _base = new Lazy<StructTuple<TState,TValue>>(valueFactory);
         }
-        /// <summary>Return a new StatePayload{TState,TValue} instance.</summary>
-        internal StatePayload(StructTuple<TState, TValue> tuple) : this(() => tuple) { ; }
-        /// <summary>Return a new StatePayload{TState,TValue} instance.</summary>
-        internal StatePayload(TState state, TValue value) : this(StructTuple.New(state,value)) { ; }
 
         private readonly Lazy<StructTuple<TState,TValue>> _base;
 
@@ -72,28 +64,24 @@ namespace PGSolutions.Monads {
 
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
-        [Pure]public override bool Equals(object obj) => 
+        public override bool Equals(object obj) => 
                 (obj as StatePayload<TState,TValue>?)?.Equals(this) ?? false;
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-        [Pure]public bool Equals(StatePayload<TState, TValue> other) =>
-            Value.Equals(other.Value) && State.Equals(other.State);
+        public bool Equals(StatePayload<TState, TValue> other) => Value.Equals(other.Value) && State.Equals(other.State);
 
         /// <summary>Tests value-equality.</summary>
-        [Pure]public static bool operator ==(StatePayload<TState,TValue> lhs, StatePayload<TState,TValue> rhs) =>
-            lhs.Equals(rhs);
+        public static bool operator ==(StatePayload<TState,TValue> lhs, StatePayload<TState,TValue> rhs) => lhs.Equals(rhs);
 
         /// <summary>Tests value-inequality.</summary>
-        [Pure]public static bool operator !=(StatePayload<TState,TValue> lhs, StatePayload<TState,TValue> rhs) =>
-            !lhs.Equals(rhs);
+        public static bool operator !=(StatePayload<TState,TValue> lhs, StatePayload<TState,TValue> rhs) => !lhs.Equals(rhs);
 
         /// <inheritdoc/>
-        [Pure]public override int GetHashCode() => unchecked(Value.GetHashCode() ^ State.GetHashCode());
-
+        public override int GetHashCode() => Value.GetHashCode() ^ State.GetHashCode();
         /// <inheritdoc/>
-        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object,System.Object)")]
-        [Pure]public override string ToString() => Format(InvariantCulture,$"({State},{Value})")
-                                                ?? nameof(this.ToString);
+        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider",
+            MessageId = "System.String.Format(System.String,System.Object,System.Object)")]
+        public override string ToString() => Format(InvariantCulture,$"({State},{Value})",new object[0]);
         #endregion
     }
 }

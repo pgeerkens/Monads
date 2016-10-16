@@ -121,14 +121,12 @@ namespace PGSolutions.Monads {
         ///<summary>Tests value-equality, returning null if either value doesn't exist.</summary>
         ///<typeparam name="T">The type of the "contained" object, being amplified to an <see cref="X{T}"/></typeparam>
         public static bool?     AreNonNullEqual<T>(this X<T> lhs, X<T> rhs) where T:class =>
-            lhs.HasValue && rhs.HasValue ? lhs.Value.Equals(rhs.Value) as bool?
-                                         : null;
+            from l in lhs from r in rhs from result in l.Equals(r) as bool? select result;
 
         ///<summary>Tests value-equality, returning null if either value doesn't exist.</summary>
         ///<typeparam name="T">The type of the "contained" object, being amplified to an <see cref="X{T}"/></typeparam>
         public static bool?     AreNonNullUnequal<T>(this X<T> lhs, X<T> rhs) where T:class =>
-            lhs.HasValue && rhs.HasValue ? !lhs.Value.Equals(rhs.Value) as bool?
-                                         : null;
+            from result in lhs.AreNonNullEqual(rhs) select result;
 
         ///<summary>Returns the type of the underlying type {TValue}.</summary>
         ///<typeparam name="T">The type of the "contained" object, being amplified to an <see cref="X{T}"/></typeparam>
