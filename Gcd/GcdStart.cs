@@ -61,15 +61,16 @@ namespace PGSolutions.Monads.Demos {
         [Pure]public bool Equals(GcdStart other) => other!=null && A==other.A && B==other.B;
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-        [Pure]public static bool operator ==(GcdStart lhs, GcdStart rhs) { return lhs.Equals(rhs); }
+        [Pure]public static bool operator ==(GcdStart lhs, GcdStart rhs) => lhs?.Equals(rhs) ?? false;
 
         /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
-        [Pure]public static bool operator !=(GcdStart lhs, GcdStart rhs) { return !lhs.Equals(rhs); }
+        [Pure]public static bool operator !=(GcdStart lhs, GcdStart rhs) => !lhs?.Equals(rhs) ?? false;
 
         /// <inheritdoc/>
         [Pure]public override int GetHashCode() => A.GetHashCode() ^ B.GetHashCode();
 
         /// <inheritdoc/>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object,System.Object)")]
         public override string ToString() => Format(InvariantCulture,$"({A,14:N0}, {B,14:N0})") ?? nameof(this.GetType);
         #endregion
     }

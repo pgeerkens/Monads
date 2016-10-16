@@ -181,6 +181,11 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\CustomDictionary.xml">
+      <Link>CustomDictionary.xml</Link>
+    </CodeAnalysisDictionary>
+  </ItemGroup>
   <PropertyGroup>
     <DontImportCodeContracts>True</DontImportCodeContracts>
   </PropertyGroup>

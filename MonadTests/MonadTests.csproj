@@ -79,8 +79,6 @@
   </Choose>
   <ItemGroup>
     <Compile Include="IOTests.cs" />
-    <Compile Include="MaybeXLinqNullTests.cs" />
-    <Compile Include="MixedMaybeTests.cs" />
     <Compile Include="NullableTests.cs" />
     <Compile Include="ReaderTests.cs" />
     <Compile Include="SafeIntTests.cs" />

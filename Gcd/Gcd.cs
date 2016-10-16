@@ -90,6 +90,7 @@ namespace PGSolutions.Monads.Demos {
                      select Unit._
             ).Invoke();
 
+        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object)")]
         private static X<IEnumerable<IO<Unit>>> ForThisTest(this X<IList<GcdStart>> startStates, 
             ITest           test, 
             Func<TimeSpan>  elapsed, 

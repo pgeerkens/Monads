@@ -35,7 +35,7 @@ using System.Linq;
 
 using Xunit;
 
-namespace PGSolutions.Monads.MonadTests {
+namespace PGSolutions.Monads.MaybeTests {
     using static CultureInfo;
     using static String;
     using static Functions;
@@ -54,6 +54,7 @@ namespace PGSolutions.Monads.MonadTests {
                 from e in _data where test(e) select e ?? s;
         #endregion
 
+        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object,System.Object)")]
         [Theory]
         [InlineData("",       "Percy//George/Ron/Ginny")]
         [InlineData("Nothing","Percy/Nothing/George/Ron/Ginny")]

@@ -34,6 +34,7 @@ using Xunit;
 
 namespace PGSolutions.Monads.MonadTests {
     using static LazyState;
+    using static CultureInfo;
 
     [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses")]
     public class LazyStateTests {
@@ -52,30 +53,29 @@ namespace PGSolutions.Monads.MonadTests {
                     state => { isExecuted1 = true; return (state + "a"); });
             Func<int, Func<int, Func<string, int>>> f2 =
                     x => y => z => { isExecuted2 = true; return x + y + z.Length; };
-            //var query1 = from x in f1()
-            //             from _ in Put(x.ToString(CultureInfo.InvariantCulture))
-            //             from y in 2.LazyState<string, int>(state => "b" + state)
-            //             from z in Get<string>()
-            //             select f2(x)(y)(z);
-            var query2 = ( from f in f1().AsX()
-                           select from x in f
-                                  from _ in Put(x.ToString(CultureInfo.InvariantCulture))
-                                  from y in 2.LazyState<string, int>(state => "b" + state)
-                                  from z in Get<string>()
-                                  select f2(x)(y)(z)
+            var query2 = ( from ff in f1().AsX()
+                           select from f in ff
+                                  from _ in Put(f.ToString(InvariantCulture))
+                                  from a in 2.LazyState<string, int>(state => "b" + state)
+                                  from b in Get<string>()
+                                  select f2(f)(a)(b)
                          ) | null;
-            var query3 = ( from x in f1().AsX()
-                           from _ in Put(x.ToString(CultureInfo.InvariantCulture))//.AsX()
-                           from y in 2.LazyState<string, int>(state => "b" + state)//.AsX()
-                           from z in Get<string>()//.AsX()
-                           select f2(x)(y)(z)
-                         ) | null;
-            var query = query3;
+            //var query3 = ( from f in f1().AsX()
+            //               from _ in Put(string.Format("{0}",InvariantCulture,f)).AsX()
+            //               from a in 2.LazyState<string, int>(state => "b" + state).AsX()
+            //               from b in Get<string>().AsX()
+            //               select f2(f)(a)(b)
+            //             ) | null;
+            //var query4 = ( f1().AsX().SelectMany(f=>Put(string.Format("{0}",InvariantCulture,f)).AsX(),   (f,_) => new { f,  _ })
+            //                         .SelectMany(a=>2.LazyState<string, int>(state => "b" + state).AsX(), (z,a) => new {z.f, a })
+            //                         .SelectMany(b=>Get<string>().AsX(),                                  (z,b) => f2(z.f)(z.a)(b))
+            //             ) | null;
+            var query = query2;
             Assert.False(isExecuted1);                  // Deferred and lazy.
             Assert.False(isExecuted2);                  // Deferred and lazy.
 
             var expected = StatePayload.New("b1", (1 + 2 + ("b1").Length));
-            var rceeived = query?.Invoke("state");     // Execution.
+            var rceeived = query?.Invoke("state");      // Execution.
             Assert.Equal(expected,rceeived);
 
             Assert.True(isExecuted1);
@@ -87,7 +87,8 @@ namespace PGSolutions.Monads.MonadTests {
         [Fact]
         public static void MonadLaw1Select() {
             var received = (_monad.AsX().Select(_addOneX) | null)("Start");
-//            var received = ( from m in _monad.AsX() select m..Select(_addOneX)("Start") ) | default(StatePayload<string,int>);
+//                received = ( from m in _monad.AsX() select m..Select(_addOneX)("Start") )
+//                         | default(StatePayload<string,int>);
             var expected = _addOne(1)("Start");
 
             Assert.True(received!=null);
@@ -97,7 +98,7 @@ namespace PGSolutions.Monads.MonadTests {
         /// <summary>Monad law 2: M.Bind(Monad) == M</summary>
         [Fact]
         public static void MonadLaw2Select() {
-            var received = _monad.Select(u=>u)("Start");
+            var received = _monad.Select(u=>u).SelectMany(m => m?.Invoke("Start"));
             var expected = _monad("Start");
 
             Assert.Equal(expected,received);
@@ -107,9 +108,12 @@ namespace PGSolutions.Monads.MonadTests {
         [Fact]
         public static void MonadLaw3Select() {
             Func<int, LazyState<string,int>> addTwo = x => (x + 2).LazyState<string,int>();
-            var received = ( _monad.Select(_addOneX).AsX().SelectMany(addTwo) | null )?.Invoke("Start");
-            var expected = ( _monad.Select(x => _addOne(x).AsX().SelectMany(addTwo))("Start").Value | null)?.Invoke("Start");
-
+            var received = ( _monad.Select(_addOneX).SelectMany(addTwo) | null )?.Invoke("Start");
+            var expected = ( from x1 in _monad
+                             from x2 in _addOne(x1)
+                             from x3 in addTwo(x2)
+                             select x3
+                           ).Invoke("Start");
             Assert.True(received!=null);
             Assert.Equal(expected, received);
         }
@@ -141,10 +145,10 @@ namespace PGSolutions.Monads.MonadTests {
         public static void MonadLaw3SelectMany() {
             Func<int, LazyState<string,int>> addTwo = x => (x + 2).LazyState<string,int>();
             var received = ( _monad.AsX().SelectMany(_addOne).SelectMany(addTwo) | null )?.Invoke("Start");
-            var expected = ( _monad.AsX().SelectMany(x => _addOne(x).SelectMany(addTwo)) | null)?.Invoke("Start");
-                expected = _monad.AsX().SelectMany(x => _addOne(x).SelectMany(addTwo))
-                                       .SelectMany<LazyState<string,int>,StatePayload<string,int>>(m => m.Invoke("Start"));
-
+            var expected = ( from x1 in _monad
+                             from x2 in _addOne(x1)
+                             from x3 in addTwo(x2)
+                             select x3 ).Invoke("Start");
             Assert.True(received!=null);
             Assert.Equal(expected,received);
         }

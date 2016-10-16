@@ -28,6 +28,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 
@@ -40,10 +41,11 @@ namespace PGSolutions.Monads.Demos {
 
     enum Syntax { Imperative, Fluent, Query, Unknown }
     class Program {
+        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object)")]
         static string Prompt(string mode) =>
             Format(InvariantCulture, $"{mode}: Type 'Q' to quit; <Enter> to repeat ... ");
-        static string Prompt1(string mode) =>
-            Format(InvariantCulture, "{0}: Type 'Q' to quit; <Enter> to repeat ... ", mode);
+        //static string Prompt1(string mode) =>
+        //    Format(InvariantCulture, "{0}: Type 'Q' to quit; <Enter> to repeat ... ", mode);
         #region GCD States
         static readonly IList<GcdStart> gcdStartStates = new List<GcdStart>() {
              new GcdStart(         40,            40)            //  0
@@ -91,6 +93,7 @@ namespace PGSolutions.Monads.Demos {
             }
         }
         #region Fluent syntax
+        [SuppressMessage("Microsoft.Globalization", "CA1304:SpecifyCultureInfo", MessageId = "PGSolutions.Monads.Demos.CharExtensions.ToUpper(System.Char)")]
         static IEnumerable<int> FluentSyntax(string mode) =>
             ( Enumerable.Range(0,int.MaxValue)
                         .Select(pass => new {pass, counter = Readers.Counter(0)})
@@ -106,6 +109,7 @@ namespace PGSolutions.Monads.Demos {
             ).Select(list => 0);
         #endregion
         #region Comprehension syntax
+        [SuppressMessage("Microsoft.Globalization", "CA1304:SpecifyCultureInfo", MessageId = "PGSolutions.Monads.Demos.CharExtensions.ToUpper(System.Char)")]
         static IEnumerable<int> QuerySyntax(string mode) =>
             from pass  in Enumerable.Range(0, int.MaxValue)
             let counter = Readers.Counter(0)

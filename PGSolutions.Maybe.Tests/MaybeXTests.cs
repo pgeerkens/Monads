@@ -131,7 +131,7 @@ namespace PGSolutions.Monads.MaybeTests {
         #endregion
 
         #region Monad tests
-        static readonly string                _v     = "4";
+        const string                          _v     = "4";
         static readonly X<string>             _m     = "4".AsX();
         static readonly Func<string,string>    f     = s => s + "X";
         static readonly Func<string,string>    g     = s => "(" + s + ")";
@@ -225,11 +225,6 @@ namespace PGSolutions.Monads.MaybeTests {
              Assert.Equal(lhs, rhs);
         }
         #endregion
-    }
-
-    internal static partial class StringExtensions {
-        public static string FormatMe(this string format, params object[] args) => 
-            string.Format(format,args);
     }
 
     internal class ExternalState {

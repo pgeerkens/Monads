@@ -28,6 +28,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 
@@ -47,14 +48,15 @@ namespace PGSolutions.Monads.Demos {
     /// <summary>TODO</summary>
     public static class MethodDetails {
         /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Flags")]
         public static X<IList<IMethodDetails<TDetails>>> GetMethodDescriptions<TDetails>(this Type type, 
             Predicate<string>        predicate,
-            BindingFlags             bindFlags,
+            BindingFlags             bindingFlags,
             Func<FieldInfo,TDetails> transform
         ) where TDetails : class =>
             from pred in predicate.AsX()
-            select  ( from @class in type?.GetNestedTypes(bindFlags)
-                      from field  in @class?.GetFields(bindFlags)
+            select  ( from @class in type?.GetNestedTypes(bindingFlags)
+                      from field  in @class?.GetFields(bindingFlags)
                       from atts   in field?.CustomAttributes
                       where pred.Invoke(field?.Name ?? "")
                          && atts?.AttributeType.Name == "DescriptionAttribute"

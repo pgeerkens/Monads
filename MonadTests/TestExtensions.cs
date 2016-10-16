@@ -32,15 +32,6 @@ using System.Diagnostics.Contracts;
 namespace PGSolutions.Monads.MonadTests {
     using static Contract;
 
-    internal static class MaybeTestsExtensions {
-        /// <summary>A string representing the object's value, or "Nothing" if it has no value.</summary>
-        public static string ToNothingString<T>(this X<T> @this
-        ) where T:class {
-            Ensures(Result<string>() != null);
-            return @this.Select(v => v.ToString()) | "Nothing";
-        }
-    }
-
     [Pure]
     internal static partial class EnumerableExtensions {
         public static IEnumerable<T> Enumerable<T>(this T value) {

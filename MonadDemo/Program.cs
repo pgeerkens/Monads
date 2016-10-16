@@ -40,6 +40,7 @@ namespace PGSolutions.Monads.Demos {
     using static Console;
 
     static class Program {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object,System.Object,System.Object)")]
         static void Main() {
             BasicTest();
 
@@ -103,6 +104,7 @@ namespace PGSolutions.Monads.Demos {
             WriteLine("_______________________");
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object)")]
         private static void ExternalStateTest() {
             WriteLine();
             var state = new ExternalState();
@@ -116,6 +118,7 @@ namespace PGSolutions.Monads.Demos {
             WriteLine("_______________________");
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object,System.Object)")]
         private static void GcdTest1(IList<int> list) {
             list.ContractedNotNull(nameof(list));
             if (list.Any()) {
