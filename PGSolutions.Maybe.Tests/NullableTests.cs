@@ -147,4 +147,11 @@ namespace PGSolutions.Monads.MonadTests {
             Assert.True(lhs == rhs, description);
         }
     }
+
+    internal class ExternalState {
+        private int _state;
+
+        public ExternalState() { _state = -1; }
+        public int GetState() { return ++_state; }
+    }
 }

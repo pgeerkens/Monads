@@ -30,7 +30,7 @@ using System;
 using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
-    /// <summary>Implementation of the LINQ extension methods for the maybe monad <see cref="X{T}"/>.</summary>
+    /// <summary>Extension methods supporting LINQ-comprehension syntax for the maybe monad on classes: <see cref="X{T}"/>.</summary>
     [Pure]
     public static class MaybeLinq {
         /// <summary>LINQ-ible implementation of the monadic map operator.</summary>
@@ -60,5 +60,13 @@ namespace PGSolutions.Monads {
 
         /// <summary>LINQ-ible Cast implementation. Argument is "boxed" if not already a class object.</summary>
         public static X<T> Cast<T>(this X<object> @this) where T: class => from obj in @this select (T)obj;
+
+        /// <summary>LINQ-ible Cast implementation for a class object.</summary>
+        /// <typeparam name="TValue"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="this"></param>
+        /// <returns></returns>
+        public static TResult Cast<TValue,TResult>(this TValue @this) where TValue:TResult 
+            => @this != null ? @this : default(TResult);
     }
 }

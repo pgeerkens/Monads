@@ -42,12 +42,8 @@ namespace PGSolutions.Monads {
         public static bool? AreNonNullEqual<TValue>(this TValue lhs, TValue rhs)
             => lhs != null && rhs != null ? lhs.Equals(rhs) : null as bool?;
 
-        /// <summary>LINQ-ible Cast implementation for a class object.</summary>
-        /// <typeparam name="TValue"></typeparam>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="this"></param>
-        /// <returns></returns>
-        public static TResult Cast<TValue,TResult>(this TValue @this) where TValue:TResult 
-            => @this != null ? @this : default(TResult);
+        ///<summary>Tests value-equality, returning <b>Nothing</b> if either value doesn't exist.</summary>
+        public static bool? AreNonNullUnequal<TValue>(this TValue lhs, TValue rhs)
+            => lhs != null && rhs != null ? ! lhs.Equals(rhs) : null as bool?;
     }
 }
