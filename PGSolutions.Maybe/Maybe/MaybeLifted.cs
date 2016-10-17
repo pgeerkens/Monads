@@ -29,7 +29,7 @@
 using System;
 
 namespace PGSolutions.Monads {
-    /// <summary>TODO</summary>
+    /// <summary>Extension methods supporting LINQ-comprehension syntax crossing between maybe monads on classes <see cref="X{T}"/> and structs <see cref="Nullable{T}"/> .</summary>
     public static class MaybeLifted {
         #region X<TValue> lifted to TResult?
         ///<summary>The monadic Bind operation of class-type <typeparamref name="TValue"/> to struct-type <typeparamref name="TResult"/>.</summary>

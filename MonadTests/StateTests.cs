@@ -165,12 +165,12 @@ namespace PGSolutions.Monads.MonadTests {
 
     /// <summary>Extension methods for <see cref="StateTuple<TState,TValue>"/>.</summary>
     internal static partial class StateExtensions {
-        /// <summary>η: T -> State&lt;T, TState&gt;</summary> 
+        /// <summary>η: T -> State{TState,TValue}</summary> 
         [Pure]
         public static State<TState, TValue> State<TState, TValue>(this TValue value) =>
                 state => StructTuple.New(state, value);
 
-        /// <summary>η: T -> State&lt;T, TState&gt;</summary> 
+        /// <summary>η: T -> State{TState,TValue}</summary> 
         [Pure]
         public static State<TState, TValue> State<TState, TValue>(this
             TValue value,

@@ -30,7 +30,7 @@ using System;
 using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
-    /// <summary>TODO</summary>
+    /// <summary>Extension methods supporting LINQ-comprehension syntax for the maybe monad on structs: <see cref="Nullable{T}"/>.</summary>
     [Pure]
     public static class NullableLinq {
         /// <summary>LINQ-compatible implementation of the monadic map operator.</summary>

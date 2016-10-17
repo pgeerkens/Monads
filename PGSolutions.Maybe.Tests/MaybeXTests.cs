@@ -131,10 +131,10 @@ namespace PGSolutions.Monads.MaybeTests {
         #endregion
 
         #region Monad tests
-        const string                          _v     = "4";
-        static readonly X<string>             _m     = "4".AsX();
-        static readonly Func<string,string>    f     = s => s + "X";
-        static readonly Func<string,string>    g     = s => "(" + s + ")";
+        const string                          _v    = "4";
+        static readonly X<string>             _m    = "4".AsX();
+        static readonly Func<string,string>    f    = s => s + "X";
+        static readonly Func<string,string>    g    = s => "(" + s + ")";
 
         /// <summary>Monad Law #1: (return x).Bind(f) == f(x)</summary>
         [Fact]

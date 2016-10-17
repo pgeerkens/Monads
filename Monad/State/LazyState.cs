@@ -123,7 +123,7 @@ namespace PGSolutions.Monads {
         #endregion
 
         #region Miscellaneous
-        /// <summary>Creates a new instance of <see cref="LazyState{TState, TValue}"/> from the supplied <paramref name="@this"/></summary>
+        /// <summary>Creates a new instance of <see cref="LazyState{TState, TValue}"/> from the supplied <paramref name="this"/></summary>
         /// <param name="this"> the <typeparamref name="TValue"/> value for the new instance.</param>
         public static LazyState<TState, TValue>         ToLazyState<TState, TValue>(this TValue @this) =>
             s => StatePayload.New(s,@this);

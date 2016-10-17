@@ -29,7 +29,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-using PGSolutions.Monads;
 using Xunit;
 
 namespace PGSolutions.Monads.MonadTests {
