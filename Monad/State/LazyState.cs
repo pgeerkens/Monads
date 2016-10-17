@@ -41,12 +41,94 @@ namespace PGSolutions.Monads {
     /// <summary>Core Monadic functionality for State, as Extension methods</summary>
     [Pure]
     public static class LazyState {
-        /// <summary>TODO</summary>
-        /// <typeparam name="TState">Type of the state to and from which this delegate selects</typeparam>
-        /// <typeparam name="TValue">Type of the value which this delegate accepts</typeparam>
-        public delegate LazyState<TState,TValue>        Selector<TState,TValue>(TState s);
+        #region m.Select()
+        /// <summary>Optimized implementation of operator (liftM): liftM f m = m >>= (\x -> return (f x)).</summary>
+        public static X<LazyState<TState, TResult>>     Select<TState, TValue, TResult>(this
+            X<LazyState<TState, TValue>> @this,
+            Func<TValue, TResult> selector
+        ) => from t in @this from r in t.Select(selector) select r;
 
-        /// <summary>TODO</summary>
+        /// <summary>Optimized implementation of operator (liftM): liftM f m = m >>= (\x -> return (f x)).</summary>
+        public static X<LazyState<TState, TResult>>     Select<TState, TValue, TResult>(this
+            LazyState<TState, TValue> @this,
+            Func<TValue, TResult> selector
+        ) => selector!=null ? @this.SelectMany<TState,TValue,TResult>(x => s => StatePayload.New(s,selector(x)))
+                            : (X<LazyState<TState, TResult>>)null;
+        #endregion
+        #region m.SelectMany(,)
+        /// <summary>LINQ-compatible alias for join.</summary>
+        public static X<LazyState<TState, TResult>>     SelectMany<TState, TValue, T, TResult>(this
+            X<LazyState<TState, TValue>> @this,
+            X<Func<TValue, LazyState<TState, T>>> selector,
+            Func<TValue, T, TResult> projector
+        ) => from t in @this from s in selector from r in t.SelectMany(s, projector).AsX() select r;
+        //) => from t in @this from s in selector from r in t.SelectMany(s, projector) select r;
+        /// <summary>LINQ-compatible alias for join.</summary>
+        public static X<LazyState<TState,TResult>>      SelectMany<TState,TValue,T,TResult> (this
+            X<LazyState<TState,TValue>> @this,
+            Func<TValue, LazyState<TState,T>> selector,
+            Func<TValue, T, TResult> projector
+        ) => from t in @this from r in t.SelectMany(selector,projector).AsX() select r;
+        //) => from t in @this from r in t.SelectMany(selector,projector) select r;
+        /// <summary>LINQ-compatible alias for join.</summary>
+        /// <remarks>
+        ///     return  @this.SelectMany(          aval =>      // Always available from Bind()
+        ///             selector(aval).SelectMany( bval =>
+        ///             new State{TState,TResult}( s    => 
+        ///             new StatePayload{TState,TResult}(s,projector(aval,bval)) ) ) );
+        /// </remarks>
+        public static LazyState<TState,TResult>         SelectMany<TState,TValue,T,TResult> (this
+        //public static X<LazyState<TState,TResult>>      SelectMany<TState,TValue,T,TResult> (this
+            LazyState<TState,TValue> @this,
+            Func<TValue, LazyState<TState,T>> selector,
+            Func<TValue, T, TResult> projector
+        ) => @this!=null && selector!=null && projector!=null
+            ? s => @this(s).Selector1(selector).Selector2(projector)
+            : (LazyState<TState,TResult>)null;
+
+        static Tuple<TValue,StatePayload<TState,TSelector>> Selector1<TState,TValue,TSelector>(this StatePayload<TState,TValue> @this,
+            Func<TValue, LazyState<TState,TSelector>> selector
+        ) => Tuple.Create(@this.Value, selector(@this.Value)(@this.State));
+        static StatePayload<TState,TResult> Selector2<TState,TValue,TSelector,TResult>(this Tuple<TValue,StatePayload<TState,TSelector>> @this,
+            Func<TValue, TSelector, TResult> projector
+        ) => StatePayload.New(@this.Item2.State, projector(@this.Item1,@this.Item2.Value));
+        #endregion
+        #region m.SelectMany()
+        /// <summary>Implementation of Bind operator: (>>=): m a -> (a -> m b) -> m b.</summary>
+        public static X<LazyState<TState,TResult>>      SelectMany<TState,TValue,TResult> (this
+            LazyState<TState,TValue> @this,
+            Func<TValue,LazyState<TState,TResult>> selector
+        ) => @this.AsX().SelectMany(selector.AsX());
+        /// <summary>Implementation of Bind operator: (>>=): m a -> (a -> m b) -> m b.</summary>
+        public static X<LazyState<TState,TResult>>      SelectMany<TState,TValue,TResult> (this
+            X<LazyState<TState,TValue>> @this,
+            Func<TValue,LazyState<TState,TResult>> selector
+        ) => @this.SelectMany(selector.AsX());
+        /// <summary>Implementation of Bind operator: (>>=): m a -> (a -> m b) -> m b.</summary>
+        /// <remarks>
+        /// Haskell operator: (>>=): m a -> (a -> m b) -> m b
+        /// or:     mv >>= g = State (\st -> 
+        ///                      let (y, st') = runState mv st
+        ///                      in runState (g y) st')
+        /// or:     return s => {
+        ///             var sourceResult = @this(s);
+        ///             return selector(sourceResult.Value)(sourceResult.State);
+        ///         };
+        /// </remarks>
+        public static X<LazyState<TState, TResult>> SelectMany<TState, TValue, TResult>(this
+            X<LazyState<TState, TValue>> @this,
+            X<Func<TValue, LazyState<TState, TResult>>> selector
+        ) => from t in @this from s in selector from r in t.SelectMany(s, Functions.Second).AsX() select r;
+        //) => from t in @this from s in selector from r in t.SelectMany(s, Functions.Second) select r;
+        #endregion
+
+        #region Miscellaneous
+        /// <summary>Creates a new instance of <see cref="LazyState{TState, TValue}"/> from the supplied <paramref name="@this"/></summary>
+        /// <param name="this"> the <typeparamref name="TValue"/> value for the new instance.</param>
+        public static LazyState<TState, TValue>         ToLazyState<TState, TValue>(this TValue @this) =>
+            s => StatePayload.New(s,@this);
+
+        /// <summary>Iterate the supplied <see cref="LazyState{TState, TValue}"/> until the calculated value is false.</summary>
         public static LazyState<TState,bool>            DoWhile<TState>(this
             LazyState<TState,bool> @this
         ) {
@@ -60,6 +142,7 @@ namespace PGSolutions.Monads {
         }
 
         /// <summary>Generates an unending stream of successive StructTuple{TState,T} objects.</summary>
+        /// <remarks>The caller is responsible for externally terminating the loop.</remarks>
         public static IEnumerable<StatePayload<TState,TValue>>  Enumerate<TState,TValue>(this
             LazyState<TState,TValue> @this,
             TState startState
@@ -70,93 +153,12 @@ namespace PGSolutions.Monads {
             while (true) yield return (tuple = @this(tuple.State));
         }
 
-        /// <summary>Optimized implementation of operator (liftM): liftM f m = m >>= (\x -> return (f x)).</summary>
-        public static X<LazyState<TState, TResult>>     Select<TState, TValue, TResult>(this
-            X<LazyState<TState, TValue>> @this,
-            Func<TValue, TResult> selector
-        ) => from t in @this from r in t.Select(selector) select r;
-
-        /// <summary>Optimized implementation of operator (liftM): liftM f m = m >>= (\x -> return (f x)).</summary>
-        public static X<LazyState<TState, TResult>>     Select<TState, TValue, TResult>(this
-            LazyState<TState, TValue> @this,
-            Func<TValue, TResult> selector
-        ) => selector!=null ? @this.SelectMany<TState,TValue,TResult>(x => s => StatePayload.New(s,selector(x)))
-                            : (X<LazyState<TState, TResult>>)null;
-
-        /// <summary>LINQ-compatible alias for join.</summary>
-        public static X<LazyState<TState,TResult>>      SelectMany<TState,TValue,T,TResult> (this
-            X<LazyState<TState,TValue>> @this,
-            X<Func<TValue, LazyState<TState,T>>> selector,
-            Func<TValue, T, TResult> projector
-        ) => from t in @this from s in selector select t.SelectMany(s,projector);
-        /// <summary>LINQ-compatible alias for join.</summary>
-        public static X<LazyState<TState,TResult>>      SelectMany<TState,TValue,T,TResult> (this
-            X<LazyState<TState,TValue>> @this,
-            Func<TValue, LazyState<TState,T>> selector,
-            Func<TValue, T, TResult> projector
-        ) => from t in @this select t.SelectMany(selector,projector);
-        /// <summary>LINQ-compatible alias for join.</summary>
-        /// <remarks>
-        ///     return  @this.SelectMany(          aval =>      // Always available from Bind()
-        ///             selector(aval).SelectMany( bval =>
-        ///             new State{TState,TResult}( s    => 
-        ///             new StatePayload{TState,TResult}(s,projector(aval,bval)) ) ) );
-        /// </remarks>
-        //public static LazyState<TState,TResult>         SelectMany<TState,TValue,T,TResult> (this
-        public static LazyState<TState,TResult>         SelectMany<TState,TValue,T,TResult> (this
-            LazyState<TState,TValue> @this,
-            Func<TValue, LazyState<TState,T>> selector,
-            Func<TValue, T, TResult> projector
-        ) => @this!=null && selector!=null && projector!=null
-            ? s => @this(s).Selector1(selector).Selector2(projector)
-            : (LazyState<TState,TResult>)null;
-
-        /// <summary>Implementation of Bind operator: (>>=): m a -> (a -> m b) -> m b.</summary>
-        public static X<LazyState<TState,TResult>>      SelectMany<TState,TValue,TResult> (this
-            X<LazyState<TState,TValue>> @this,
-            X<Func<TValue,LazyState<TState,TResult>>> selector
-        ) => from t in @this from s in selector from r in t.SelectMany(s) select r;
-        /// <summary>Implementation of Bind operator: (>>=): m a -> (a -> m b) -> m b.</summary>
-        public static X<LazyState<TState,TResult>>      SelectMany<TState,TValue,TResult> (this
-            X<LazyState<TState,TValue>> @this,
-            Func<TValue,LazyState<TState,TResult>> selector
-        ) => from t in @this from r in t.SelectMany(selector) select r;
-        /// <summary>Implementation of Bind operator: (>>=): m a -> (a -> m b) -> m b.</summary>
-        /// <remarks>
-        /// Haskell operator: (>>=): m a -> (a -> m b) -> m b
-        /// or:     mv >>= g = State (\st -> 
-        ///                      let (y, st') = runState mv st
-        ///                      in runState (g y) st')
-        /// or:     return s => {
-        ///             var sourceResult = @this(s);
-        ///             return selector(sourceResult.Value)(sourceResult.State);
-        ///         };
-        /// </remarks>
-        public static X<LazyState<TState,TResult>>       SelectMany<TState,TValue,TResult> (this
-            LazyState<TState,TValue> @this,
-            Func<TValue,LazyState<TState,TResult>> selector
-        ) => selector!=null ? @this?.SelectMany(selector, Functions.Second) : null;
-
-        static Tuple<TValue,StatePayload<TState,TSelector>> Selector1<TState,TValue,TSelector>(this StatePayload<TState,TValue> @this,
-            Func<TValue, LazyState<TState,TSelector>> selector
-        ) => Tuple.Create(@this.Value, selector(@this.Value)(@this.State));
-        static StatePayload<TState,TResult> Selector2<TState,TValue,TSelector,TResult>(this Tuple<TValue,StatePayload<TState,TSelector>> @this,
-            Func<TValue, TSelector, TResult> projector
-        ) => StatePayload.New(@this.Item2.State, projector(@this.Item1,@this.Item2.Value));
-
-        /// <summary>TODO</summary>
-        public static LazyState<TState, TValue>         ToLazyState<TState, TValue>(this TValue @this) =>
-            s => StatePayload.New(s,@this);
-
-        /// <summary>Get's the current state as both State and Value.</summary>
+        /// <summary>'Gets' the current state, as both State and Value.</summary>
         public static LazyState<TState, TState>         Get<TState>() => s => StatePayload.New(s, s);
 
-        /// <summary>Performs <param name="selector"/> on the result from a Get.</summary>
-        public static LazyState<TState,Unit>            GetCompose<TState>(Selector<TState,Unit> selector)=>
-            selector!=null ? s => selector(s)(s) : (LazyState<TState,Unit>)null;
-
-        /// <summary>Puts the supplied state, resturning a Unit.</summary>
+        /// <summary>'Puts' the supplied state, resturning a Unit.</summary>
         public static LazyState<TState,Unit>            Put<TState>(TState state) =>
             s => StatePayload.New(state, Unit._);
+        #endregion
     }
 }
