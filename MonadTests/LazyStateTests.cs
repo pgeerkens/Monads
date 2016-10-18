@@ -36,15 +36,130 @@ namespace PGSolutions.Monads.MonadTests {
     using static LazyState;
     using static CultureInfo;
 
+    using Maybe_T = LazyState<string,object>;
+
     [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses")]
     public class LazyStateTests {
         public LazyStateTests() { }
 
-        const           int                     _value  = 1;
-        readonly static LazyState<string,int>   _monad  = _value.ToMonad();
-        readonly static Func<int,int>           _addOne = x => (x + 1);
-        readonly static Func<int,int>           _times2 = x => x * 2;
-        readonly static Func<int,int>           _plus3  = x => x + 3;
+        const           int                             _v  = 1;
+        readonly static LazyState<string,int>           _m  = _v.ToMonad();
+        readonly static Func<int,int>                   _f  = x => x * 2;
+        readonly static Func<int,int>                   _g  = x => x + 3;
+        static readonly Func<int,LazyState<string,int>> _fm = i => _f(i).ToMonad();
+        static readonly Func<int,LazyState<string,int>> _gm = i => _g(i).ToMonad();
+
+        #region Functor Laws
+        /// <summary>Functor Law #1: fmap id ≡ id.</summary>
+        [Fact]
+        public static void FunctorLaw1() {
+            var lhs = _m.AsX();
+            var rhs = from i in _m select i;
+
+            Assert.True(rhs.HasValue);
+            Assert.Equal(lhs.Apply("Start"), rhs.Apply("Start"));
+        }
+
+        /// <summary>Functor Law #2: fmap (f . g) ≡ (fmap f) . (fmap g).</summary>
+        [Fact]
+        public static void FunctorLaw2() {
+            var lhs = from s in _m select _f(_g(s));
+            var rhs = from s in ( from s in _m select _g(s) ) select _f(s);
+
+            Assert.True(rhs.HasValue);
+            Assert.Equal(lhs.Apply("Start"), rhs.Apply("Start"));
+        }
+        #endregion
+        #region Join Laws
+        /// <summary>Return Law: return . f ≡ fmap f . return.</summary>
+        /// <remarks>In expanded form: \x -> return (f x) = \x -> fmap f (return x).</remarks>
+        [Fact]
+        public static void ReturnLaw() {
+            var lhs = ( _g(_v).ToLazyState<string,int>() )?.Invoke("Start");
+            var rhs = ( (from s in _m select _g(s)) | null)?.Invoke("Start");
+
+            Assert.True(rhs!=null);
+            Assert.Equal(lhs, rhs);
+        }
+
+        /// <summary>Join Law #1: ( join . fmap join ) ≡ ( join . join ).</summary>
+        [Fact]
+        public static void JoinLaw1() {
+            var m   = ((object)((object)_m).ToMonad()).ToMonad();
+            var lhs = from x1 in m
+                      from x2 in x1.ToMonad()
+                      from r  in (Maybe_T)x2
+                      select r;
+            var rhs = from x3 in ( from x1 in m from x2 in x1.ToMonad() select x2 )
+                      from r in (Maybe_T)x3
+                      select r;
+
+            Assert.True(rhs.HasValue);
+            Assert.Equal(lhs.Apply("Start"), rhs.Apply("Start"));
+        }
+
+        /// <summary>Join Law #2: ( join . fmap return ) ≡ ( join . return = id ).</summary>
+        [Fact]
+        public static void JoinLaw2() {
+            var lhs = from x1 in _m from x2 in x1.ToMonad() select x2;
+            var rhs = from x1 in _m from x2 in x1.ToMonad() select x2;
+
+            Assert.True(rhs.HasValue);
+            Assert.Equal(lhs.Apply("Start"), rhs.Apply("Start"));
+        }
+
+        /// <summary>Join Law #3: ( join . fmap (fmap f) ) ≡ ( fmap f . join ).</summary>
+        /// <remarks>In expanded form: \x -> join (fmap (fmap f) x) = \x -> fmap f (join x).</remarks>
+        [Fact]
+        public static void JoinLaw3() {
+            var lhs = from x1 in _m.Select(_f).Select(_g) select x1;
+            var rhs = from x2 in ( from x1 in _m select _f(x1) ) select _g(x2);
+
+            Assert.True(rhs.HasValue);
+            Assert.Equal(lhs.Apply("Start"), rhs.Apply("Start"));
+        }
+        #endregion
+        #region Monad Laws
+        /// <summary>Monad Law #1: (return x).Bind(f) == f(x)</summary>
+        [Fact]
+        public static void MonadLaw1() {
+            var lhs = _fm(_v);
+            var rhs = _v.ToMonad().SelectMany(_fm);
+
+            Assert.True(rhs.HasValue);
+            Assert.Equal(lhs.Invoke("Start"), rhs.Apply("Start"));
+        }
+
+        /// <summary>Monad Law #2: M.Bind(Monad) == M</summary>
+        [Fact]
+        public static void MonadLaw2() {
+            var lhs = _m.AsX();
+            var rhs = _m.SelectMany(Extensions.ToMonad);
+
+            Assert.True(rhs.HasValue);
+            Assert.Equal(lhs.Apply("Start"), rhs.Apply("Start"));
+        }
+
+        /// <summary>Monad Law #3: (m >>= f) >>= g == m >>= ( \x -> (f x >>= g) ).</summary>
+        [Fact]
+        public static void MonadLaw3A() {
+            var lhs = from x in _m from y in _fm(x) from r in _gm(y) select r;
+            var rhs = from y in (from x in _m from r in _fm(x) select r ) from r in _gm(y) select r;
+
+            Assert.True(rhs.HasValue);
+            Assert.Equal(lhs.Apply("Start"), rhs.Apply("Start"));
+        }
+
+        /// <summary>Monad Law #3: (m >>= f) >>= g == m >>= ( \x -> (f x >>= g) ).</summary>
+        [Fact]
+        public static void MonadLaw3B() {
+            var lhs = _m.SelectMany(_fm).SelectMany(_gm);
+            var rhs = _m.SelectMany(x => _fm(x).SelectMany(_gm) | null);
+
+            Assert.True(rhs.HasValue);
+            Assert.Equal(lhs.Apply("Start"), rhs.Apply("Start"));
+        }
+        #endregion
 
         [Fact]
         public static void LazyEvaluationTestSelectMany() {
@@ -59,165 +174,18 @@ namespace PGSolutions.Monads.MonadTests {
                           from a in 2.ToMonad<string, int>(state => "b" + state)
                           from b in Get<string>()
                           select f2(f)(a)(b)
-                        ) | null;
+                        );
 
             Assert.False(isExecuted1);                  // Deferred and lazy.
             Assert.False(isExecuted2);                  // Deferred and lazy.
 
             var expected = StatePayload.New("b1", (1 + 2 + ("b1").Length));
-            var rceeived = query?.Invoke("state");      // Execution.
+            var rceeived = query.Apply("state");        // Execution.
             Assert.Equal(expected,rceeived);
 
             Assert.True(isExecuted1);
             Assert.True(isExecuted2);
         }
-
-        #region FUnctor Laws
-        /// <summary>Functor Law #1: fmap id ≡ id.</summary>
-        [Fact]
-        public static void FunctorLaw1() {
-            var lhs = ( ( from i in _monad select i) | null)?.Invoke("Start");
-            var rhs = _monad?.Invoke("Start");
-
-            Assert.True(rhs!=null);
-            Assert.Equal(lhs, rhs);
-        }
-
-        /// <summary>Functor Law #2: fmap (f . g) ≡ (fmap f) . (fmap g).</summary>
-        [Fact]
-        public static void FunctorLaw2() {
-            var lhs = ( ( from s in _monad select _times2(_plus3(s))) | null)?.Invoke("Start");
-            var rhs = ( ( from s in ( from s in _monad select _plus3(s) )
-                          select _times2(s)
-                        ) | null
-                      )?.Invoke("Start");
-
-            Assert.True(rhs!=null);
-            Assert.Equal(lhs, rhs);
-        }
-        #endregion
-        #region Join Laws
-        /// <summary>Return Law: return . f ≡ fmap f . return.</summary>
-        /// <remarks>In expanded form: \x -> return (f x) = \x -> fmap f (return x).</remarks>
-        [Fact]
-        public static void ReturnLaw() {
-            var lhs = ( _plus3(_value).ToLazyState<string,int>() )?.Invoke("Start");
-            var rhs = ( (from s in _monad select _plus3(s)) | null)?.Invoke("Start");
-
-            Assert.True(rhs!=null);
-            Assert.Equal(lhs, rhs);
-        }
-
-        /// <summary>Join Law #1: ( join . fmap join ) ≡ ( join . join ).</summary>
-        [Fact]
-        public static void JoinLaw1() {
-            var m = (_monad).ToLazyState<string,object>().ToLazyState<string,object>();
-            var lhs = ( ( from x1 in m
-                          from x2 in x1.ToLazyState<string,object>()
-                          from r in (LazyState<string,object>)x2
-                          select r as int?) ?? null
-                      )?.Invoke("Start");
-            var rhs = ( ( from x3 in ( from x1 in m from x2 in x1.ToLazyState<string,object>() select x2 )
-                          from r in (LazyState<string,object>)x3
-                          select r as int?
-                        ) ?? null
-                      )?.Invoke("Start");
-
-            Assert.True(rhs!=null);
-            Assert.Equal(lhs, rhs);
-        }
-
-        /// <summary>Join Law #2: ( join . fmap return ) ≡ ( join . return = id ).</summary>
-        [Fact]
-        public static void JoinLaw2() {
-            var lhs = (from x1 in _monad from x2 in x1.ToLazyState<string,int>() select x2)?.Invoke("Start");
-            var rhs = (from x1 in _monad from x2 in x1.ToLazyState<string,int>() select x2)?.Invoke("Start");
-
-            Assert.True(rhs!=null);
-            Assert.Equal(lhs, rhs);
-        }
-
-        /// <summary>Join Law #3: ( join . fmap (fmap f) ) ≡ ( fmap f . join ).</summary>
-        /// <remarks>In expanded form: \x -> join (fmap (fmap f) x) = \x -> fmap f (join x).</remarks>
-        [Fact]
-        public static void JoinLaw3() {
-            var lhs = ( (from x1 in _monad.Select(_times2).Select(_plus3) select x1) | null)?.Invoke("Start");
-            var rhs = ( (from x2 in ( from x1 in _monad select _times2(x1) ) select _plus3(x2)) | null)?.Invoke("Start");
-
-            Assert.True(rhs!=null);
-            Assert.Equal(lhs, rhs);
-        }
-        #endregion
-
-        #region SelectMany() Monad Law Tests
-        /// <summary>Monad law 1: m.Monad().Bind(f) == f(m)</summary>
-        [Fact]
-        public static void MonadLaw1SelectMany() {
-            var received = ( ( from m in _monad select _addOne(m) ) | null )?.Invoke("Start");
-            var expected = _addOne(1).ToMonad()("Start");
-
-            Assert.True(received!=null);
-            Assert.Equal(expected,received);
-        }
-
-        /// <summary>Monad law 2: M.Bind(Monad) == M</summary>
-        [Fact]
-        public static void MonadLaw2SelectMany() {
-            var received = ( _monad.SelectMany(Extensions.ToMonad) | null )?.Invoke("Start");
-            var expected = _monad?.Invoke("Start");
-
-            Assert.True(received!=null);
-            Assert.Equal(expected,received);
-        }
-
-        /// <summary>Monad law 3: M.Bind(f1).Bind(f2) == M.Bind(x => f1(x).Bind(f2))</summary>
-        [Fact]
-        public static void MonadLaw3SelectMany() {
-            Func<int, LazyState<string,int>> addTwo = x => (x + 2).ToMonad();
-            var received = ( _monad.SelectMany(i=>_addOne(i).ToMonad()).SelectMany(addTwo) | null )?.Invoke("Start");
-            var expected = ( from x1 in _monad
-                             from x2 in _addOne(x1).ToMonad()
-                             from x3 in addTwo(x2)
-                             select x3 ).Invoke("Start");
-            Assert.True(received!=null);
-            Assert.Equal(expected,received);
-        }
-        #endregion
-
-        #region Select() Monad Law Tests - possibly irrelevant now
-        /// <summary>Monad law 1: m.Monad().Bind(f) == f(m)</summary>
-        [Fact]
-        public static void MonadLaw1Select() {
-            var received = (_monad.Select(_addOne) | null)?.Invoke("Start");
-            var expected = _addOne(1).ToMonad()?.Invoke("Start");
-
-            Assert.True(received!=null);
-            Assert.Equal(expected,received);
-        }
-
-        /// <summary>Monad law 2: M.Bind(Monad) == M</summary>
-        [Fact]
-        public static void MonadLaw2Select() {
-            var received = _monad.Select(u=>u).SelectMany(m => m?.Invoke("Start"));
-            var expected = _monad("Start");
-
-            Assert.Equal(expected,received);
-        }
-
-        /// <summary>Monad law 3: M.Bind(f1).Bind(f2) == M.Bind(x => f1(x).Bind(f2))</summary>
-        [Fact]
-        public static void MonadLaw3Select() {
-            Func<int, LazyState<string,int>> addTwo = x => (x + 2).ToMonad();
-            var received = ( _monad.Select(_addOne).SelectMany(addTwo) | null )?.Invoke("Start");
-            var expected = ( from x1 in _monad
-                             from x2 in _addOne(x1).ToMonad()
-                             from x3 in addTwo(x2)
-                             select x3
-                           ).Invoke("Start");
-            Assert.True(received!=null);
-            Assert.Equal(expected, received);
-        }
-        #endregion
     }
 
     /// <summary>Extension methods for <see cref="LazyStateTests"/>.</summary>

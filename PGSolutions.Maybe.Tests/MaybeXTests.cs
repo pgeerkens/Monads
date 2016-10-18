@@ -35,7 +35,7 @@ using System.Linq;
 using Xunit;
 
 namespace PGSolutions.Monads.MaybeTests {
-    using static Functions;
+    using Maybe_T = X<object>;
 
     /// <summary>TODO</summary>
     /// <remarks>
@@ -46,13 +46,130 @@ namespace PGSolutions.Monads.MaybeTests {
     /// </remarks>
     [ExcludeFromCodeCoverage] [CLSCompliant(false)]
     public class MaybeXTests {
+        const string                            _v  = "4";
+        static readonly X<string>               _m  = _v;
+        static readonly Func<string,string>     _f  = s => s + "X";
+        static readonly Func<string,string>     _g  = s => "(" + s + ")";
+        static readonly Func<string,X<string>>  _fm = s => _f(s);
+        static readonly Func<string,X<string>>  _gm = s => _g(s);
+
+        #region Functor Laws
+        /// <summary>Functor Law #1: fmap id ≡ id.</summary>
+        [Fact]
+        public static void FunctorLaw1() {
+            var lhs = _m;
+            var rhs = from i in _m select i;
+
+            Assert.True(rhs.HasValue);
+            Assert.Equal(lhs, rhs);
+        }
+
+        /// <summary>Functor Law #2: fmap (f . g) ≡ (fmap f) . (fmap g).</summary>
+        [Fact]
+        public static void FunctorLaw2() {
+            var lhs = from s in _m select _g(_f(s));
+            var rhs = from s in ( from s in _m select _f(s) ) select _g(s);
+
+            Assert.True(rhs.HasValue);
+            Assert.Equal(lhs, rhs);
+        }
+        #endregion
+        #region Join Laws
+        /// <summary>Return Law: return . f ≡ fmap f . return.</summary>
+        /// <remarks>In expanded form: \x -> return (f x) = \x -> fmap f (return x).</remarks>
+        [Fact]
+        public static void ReturnLaw() {
+            var lhs = _g(_v).ToMonad();
+            var rhs = from s in _v.ToMonad() select _g(s);
+
+            Assert.True(rhs.HasValue);
+            Assert.Equal(lhs, rhs);
+        }
+
+        /// <summary>Join Law #1: ( join . fmap join ) ≡ ( join . join ).</summary>
+        [Fact]
+        public static void JoinLaw1() {
+            var m = ((object)((object)_m).ToMonad()).ToMonad();
+            var lhs = from x1 in m
+                      from x2 in (Maybe_T)x1
+                      from r  in (X<string>)x2
+                      select r;
+            var rhs = from x3 in ( from x1 in m from x2 in (X<object>)x1 select x2 )
+                      from r in (X<string>)x3
+                      select r;
+
+            Assert.True(rhs.HasValue);
+            Assert.Equal(lhs, rhs);
+        }
+
+        /// <summary>Join Law #2: ( join . fmap return ) ≡ ( join . return = id ).</summary>
+        [Fact]
+        public static void JoinLaw2() {
+            var lhs = from x1 in _m from x2 in x1.ToMonad() select x2;
+            var rhs = from x1 in _m from x2 in x1.ToMonad() select x2;
+
+            Assert.True(rhs.HasValue);
+            Assert.Equal(lhs, rhs);
+        }
+
+        /// <summary>Join Law #3: ( join . fmap (fmap f) ) ≡ ( fmap f . join ).</summary>
+        /// <remarks>In expanded form: \x -> join (fmap (fmap f) x) = \x -> fmap f (join x).</remarks>
+        [Fact]
+        public static void JoinLaw3() {
+            var lhs = from x1 in _m.Select(_f).Select(_g) select x1;
+            var rhs = from x2 in ( from x1 in _m select _f(x1) ) select _g(x2);
+
+            Assert.True(rhs.HasValue);
+             Assert.Equal(lhs, rhs);
+        }
+        #endregion
+        #region Monad Laws
+        /// <summary>Monad Law #1: (return x) >>= f == f(x).</summary>
+        [Fact]
+        public static void MonadLaw1() {
+            var lhs = _fm(_v);
+            var rhs = _v.ToMonad().SelectMany(_fm);
+
+            Assert.True(rhs.HasValue);
+            Assert.Equal(lhs, rhs);
+        }
+
+        /// <summary>Monad Law #2: m >>= return = m.</summary>
+        [Fact]
+        public static void MonadLaw2() {
+            var lhs = _m;
+            var rhs = _m.SelectMany(Extensions.ToMonad);
+
+            Assert.True(rhs.HasValue);
+            Assert.Equal(lhs, rhs);
+        }
+
+        /// <summary>Monad Law #3: (m >>= f) >>= g == m >>= ( \x -> (f x >>= g) ).</summary>
+        [Fact]
+        public static void MonadLaw3A() {
+            var lhs = from y in (from x in _m from r in _fm(x) select r ) from r in _gm(y) select r;
+            var rhs = from x in _m from y in _fm(x) from r in _gm(y) select r;
+
+            Assert.True(rhs.HasValue);
+            Assert.Equal(lhs, rhs);
+        }
+
+        /// <summary>Monad Law #3: (m >>= f) >>= g == m >>= ( \x -> (f x >>= g) ).</summary>
+        [Fact]
+        public static void MonadLaw3B() {
+            var lhs = _m.SelectMany(_fm).SelectMany(_gm);
+            var rhs = _m.SelectMany(x => _fm(x).SelectMany(_gm));
+
+            Assert.True(rhs.HasValue);
+            Assert.Equal(lhs, rhs);
+        }
+        #endregion
+
         #region Weasley tests
-        readonly static string[]                _strings  =  { "Percy", null, "George", "Ron", "Ginny" };
-        readonly static IList<X<string>>        _data     = ( from e in _strings
-                                                              select e.AsX()
-                                                            ).ToList().AsReadOnly();
-        readonly static Func<string, X<string>> _addOne   = x => x + "constant";
-        readonly static Func<string, X<string>> _addEight = x => x + "/" + x;
+        readonly static string[]            _strings = { "Percy", null, "George", "Ron", "Ginny" };
+        readonly static IList<X<string>>    _data    = ( from e in _strings
+                                                         select e.ToMonad()
+                                                       ).ToList().AsReadOnly();
 
         [Theory]
         [InlineData("",        "Percy//George/Ron/Ginny")]
@@ -123,108 +240,16 @@ namespace PGSolutions.Monads.MaybeTests {
         [InlineData("Fred Weasley", " Weasley")]
         [InlineData("Nothing!",      null)]
         public static void WesDyerTest(string expected, string second) {
-            var received = ( from x in "Fred".AsX()
-                             from y in second.AsX()
+            var received = ( from x in "Fred".ToMonad()
+                             from y in second.ToMonad()
                              select x + y).ToNothingString();
             Assert.Equal(expected, received);
         }
         #endregion
+    }
 
-        #region Monad tests
-        const string                          _v    = "4";
-        static readonly X<string>             _m    = "4".AsX();
-        static readonly Func<string,string>    f    = s => s + "X";
-        static readonly Func<string,string>    g    = s => "(" + s + ")";
-
-        /// <summary>Monad Law #1: (return x).Bind(f) == f(x)</summary>
-        [Fact]
-        public static void MonadLaw1() {
-            var lhs = _v.AsX().SelectMany(_addOne);
-            var rhs = _addOne(_v);
-
-            Assert.Equal(lhs, rhs);
-        }
-
-        /// <summary>Monad Law #2: M.Bind(Monad) == M</summary>
-        [Fact]
-        public static void MonadLaw2() {
-            var lhs = _m.SelectMany<string,string>(i => i);
-            var rhs = _m;
-
-            Assert.Equal(lhs, rhs);
-        }
-
-        /// <summary>Monad Law #3: (m >>= f) >>= g == m >>= ( \x -> (f x >>= g) ).</summary>
-        [Fact]
-        public static void MonadLaw3() {
-            var lhs = _m.SelectMany(_addOne).SelectMany(_addEight);
-            var rhs = _m.SelectMany(x => _addOne(x).SelectMany(_addEight));
-
-            Assert.Equal(lhs, rhs);
-        }
-
-        /// <summary>Functor Law #1: fmap id ≡ id.</summary>
-        [Fact]
-        public static void FunctorLaw1() {
-            var lhs = from i in _m select i;
-            var rhs = _m;
-
-            Assert.Equal(lhs, rhs);
-        }
-
-        /// <summary>Functor Law #2: fmap (f . g) ≡ (fmap f) . (fmap g).</summary>
-        [Fact]
-        public static void FunctorLaw2() {
-            var lhs = from s in _m select g(f(s));
-            var rhs = from s in ( from s in _m select f(s) ) select g(s);
-
-            Assert.Equal(lhs, rhs);
-        }
-
-        /// <summary>Return Law: return . f ≡ fmap f . return.</summary>
-        /// <remarks>In expanded form: \x -> return (f x) = \x -> fmap f (return x).</remarks>
-        [Fact]
-        public static void ReturnLaw() {
-            var lhs = g(_v).AsX();
-            var rhs = from s in _v.AsX() select g(s);
-
-            Assert.Equal(lhs, rhs);
-        }
-
-        /// <summary>Join Law #1: ( join . fmap join ) ≡ ( join . join ).</summary>
-        [Fact]
-        public static void JoinLaw1() {
-            var m = ((object)((object)_m).AsX()).AsX();
-            var lhs = from x1 in m
-                      from x2 in (X<object>)x1
-                      from r in (X<string>)x2
-                      select r;
-            var rhs = from x3 in ( from x1 in m from x2 in (X<object>)x1 select x2 )
-                      from r in (X<string>)x3
-                      select r as string;
-
-            Assert.Equal(lhs, rhs);
-        }
-
-        /// <summary>Join Law #2: ( join . fmap return ) ≡ ( join . return = id ).</summary>
-        [Fact]
-        public static void JoinLaw2() {
-            var lhs = from x1 in _m from x2 in x1.AsX() select x2;
-            var rhs = from x1 in _m from x2 in x1.AsX() select x2;
-
-            Assert.Equal(lhs, rhs);
-        }
-
-        /// <summary>Join Law #3: ( join . fmap (fmap f) ) ≡ ( fmap f . join ).</summary>
-        /// <remarks>In expanded form: \x -> join (fmap (fmap f) x) = \x -> fmap f (join x).</remarks>
-        [Fact]
-        public static void JoinLaw3() {
-            var lhs = from x1 in _m.Select(f).Select(g) select x1;
-            var rhs = from x2 in ( from x1 in _m select f(x1) ) select g(x2);
-
-             Assert.Equal(lhs, rhs);
-        }
-        #endregion
+    internal static partial class Extensions {
+        public static X<TValue> ToMonad<TValue>(this TValue value) where TValue:class => value;
     }
 
     internal class ExternalState {
