@@ -105,11 +105,14 @@ namespace PGSolutions.Monads.MaybeTests {
         /// <summary>Join Law #2: ( join . fmap return ) ≡ ( join . return = id ).</summary>
         [Fact]
         public static void JoinLaw2() {
-            var lhs = from x1 in _m from x2 in x1.ToMonad() select x2;
-            var rhs = from x1 in _m from x2 in x1.ToMonad() select x2;
+            var lhs = from m in MaybeLinq.Select(_v.ToMonad(), _f)
+                      from r in MaybeLinq.SelectMany<string,string>(m, i => i.ToMonad())
+                      select r;
+            var rhs = MaybeLinq.SelectMany(_v.ToMonad(),_fm);
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs, rhs);
+            //Assert.Equal(_v.ToMonad(),rhs);
         }
 
         /// <summary>Join Law #3: ( join . fmap (fmap f) ) ≡ ( fmap f . join ).</summary>

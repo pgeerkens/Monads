@@ -101,11 +101,14 @@ namespace PGSolutions.Monads.MonadTests {
         /// <summary>Join Law #2: ( join . fmap return ) ≡ ( join . return = id ).</summary>
         [Fact]
         public static void JoinLaw2() {
-            var lhs = from x1 in _m from x2 in x1.ToMonad() select x2;
-            var rhs = from x1 in _m from x2 in x1.ToMonad() select x2;
+            var lhs = from m in LazyState.Select(_v.ToMonad(), _f)
+                      from r in LazyState.SelectMany(m, i => i.ToMonad())
+                      select r;
+            var rhs = LazyState.SelectMany(_v.ToMonad(),_fm);
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs.Apply("Start"), rhs.Apply("Start"));
+            Assert.Equal(StatePayload.New("Start",_f(_v)), rhs.Apply("Start"));
         }
 
         /// <summary>Join Law #3: ( join . fmap (fmap f) ) ≡ ( fmap f . join ).</summary>
