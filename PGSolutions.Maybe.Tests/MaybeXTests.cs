@@ -52,17 +52,17 @@ namespace PGSolutions.Monads.MaybeTests {
 
         const string                            _v  = "4";
         static readonly X<string>               _m  = _v;
-        static readonly Func<string,string>     _f  = s => s + "X";
-        static readonly Func<string,string>     _g  = s => "(" + s + ")";
-        static readonly Func<string,X<string>>  _fm = s => _f(s);
-        static readonly Func<string,X<string>>  _gm = s => _g(s);
+        static readonly Func<string,string>     _f  = x => x + "X";
+        static readonly Func<string,string>     _g  = x => "(" + x + ")";
+        static readonly Func<string,X<string>>  _fm = x => _f(x);
+        static readonly Func<string,X<string>>  _gm = x => _g(x);
 
         #region Functor Laws
         /// <summary>Functor Law #1: fmap id ≡ id.</summary>
         [Fact]
         public static void FunctorLaw1() {
             var lhs = _m;
-            var rhs = from i in _m select i;
+            var rhs = from x in _m select x;
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs, rhs);
@@ -71,8 +71,8 @@ namespace PGSolutions.Monads.MaybeTests {
         /// <summary>Functor Law #2: fmap (f . g) ≡ (fmap f) . (fmap g).</summary>
         [Fact]
         public static void FunctorLaw2() {
-            var lhs = from s in _m select _g(_f(s));
-            var rhs = from s in ( from s in _m select _f(s) ) select _g(s);
+            var lhs = from x in _m select _g(_f(x));
+            var rhs = from x in ( from x in _m select _f(x) ) select _g(x);
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs, rhs);
