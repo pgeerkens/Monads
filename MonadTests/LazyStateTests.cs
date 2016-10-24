@@ -38,7 +38,8 @@ namespace PGSolutions.Monads.MonadTests {
 
     using Maybe_T = LazyState<string,object>;
 
-    [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses")]
+    /// <summary>Unit tests for <see cref="LazyState{TState,TValue}"/></summary>
+    [ExcludeFromCodeCoverage] [CLSCompliant(false)]
     public class LazyStateTests {
         public LazyStateTests() { }
 
@@ -86,29 +87,29 @@ namespace PGSolutions.Monads.MonadTests {
         [Fact]
         public static void JoinLaw1() {
             var m   = ((object)((object)_m).ToMonad()).ToMonad();
-            var lhs = from x1 in m
+            var lhs = from x3 in ( from x1 in m from x2 in x1.ToMonad() select x2 )
+                      from r in (Maybe_T)x3
+                      select r;
+            var rhs = from x1 in m
                       from x2 in x1.ToMonad()
                       from r  in (Maybe_T)x2
-                      select r;
-            var rhs = from x3 in ( from x1 in m from x2 in x1.ToMonad() select x2 )
-                      from r in (Maybe_T)x3
                       select r;
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs.Apply("Start"), rhs.Apply("Start"));
         }
 
-        /// <summary>Join Law #2: ( join . fmap return ) ≡ ( join . return = id ).</summary>
+        /// <summary>Join Law #2: join . fmap return  ≡  join . return  =  id.</summary>
         [Fact]
         public static void JoinLaw2() {
-            var lhs = from m in LazyState.Select(_v.ToMonad(), _f)
-                      from r in LazyState.SelectMany(m, i => i.ToMonad())
+            var lhs = _v.ToMonad().SelectMany(Extensions.ToMonad);
+            var rhs = from m in _v.ToMonad().Select(i=>i)
+                      from r in m.SelectMany(Extensions.ToMonad)
                       select r;
-            var rhs = LazyState.SelectMany(_v.ToMonad(),_fm);
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs.Apply("Start"), rhs.Apply("Start"));
-            Assert.Equal(StatePayload.New("Start",_f(_v)), rhs.Apply("Start"));
+            Assert.Equal(_v, rhs.Apply("Start").Value.Value);
         }
 
         /// <summary>Join Law #3: ( join . fmap (fmap f) ) ≡ ( fmap f . join ).</summary>
@@ -192,6 +193,7 @@ namespace PGSolutions.Monads.MonadTests {
     }
 
     /// <summary>Extension methods for <see cref="LazyStateTests"/>.</summary>
+    [ExcludeFromCodeCoverage]
     internal static partial class Extensions {
         /// <summary>η: T -> State{TState,TValue}</summary> 
         public static LazyState<string,TValue>      ToMonad<TValue>(this TValue value) => 

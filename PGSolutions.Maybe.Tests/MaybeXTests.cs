@@ -37,15 +37,19 @@ using Xunit;
 namespace PGSolutions.Monads.MaybeTests {
     using Maybe_T = X<object>;
 
-    /// <summary>TODO</summary>
+    /// <summary>Unit tests for <see cref="X{T}"/></summary>
     /// <remarks>
     /// See
     ///     <a href="https://en.wikipedia.org/wiki/Monad_(functional_programming)#fmap_and_join"/>
     /// as well as
-    ///     <a href="https://en.wikibooks.org/wiki/Haskell/Category_theory#The_monad_laws_and_their_importance".
+    ///     <a href="https://en.wikibooks.org/wiki/Haskell/Category_theory#The_monad_laws_and_their_importance"/>
+    /// and
+    ///     <a href="https://en.wikibooks.org/wiki/Haskell/Category_theory#cite_ref-1"/> .
     /// </remarks>
     [ExcludeFromCodeCoverage] [CLSCompliant(false)]
     public class MaybeXTests {
+        public MaybeXTests() { }
+
         const string                            _v  = "4";
         static readonly X<string>               _m  = _v;
         static readonly Func<string,string>     _f  = s => s + "X";
@@ -90,29 +94,29 @@ namespace PGSolutions.Monads.MaybeTests {
         [Fact]
         public static void JoinLaw1() {
             var m = ((object)((object)_m).ToMonad()).ToMonad();
-            var lhs = from x1 in m
-                      from x2 in (Maybe_T)x1
-                      from r  in (X<string>)x2
+            var lhs = from x3 in ( from x1 in m from x2 in x1.ToMonad() select x2 )
+                      from r in (Maybe_T)x3
                       select r;
-            var rhs = from x3 in ( from x1 in m from x2 in (X<object>)x1 select x2 )
-                      from r in (X<string>)x3
+            var rhs = from x1 in m
+                      from x2 in x1.ToMonad()
+                      from r  in (Maybe_T)x2
                       select r;
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs, rhs);
         }
 
-        /// <summary>Join Law #2: ( join . fmap return ) ≡ ( join . return = id ).</summary>
+        /// <summary>Join Law #2: join . fmap return  ≡  join . return  =  id.</summary>
         [Fact]
         public static void JoinLaw2() {
-            var lhs = from m in MaybeLinq.Select(_v.ToMonad(), _f)
-                      from r in MaybeLinq.SelectMany<string,string>(m, i => i.ToMonad())
-                      select r;
-            var rhs = MaybeLinq.SelectMany(_v.ToMonad(),_fm);
+            var lhs = _v.ToMonad().SelectMany(Extensions.ToMonad);
+            var rhs = from m in _v.ToMonad()//.Select(i=>i)
+                 //     from r in m.SelectMany(Extensions.ToMonad)
+                      select m;
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs, rhs);
-            //Assert.Equal(_v.ToMonad(),rhs);
+            Assert.True(rhs.SelectMany<string,bool>(r => r==_v) ?? false);
         }
 
         /// <summary>Join Law #3: ( join . fmap (fmap f) ) ≡ ( fmap f . join ).</summary>
@@ -255,6 +259,7 @@ namespace PGSolutions.Monads.MaybeTests {
         public static X<TValue> ToMonad<TValue>(this TValue value) where TValue:class => value;
     }
 
+    [ExcludeFromCodeCoverage]
     internal class ExternalState {
         private int _state;
 
