@@ -27,15 +27,13 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
-using System.Linq;
 
 using Xunit;
 
 namespace PGSolutions.Monads.MaybeTests {
     using Maybe_T = X<object>;
+    using static Functions;
 
     /// <summary>Unit tests for <see cref="X{T}"/></summary>
     /// <remarks>
@@ -47,8 +45,8 @@ namespace PGSolutions.Monads.MaybeTests {
     ///     <a href="https://en.wikibooks.org/wiki/Haskell/Category_theory#cite_ref-1"/> .
     /// </remarks>
     [ExcludeFromCodeCoverage] [CLSCompliant(false)]
-    public class MaybeXTests {
-        public MaybeXTests() { }
+    public class MaybeTests {
+        public MaybeTests() { }
 
         const string                            _v  = "4";
         static readonly X<string>               _m  = _v;
@@ -116,7 +114,7 @@ namespace PGSolutions.Monads.MaybeTests {
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs, rhs);
-            Assert.True(rhs.SelectMany<string,bool>(r => r==_v) ?? false);
+            Assert.True(rhs.SelectMany<string, bool>(r => r==_v) ?? false);
         }
 
         /// <summary>Join Law #3: ( join . fmap (fmap f) ) ≡ ( fmap f . join ).</summary>
@@ -127,7 +125,7 @@ namespace PGSolutions.Monads.MaybeTests {
             var rhs = from x2 in ( from x1 in _m select _f(x1) ) select _g(x2);
 
             Assert.True(rhs.HasValue);
-             Assert.Equal(lhs, rhs);
+            Assert.Equal(lhs, rhs);
         }
         #endregion
         #region Monad Laws
@@ -154,8 +152,8 @@ namespace PGSolutions.Monads.MaybeTests {
         /// <summary>Monad Law #3: (m >>= f) >>= g == m >>= ( \x -> (f x >>= g) ).</summary>
         [Fact]
         public static void MonadLaw3A() {
-            var lhs = from y in (from x in _m from r in _fm(x) select r ) from r in _gm(y) select r;
-            var rhs = from x in _m from y in _fm(x) from r in _gm(y) select r;
+            var lhs = from y in ( from x in _m from r1 in _fm(x) select r1 ) from r in _gm(y) select r;
+            var rhs = from x in _m from r in ( from y in _fm(x) from r1 in _gm(y) select r1 ) select r;
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs, rhs);
@@ -172,98 +170,31 @@ namespace PGSolutions.Monads.MaybeTests {
         }
         #endregion
 
-        #region Weasley tests
-        readonly static string[]            _strings = { "Percy", null, "George", "Ron", "Ginny" };
-        readonly static IList<X<string>>    _data    = ( from e in _strings
-                                                         select e.ToMonad()
-                                                       ).ToList().AsReadOnly();
-
-        [Theory]
-        [InlineData("",        "Percy//George/Ron/Ginny")]
-        [InlineData("Nothing", "Percy/Nothing/George/Ron/Ginny")]
-        public static void BasicTest(string defaultValue, string expected) {
-            var received = string.Join("/", from e in _data
-                                            select e | defaultValue
-                                            );
-            Contract.Assert(received != null);
-            Assert.Equal(expected, received);
-        }
-
-        /// <summary>Verify that == and != are opposites, and are implemented as Equals().</summary>
-        [Theory]
-        [InlineData(true, "George")]
-        [InlineData(false, "Percy/Nothing!/Ron/Ginny")]
-        public static void IncludedMiddleTest(bool comparison, string expected) {
-            var received = string.Join("/", from e in _data
-                                            where e.Equals("George") == comparison
-                                            select e.ToNothingString()
-                                            );
-            Assert.Equal(expected, received);
-            Assert.False(ReferenceEquals(expected, received));
-
-            received     = string.Join("/", from e in _data
-                                            where (e == "George") == comparison
-                                            select e.ToNothingString()
-                                            );
-            Assert.Equal(expected, received);
-
-            received     = string.Join("/", from e in _data
-                                            where (e != "George") != comparison
-                                            select e.ToNothingString()
-                                            );
-            Assert.Equal(expected, received);
-        }
-
-        [Theory]
-        [InlineData(true,  "George")]
-        [InlineData(false, "Percy/Ron/Ginny")]
-        [InlineData(null,  "Nothing!")]
-        public static void ExcludedMiddleTest(bool? comparison, string expected) {
-            var received = string.Join("/", from e in _data
-                                            where e.AreNonNullEqual("George") == comparison
-                                            select e.ToNothingString()
-                                            );
-            Assert.Equal(expected, received);
-        }
-
+        #region Null-Argument tests
         [Fact]
-        public static void LazyEvaluationTest() {
-            var state = new ExternalState();
-            var x = (from a in (X<Func<int>>)state.GetState select a) | (()=>0);
-            var y = x();
-
-            for (int i = 0; i++ < 5;) state.GetState();
-
-            Assert.Equal(0, y);
-            Assert.Equal(6, state.GetState());
-            Assert.Equal(7, x());
+        public void MaybeXSelect() {
+            var received = _m.Select<string,string>(null);
+            Assert.True(received == null);
         }
-
-        /// <summary>Chaining with LINQ Comprehension syntax: all valid</summary>
-        /// <remarks>
-        /// after Wes Dyer: http://blogs.msdn.com/b/wesdyer/archive/2008/01/11/the-marvels-of-monads.aspx
-        /// </remarks>
-        [Theory]
-        [InlineData("Fred Weasley", " Weasley")]
-        [InlineData("Nothing!",      null)]
-        public static void WesDyerTest(string expected, string second) {
-            var received = ( from x in "Fred".ToMonad()
-                             from y in second.ToMonad()
-                             select x + y).ToNothingString();
-            Assert.Equal(expected, received);
+        [Fact]
+        public static void MaybeXSelectMany1() {
+            var received = _m.SelectMany<string,string>(null);
+            Assert.True(received == null);
+        }
+        [Fact]
+        public static void MaybeXSelectMany2() {
+            var received = _m.SelectMany<string,string,string>(null, Second);
+            Assert.True(received == null, "1st arg null");
+        }
+        [Fact]
+        public static void MaybeXSelectMany3() {
+            var received  = _m.SelectMany<string,string,string>(u=>u, null);
+            Assert.True(received == null, "2nd arg null");
         }
         #endregion
     }
 
     internal static partial class Extensions {
         public static X<TValue> ToMonad<TValue>(this TValue value) where TValue:class => value;
-    }
-
-    [ExcludeFromCodeCoverage]
-    internal class ExternalState {
-        private int _state;
-
-        public ExternalState() { _state = -1; }
-        public int GetState() { return ++_state; }
     }
 }

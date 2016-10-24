@@ -27,10 +27,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
-using System.Linq;
 
 using Xunit;
 
@@ -38,6 +35,15 @@ namespace PGSolutions.Monads.MonadTests {
     using Maybe_T = Nullable<int>;
     using static Functions;
 
+    /// <summary>Unit tests for <see cref="X{T}"/></summary>
+    /// <remarks>
+    /// See
+    ///     <a href="https://en.wikipedia.org/wiki/Monad_(functional_programming)#fmap_and_join"/>
+    /// as well as
+    ///     <a href="https://en.wikibooks.org/wiki/Haskell/Category_theory#The_monad_laws_and_their_importance"/>
+    /// and
+    ///     <a href="https://en.wikibooks.org/wiki/Haskell/Category_theory#cite_ref-1"/> .
+    /// </remarks>
     [ExcludeFromCodeCoverage] [CLSCompliant(false)]
     public class NullableTests {
         public NullableTests() { ; }
@@ -143,10 +149,8 @@ namespace PGSolutions.Monads.MonadTests {
         /// <summary>Monad Law #3: (m >>= f) >>= g == m >>= ( \x -> (f x >>= g) ).</summary>
         [Fact]
         public static void MonadLaw3A() {
-            var lhs = from y in (from x in _m from r in _fm(x) select r ) from r in _gm(y) select r;
-            //var rhs = from x in _m from y in _fm(x) from r in _gm(y) select r;
-            var rhs = from _ in _m.SelectMany(x => _fm(x), (x,y) => ValueTuple.Create(x,y))
-                      from r in _gm(_.Item2) select r;
+            var lhs = from y in ( from x in _m from r1 in _fm(x) select r1 ) from r in _gm(y) select r;
+            var rhs = from x in _m from r in ( from y in _fm(x) from r1 in _gm(y) select r1 ) select r;
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs, rhs);
@@ -163,71 +167,26 @@ namespace PGSolutions.Monads.MonadTests {
         }
         #endregion
 
-        #region Other tests
-        readonly static int? _maybeGeorge = 2;
-        readonly static IList<int?> _data = ( from e in new List<int?>() { 0, null, 2, 3, 4 }
-                                              select e
-                                            ).ToList().AsReadOnly();
-
-        [Theory]
-        [InlineData(99, "0/99/2/3/4")]
-        public void BasicTest(int defaultValue, string expected) {
-            var received = string.Join("/", from e in _data
-                                            select e ?? defaultValue
-                                            );
-            Contract.Assert(received != null);
-            Assert.Equal(expected, received);
-        }
-
-        /// <summary>Verify that == and != are opposites, and are implemented as Equals().</summary>
-        [Theory]
-        [InlineData(true, "2")]
-        [InlineData(false, "0/Nothing/3/4")]
-        public void IncludedMiddleTest(bool comparison, string expected) {
-            expected.ContractedNotNull(nameof(expected));
-            var received = string.Join("/", from e in _data
-                                            where e.Equals(_maybeGeorge) == comparison
-                                            select e.ToNothingString()
-                                      );
-            Assert.True(expected == received);
-            Assert.False(ReferenceEquals(expected, received));
-
-            received     = string.Join("/", from i in ( from e in _data
-                                            where (e == _maybeGeorge) == comparison select e).ToList()
-                                            select i.ToNothingString()
-                                      );
-            Assert.Equal(expected, received);
-
-            received     = string.Join("/", from int? e in _data
-                                            where (e != _maybeGeorge) != comparison
-                                            select e.ToNothingString()
-                                      );
-            Assert.Equal(expected, received);
-        }
-
-        [Theory]
-        [InlineData(true, "2")]
-        [InlineData(false, "0/3/4")]
-        [InlineData(null, "Nothing")]
-        public void ExcludedMiddleTest(bool? comparison, string expected) {
-            var received = string.Join("/", from int? e in _data
-                                            where e.AreNonNullEqual(_maybeGeorge) == comparison
-                                            select e.ToNothingString()
-                                      );
-            Assert.Equal(expected, received);
-        }
-
+        #region Null-Argument tests
         [Fact]
-        public static void LazyEvaluationTest() {
-            var state = new ExternalState();
-            var x = (from a in (X<Func<int>>)state.GetState select a) | (()=>0);
-            var y = x();
-
-            for (int i = 0; i++ < 5;) state.GetState();
-
-            Assert.Equal(0, y);
-            Assert.Equal(6, state.GetState());
-            Assert.Equal(7, x());
+        public void NullableSelect() {
+            var received = _m.Select<int,int>(null);
+            Assert.True(received == null);
+        }
+        [Fact]
+        public static void NullableSelectMany1() {
+            var received = _m.SelectMany<int,int>(null);
+            Assert.True(received == null);
+        }
+        [Fact]
+        public static void NullableSelectMany2() {
+            var received = _m.SelectMany<int,int,int>(null, Second);
+            Assert.True(received == null, "1st arg null");
+        }
+        [Fact]
+        public static void MaybeXSelectMany3() {
+            var received = _m.SelectMany<int,int,int>(u=>2, null);
+            Assert.True(received == null, "2nd arg null");
         }
         #endregion
     }
@@ -236,10 +195,4 @@ namespace PGSolutions.Monads.MonadTests {
         public static TValue? ToMonad<TValue>(this TValue value) where TValue:struct => value;
     }
 
-    internal class ExternalState {
-        private int _state;
-
-        public ExternalState() { _state = -1; }
-        public int GetState() { return ++_state; }
-    }
 }

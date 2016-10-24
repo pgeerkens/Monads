@@ -26,24 +26,14 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
-using System.Diagnostics.Contracts;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PGSolutions.Monads {
-    /// <summary>TODO</summary>
-    [Pure]
-    public static class LinqExtensions {
-        /// <summary>A string representing the object's value, or "Nothing" if it has no value.</summary>
-        public static string ToNothingString<T>(this T @this) {
-            Contract.Ensures(Contract.Result<string>() != null);
-            return @this != null ? @this.ToString() : "Nothing";
-        }
+    [ExcludeFromCodeCoverage]
+    internal class ExternalState {
+        private int _state;
 
-        ///<summary>Tests value-equality, returning <b>Nothing</b> if either value doesn't exist.</summary>
-        public static bool? AreNonNullEqual<TValue>(this TValue lhs, TValue rhs)
-            => lhs != null && rhs != null ? lhs.Equals(rhs) : null as bool?;
-
-        ///<summary>Tests value-equality, returning <b>Nothing</b> if either value doesn't exist.</summary>
-        public static bool? AreNonNullUnequal<TValue>(this TValue lhs, TValue rhs)
-            => lhs != null && rhs != null ? ! lhs.Equals(rhs) : null as bool?;
+        public ExternalState() { _state = -1; }
+        public int GetState() { return ++_state; }
     }
 }

@@ -75,7 +75,7 @@ namespace PGSolutions.Monads {
         public static TResult Cast<TValue,TResult>(this TValue @this) where TValue:TResult 
             => @this != null ? @this : default(TResult);
     }
-
+#if false   // Standard pattern for C# COmprehension syntax, from spec.
     //public delegate R Func<T1, R>(T1 arg1);
     //public delegate R Func<T1, T2, R>(T1 arg1,T2 arg2);
     public abstract class C { abstract public C<T> Cast<T>(); }
@@ -95,4 +95,5 @@ namespace PGSolutions.Monads {
         abstract public O<T> ThenByDescending<K>(Func<T,K> keySelector);
     }
     public abstract class G<K, T>:C<T> { public K Key { get; } }
+#endif
 }

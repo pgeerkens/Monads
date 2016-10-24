@@ -53,7 +53,7 @@ namespace PGSolutions.Monads {
         /// <remarks>
         /// Convenience method - not used by LINQ
         /// </remarks>
-        public static X<TResult> SelectMany<TValue, TResult>(this TValue? @this,
+        public static X<TResult>    SelectMany<TValue, TResult>(this TValue? @this,
             Func<TValue, X<TResult>> selector
         ) where TValue : struct where TResult : class
             => @this.HasValue ? selector?.Invoke(@this.Value) ?? null
@@ -63,7 +63,7 @@ namespace PGSolutions.Monads {
         /// <remarks>
         /// Used for LINQ queries with multiple <i>from</i> clauses or with more complex structure.
         /// </remarks>
-        public static X<TResult> SelectMany<TValue, T, TResult>(this TValue? @this,
+        public static X<TResult>    SelectMany<TValue, T, TResult>(this TValue? @this,
             Func<TValue, X<T>> selector,
             Func<TValue, T, TResult> projector
         ) where TValue : struct where T : class where TResult : class

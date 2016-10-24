@@ -118,16 +118,6 @@ namespace PGSolutions.Monads {
         ///<remarks>THe input value is first (presumably) "boxed" by the CLR.</remarks>
         public static X<object> ToX<T>(this T @this) where T:struct => @this;
 
-        ///<summary>Tests value-equality, returning null if either value doesn't exist.</summary>
-        ///<typeparam name="T">The type of the "contained" object, being amplified to an <see cref="X{T}"/></typeparam>
-        public static bool?     AreNonNullEqual<T>(this X<T> lhs, X<T> rhs) where T:class =>
-            from l in lhs from r in rhs from result in l.Equals(r) as bool? select result;
-
-        ///<summary>Tests value-equality, returning null if either value doesn't exist.</summary>
-        ///<typeparam name="T">The type of the "contained" object, being amplified to an <see cref="X{T}"/></typeparam>
-        public static bool?     AreNonNullUnequal<T>(this X<T> lhs, X<T> rhs) where T:class =>
-            from result in lhs.AreNonNullEqual(rhs) select result;
-
         ///<summary>Returns the type of the underlying type {TValue}.</summary>
         ///<typeparam name="T">The type of the "contained" object, being amplified to an <see cref="X{T}"/></typeparam>
         ///<param name="this">todo: describe this parameter on GetUnderlyingType</param>
