@@ -81,32 +81,31 @@ namespace PGSolutions.Monads {
         /// <remarks>In expanded form: \x -> return (f x) = \x -> fmap f (return x).</remarks>
         [Fact]
         public static void ReturnLaw() {
-            var lhs = _g(_v).ToMonad();
-            var rhs = from s in _v.ToMonad() select _g(s);
+            var lhs = _g(_v).ToNullable();
+            var rhs = from s in _v.ToNullable() select _g(s);
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs, rhs);
         }
-
         /// <summary>Join Law #1: ( join . fmap join ) ≡ ( join . join ).</summary>
         [Fact]
         public static void JoinLaw1() {
-            var m = ((int)((int)_m).ToMonad()).ToMonad();
-            var lhs = from x3 in ( from x1 in m from x2 in x1.ToMonad() select x2 )
+            //var m = ((int)((int)_m).ToMonad()).ToMonad();
+            var m = Monad.ToNullable((int)Monad.ToNullable((int)_m));
+            var lhs = from x3 in ( from x1 in m from x2 in x1.ToNullable() select x2 )
                       from r in (Maybe_T)x3
                       select r;
-            var rhs = from x1 in _m from x2 in x1.ToMonad() select x2;
+            var rhs = from x1 in _m from x2 in x1.ToNullable() select x2;
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs, rhs);
         }
-
         /// <summary>Join Law #2: join . fmap return  ≡  join . return  =  id.</summary>
         [Fact]
         public static void JoinLaw2() {
-            var lhs = _v.ToMonad().SelectMany(Extensions.ToMonad);
-            var rhs = from m in _v.ToMonad()//.Select(i=>i)
-                 //     from r in m.SelectMany(Extensions.ToMonad)
+            var lhs = _v.ToNullable().SelectMany(Monad.ToNullable);
+            var rhs = from m in _v.ToNullable()//.Select(i=>i)
+                                                      //     from r in m.SelectMany(Extensions.ToMonad)
                       select m;
 
             Assert.True(rhs.HasValue);
@@ -122,7 +121,7 @@ namespace PGSolutions.Monads {
             var rhs = from x2 in ( from x1 in _m select _f(x1) ) select _g(x2);
 
             Assert.True(rhs.HasValue);
-             Assert.Equal(lhs, rhs);
+            Assert.Equal(lhs, rhs);
         }
         #endregion
         #region Monad Laws
@@ -130,7 +129,7 @@ namespace PGSolutions.Monads {
         [Fact]
         public static void MonadLaw1() {
             var lhs = _fm(_v);
-            var rhs = _v.ToMonad().SelectMany(_fm);
+            var rhs = _v.ToNullable().SelectMany(_fm);
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs, rhs);
@@ -140,7 +139,7 @@ namespace PGSolutions.Monads {
         [Fact]
         public static void MonadLaw2() {
             var lhs = _m;
-            var rhs = _m.SelectMany(Extensions.ToMonad);
+            var rhs = _m.SelectMany(Monad.ToNullable);
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs, rhs);
@@ -190,9 +189,4 @@ namespace PGSolutions.Monads {
         }
         #endregion
     }
-
-    internal static partial class Extensions {
-        public static TValue? ToMonad<TValue>(this TValue value) where TValue:struct => value;
-    }
-
 }

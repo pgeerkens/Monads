@@ -142,12 +142,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ContractExtensions.cs" />
+    <Compile Include="FrameworkDummies.cs" />
     <Compile Include="Functions.cs" />
     <Compile Include="Maybe\EqualityExtensions.cs" />
     <Compile Include="Maybe\Maybe.cs" />
     <Compile Include="Maybe\MaybeLifted.cs" />
     <Compile Include="Maybe\MaybeLinq.cs" />
     <Compile Include="Maybe\NullableLinq.cs" />
+    <Compile Include="Nullable2.cs" />
+    <Compile Include="Nullable2Linq.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Unit.cs" />
   </ItemGroup>

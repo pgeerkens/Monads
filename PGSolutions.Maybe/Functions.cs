@@ -26,6 +26,7 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
+using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PGSolutions.Monads {
@@ -41,5 +42,16 @@ namespace PGSolutions.Monads {
         /// <summary>Returns its second argument.</summary>
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "p1")]
         public static TSecond   Second<TFirst,TSecond>(TFirst p1, TSecond p2) => p2;
+    }
+    /// <summary>TODO</summary>
+    public static partial class Monad {
+        /// <summary>TODO</summary>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="value"></param>
+        public static TValue? ToNullable<TValue>(this TValue value) where TValue : struct => value;
+
+        /// <summary>TODO</summary>
+        [System.Runtime.InteropServices.ComVisible(true)]
+        public static Nullable2<T> ToNullable2<T>(this T value) => new Nullable2<T>(value);
     }
 }

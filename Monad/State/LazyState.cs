@@ -30,6 +30,8 @@ using System;
 using System.Collections.Generic;
 
 namespace PGSolutions.Monads {
+    using static Functions;
+
     /// <summary>The State monad.</summary>
     /// <typeparam name="TState">Type of the internal state threaded by this instance.</typeparam>
     /// <typeparam name="TValue">Type of the calculated value exposed by this instance.</typeparam>
@@ -111,7 +113,7 @@ namespace PGSolutions.Monads {
         public static X<LazyState<TState, TResult>> SelectMany<TState, TValue, TResult>(this
             X<LazyState<TState, TValue>> @this,
             X<Func<TValue, LazyState<TState, TResult>>> selector
-        ) => from t in @this from s in selector from r in t.SelectMany(s, Functions.Second) select r;
+        ) => from t in @this from s in selector from r in t.SelectMany(s, Second) select r;
         #endregion
 
         #region Miscellaneous

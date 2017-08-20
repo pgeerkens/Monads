@@ -8,6 +8,7 @@ using Xunit;
 using PGSolutions.Monads;
 
 namespace PGSolutions.Monads {
+    using static Functions;
 
     [ExcludeFromCodeCoverage]
     public partial class EnumerableTests {
@@ -29,8 +30,8 @@ namespace PGSolutions.Monads {
             Assert.Equal(expected, result);
         }
 
-        static readonly Func<int, IEnumerable<int>> _plusOne  = x => (x + 1).Enumerable();
-        static readonly Func<int, IEnumerable<int>> _timesTwo = x => (x * 2).Enumerable();
+        static readonly Func<int, IEnumerable<int>> _plusOne  = x => (x + 1).ToEnumerable();
+        static readonly Func<int, IEnumerable<int>> _timesTwo = x => (x * 2).ToEnumerable();
         static readonly IEnumerable<int> _enumerable1 = new int[] { 0, 1 };
         static readonly IEnumerable<int> _enumerable2 = new int[] { 2, 4 };
 
@@ -39,7 +40,7 @@ namespace PGSolutions.Monads {
         public static void MonadLawsTest1() {
             var plusOne  = _plusOne(1);   //Contract.Assume(plusOne != null);
             var expected = plusOne.ToList();
-            var received = 1.Enumerable().SelectMany(_plusOne).ToList();
+            var received = 1.ToEnumerable().SelectMany(_plusOne).ToList();
             Assert.NotNull(received);
 
             Assert.Equal(expected, received);
@@ -48,7 +49,7 @@ namespace PGSolutions.Monads {
         [Fact]
         public static void MonadLawsTest2() {
             var expected = _enumerable1.ToList();
-            var received = _enumerable1.SelectMany(EnumerableExtensions.Enumerable).ToList();
+            var received = _enumerable1.SelectMany(EnumerableExtensions.ToEnumerable).ToList();
 
             Assert.Equal(expected, received);
         }
@@ -83,7 +84,7 @@ namespace PGSolutions.Monads {
 
         [Fact]
         public static void SelectMany2Arg() {
-            var received = _unit.SelectMany<Unit,int,int>(null, Functions.Second);
+            var received = _unit.SelectMany<Unit,int,int>(null, Second);
             Assert.True(received == null, "A: ");
 
             received = _unit.SelectMany<Unit,Unit,int>(u=>()=>Unit.Empty, null);

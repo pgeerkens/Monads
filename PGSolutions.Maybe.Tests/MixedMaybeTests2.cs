@@ -36,18 +36,14 @@ using Xunit;
 namespace PGSolutions.Monads {
     using static FormattableString;
     using static String;
-    using static Functions;
 
     [ExcludeFromCodeCoverage] [CLSCompliant(false)]
-    public class MixedMaybeTests {
-        const           string           _maybeGeorge = "George";
-        readonly static string[]         _strings     = { "Percy", null, "George","Ron", "Ginny" };
-        readonly static IList<string>    _data        = _strings.ToList().AsReadOnly();
-        readonly static Func<int, int?>  _addOne      = x => (x + 1);
-        readonly static Func<int, int?>  _addEight    = x => (x + 8);
-        readonly static Func<int,string> _concatEight = i => Invariant($"{i}eight");
+    public class Nullable2Tests {
+        const           string          _maybeGeorge = "George";
+        readonly static string[]        _strings     = { "Percy", null, "George","Ron", "Ginny" };
+        readonly static IList<string>   _data        = _strings.ToList().AsReadOnly();
 
-        Func<string,Func<string,bool>,IEnumerable<string>> IsGeorge => (s,test) => 
+        readonly Func<string,Func<string,bool>,IEnumerable<string>> _isGeorge = (s,test) => 
                 from e in _data where test(e) select e ?? s;
 
         /// <summary>Test basic functionaity of bind operation.</summary>
@@ -59,9 +55,10 @@ namespace PGSolutions.Monads {
             string received;
 
             predicate = s => true;
-            received  = Join("/", IsGeorge(defaultValue, predicate) );
+            received  = Join("/", _isGeorge(defaultValue, predicate) );
+
             Assert.True(received != null);
-            Assert.True(expected?.Equals(received), 
+            Assert.True(expected?.Equals(received),
                 Invariant($"Value: Expected: '{expected}'; Received: '{received}'"));
         }
 
@@ -74,11 +71,11 @@ namespace PGSolutions.Monads {
             string received;
 
             predicate = s => (s == _maybeGeorge) == comparison;
-            received  = Join("/", IsGeorge("Nothing", predicate) );
+            received  = Join("/", _isGeorge("Nothing", predicate) );
             Assert.Equal(expected, received);
 
-            predicate = s => (s != _maybeGeorge) != comparison;
-            received  = Join("/", IsGeorge("Nothing", predicate) );
+                predicate = s => (s != _maybeGeorge) != comparison;
+                received  = Join("/", _isGeorge("Nothing", predicate) );
             Assert.Equal(expected, received);
         }
 
@@ -88,17 +85,17 @@ namespace PGSolutions.Monads {
         [InlineData(null,  "Nothing")]
         public void ExcludedMiddleTest(bool? c, string expected) {
             Func<string,bool> predicate;
+            Nullable2<bool>   comparison = c??new Nullable2<bool>();
 
-            var comparison = c??new Nullable2<bool>();
-            predicate      = s => s.AreNonNullEqual(_maybeGeorge) == comparison;
-            var received   = Join("/", IsGeorge("Nothing", predicate) );
+            predicate     = s => s.AreNonNullEqual(_maybeGeorge).Equals(comparison);
+            var received  = Join("/", _isGeorge("Nothing", predicate) );
             Assert.Equal(expected, received);
         }
 
         [Fact]
         public static void LazyEvaluationTest() {
             var state = new ExternalState();
-            var x = (from a in (X<Func<int>>)state.GetState select a) | (()=>0);
+            var x = (from a in (Nullable2<Func<int>>)state.GetState select a) | (()=>0);
             var y = x();
 
             for (int i = 0; i++ < 5;) state.GetState();
@@ -106,55 +103,6 @@ namespace PGSolutions.Monads {
             Assert.Equal(0, y);
             Assert.Equal(6, state.GetState());
             Assert.Equal(7, x());
-        }
-
-        /// <summary>Monad law 1: m.Monad().Bind(f) == f(m)</summary>
-        [Fact]
-        public void MonadLaw1Maybe() {
-            const string description = "Monad law 1: m.Monad().Bind(f) == f(m)";
-
-            var M   = 1.ToNullable();
-            var lhs = M.SelectMany(_addOne, Second);
-            var rhs = _addOne(1);
-            Assert.True(lhs == rhs, description);
-        }
-
-        /// <summary>Monad law 2: M.Bind(Monad) == M</summary>
-        [Fact]
-        public static void MonadLaw2Maybe() {
-            const string description = "Monad law 2: M.Bind(Monad) == M";
-
-            var M   = 4.ToNullable();
-            var lhs = M.SelectMany(i => i.ToNullable(), Second);
-            var rhs = M;
-            Assert.True(lhs == rhs, description);
-        }
-
-        /// <summary>Monad law 3: M.Bind(f1).Bind(f2) == M.Bind(x => f1(x).Bind(f2))</summary>
-        [Fact]
-        public void MonadLaw3Maybe() {
-            const string description = "Monad law 3: M.Bind(f1).Bind(f2) == M.Bind(x => f1(x).Bind(f2))";
-
-            var M   = 4.ToNullable();
-            var lhs = M.SelectMany(_addOne).SelectMany(_addEight);
-            var rhs = M.SelectMany(m => _addOne(m).SelectMany(_addEight));
-            Assert.True(lhs == rhs, description);
-        }
-
-        /// <summary>Monad law 3: M.Bind(f1).Bind(f2) == M.Bind(x => f1(x).Bind(f2))</summary>
-        [Fact]
-        public void MonadLaw3MaybeMixed() {
-            const string description = "Monad law 3: M.Bind(f1).Bind(f2) == M.Bind(x => f1(x).Bind(f2))";
-
-            var M       = 4 as int?;
-            var addOneX = X.New<Func<int,int>>(i => i+1);
-            var lhs     = from m in M from a in addOneX select _concatEight(a(m));
-            var rhs     = from m in M select from a in addOneX select _concatEight(a(m));
-            Assert.True(lhs == rhs, description);
-
-            lhs = M.SelectMany(a => addOneX, (m,a) => _concatEight(a(m)));
-            rhs = M.Select(m => addOneX.Select(a => _concatEight(a(m))) );
-            Assert.True(lhs == rhs, description);
         }
     }
 }

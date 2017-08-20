@@ -79,7 +79,7 @@ namespace PGSolutions.Monads {
         public static void MonadLaws() {
             Reader<Tuple<bool, string>, int> left = 1.ToReader<Tuple<bool, string>, int>().Bind(addOne);
             Reader<Tuple<bool, string>, int> right = addOne(1);
-            //Contract.Assume(right != null);
+
             Assert.NotNull(right);
             Assert.Equal(left(config), right(config));
         }

@@ -30,7 +30,7 @@ using System;
 
 namespace PGSolutions.Monads {
     /// <summary>Extension methods supporting LINQ-comprehension syntax for the maybe monad on classes: <see cref="X{T}"/>.</summary>
-    public static class MaybeLinq {
+    public static class Nullable2Linq {
         /// <summary>LINQ-ible implementation of the monadic map operator.</summary>
         ///<remarks>Used by the LINQ <i>let</i> clause and queries with a single FROM clause.</remarks>
         public static Nullable2<TResult>    Select<TValue, TResult>(this Nullable2<TValue> @this,

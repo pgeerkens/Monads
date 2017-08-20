@@ -49,13 +49,13 @@ namespace PGSolutions.Monads.Demos {
 
             var start = new GcdStart(40,1024);
 
-            GcdS4.BestRun(start).ToNullable().SelectMany(result => {
+            GcdS4.BestRun(start).ToNullable2().SelectMany(result => {
                 var value = result.Item2;
                 var title = GcdS4.GetTest("Best.Run");
                 WriteLine(Invariant($"    GCD = {value.Gcd} for {start} - {title}"));
                 WriteLine(Invariant($"_______________________"));
                 WriteLine(Invariant($"Hit ENTER to close."));
-                return Unit.Empty.ToNullable();
+                return Unit.Empty.ToNullable2();
             });
 
             ReadLine();

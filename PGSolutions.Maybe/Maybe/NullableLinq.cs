@@ -30,7 +30,7 @@ using System;
 
 namespace PGSolutions.Monads {
     /// <summary>Extension methods supporting LINQ-comprehension syntax for the maybe monad on structs: <see cref="Nullable{T}"/>.</summary>
-    public static class NullableLinq {
+    public static partial class NullableLinq {
         /// <summary>LINQ-compatible implementation of the monadic map operator.</summary>
         ///<remarks>
         /// Used to implement the LINQ <i>let</i> clause and queries with a single FROM clause.
@@ -65,12 +65,6 @@ namespace PGSolutions.Monads {
             => @this.HasValue ? selector?.Invoke(@this.Value).SelectMany(e => 
                                 projector?.Invoke(@this.Value, e))
                               : null;
-
-        /// <summary>TODO</summary>
-        /// <typeparam name="TValue"></typeparam>
-        /// <param name="value"></param>
-        public static TValue? ToNullable<TValue>(this TValue value) where TValue : struct =>
-            value;
 
         /// <summary>TODO</summary>
         /// <typeparam name="TValue">The underlying type of the Nulable{}.</typeparam>

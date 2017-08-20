@@ -31,6 +31,6 @@ using System.Collections.Generic;
 namespace PGSolutions.Monads {
 
     internal static partial class EnumerableExtensions {
-        public static IEnumerable<T> Enumerable<T>(this T value) { yield return value; }
+        public static IEnumerable<T> ToEnumerable<T>(this T value) { yield return value; }
     }
 }

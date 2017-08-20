@@ -31,6 +31,7 @@ using System.Threading.Tasks;
 
 namespace PGSolutions.Monads {
     using static Task;
+    using static Functions;
 
     /// <summary>LINQ extension methods for <see cref="System.Threading.Tasks.Task"/> and 
     ///          <see cref="System.Threading.Tasks.Task{TResult}"/>.
@@ -46,7 +47,7 @@ namespace PGSolutions.Monads {
         ) {
             selector.ContractedNotNull(nameof(selector));
 
-            return source.Flatten(value => selector(value).Task(), Functions.Second);
+            return source.Flatten(value => selector(value).Task(), Second);
         }
 
         /// <summary>TODO</summary>
@@ -55,7 +56,7 @@ namespace PGSolutions.Monads {
         ) {
             selector.ContractedNotNull(nameof(selector));
 
-            return source.Flatten(selector, Functions.Second);
+            return source.Flatten(selector, Second);
         }
 
         /// <summary>TODO</summary>
@@ -74,12 +75,12 @@ namespace PGSolutions.Monads {
         //    source.ContractedNotNull(nameof(source));
         //    Ensures(Result<Task<TResult>>() != null);
 
-        //    return source.Flatten(Functions.Identity, Functions.Second) | DefaultTask<TResult>();
+        //    return source.Flatten(Functions.Identity, Second) | DefaultTask<TResult>();
         //}
 
         /// <summary>TODO</summary>
         public static X<Task<Unit>>     ToTaskUnit(this X<Task> source) =>
-            source.Flatten(value => value.Task(), Functions.Second);
+            source.Flatten(value => value.Task(), Second);
 
         /// <summary>TODO</summary>
         private static X<Task<TResult>> Flatten<TSource, T, TResult>(this X<Task<TSource>> source,

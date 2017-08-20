@@ -31,6 +31,7 @@ using System.Globalization;
 
 namespace PGSolutions.Monads {
     using static CultureInfo;
+    using static Functions;
 
     /// <summary>TODO</summary>
     /// <typeparam name="T"></typeparam>
@@ -72,14 +73,14 @@ namespace PGSolutions.Monads {
         /// <summary>Returns a SafeInt with the sum, or null if the operation fails.</summary>
         public static SafeInt operator + (SafeInt addend1, SafeInt addend2) =>
             addend1._value.SelectMany(l =>
-            addend2._value.SelectMany(r => l.SafeAddition(r), Functions.Second), Functions.Second);
+            addend2._value.SelectMany(r => l.SafeAddition(r), Second), Second);
         /// <summary><see cref="Add"/></summary>
         public static SafeInt Add(SafeInt lhs, SafeInt rhs) => lhs + rhs;
 
         /// <summary>Returns a SafeInt with the difference, or null if the operation fails.</summary>
         public static SafeInt operator - (SafeInt lhs, SafeInt rhs) =>
             lhs._value.SelectMany(l =>
-            rhs._value.SelectMany(r => l.SafeSubtract(r), Functions.Second), Functions.Second);
+            rhs._value.SelectMany(r => l.SafeSubtract(r), Second), Second);
 
         /// <summary><see cref="Subtract"/></summary>
         public static SafeInt Subtract(SafeInt minuend, SafeInt subtrahend) =>
@@ -88,7 +89,7 @@ namespace PGSolutions.Monads {
         /// <summary>Returns a SafeInt with the quotient, or null if the operation fails.</summary>
         public static SafeInt operator / (SafeInt dividend, SafeInt divisor) =>
             dividend._value.SelectMany(lhs =>
-            divisor ._value.SelectMany(rhs => lhs.SafeDivide(rhs), Functions.Second), Functions.Second);
+            divisor ._value.SelectMany(rhs => lhs.SafeDivide(rhs), Second), Second);
 
         /// <summary><see cref="Divide"/></summary>
         public static SafeInt Divide(SafeInt lhs, SafeInt rhs) => lhs / rhs;

@@ -38,7 +38,7 @@ namespace PGSolutions.Monads.Nullable2Tests {
     using static String;
 
     [ExcludeFromCodeCoverage]
-    public class MixedBasicTests {
+    public class MixedBasicTests2 {
         const           string          _maybeGeorge = "George";
         readonly static string[]        _strings     = { "Percy", null, "George","Ron", "Ginny" };
         readonly static IList<string>   _data        = _strings.ToList().AsReadOnly();

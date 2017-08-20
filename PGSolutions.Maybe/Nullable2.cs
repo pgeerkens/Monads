@@ -5,22 +5,24 @@
 // ==--==
  
     using System;
- 
-namespace System
-{
+
+namespace PGSolutions.Monads {
     using System.Globalization;
     using System.Reflection;    
     using System.Collections.Generic;
     using System.Runtime;
     using System.Runtime.CompilerServices;    
     using System.Security;
- 
+
+    using PGSolutions.Monads;
+
     // Warning, don't put System.Runtime.Serialization.On*Serializ*Attribute
     // on this class without first fixing ObjectClone::InvokeVtsCallbacks
     // Also, because we have special type system support that says a a boxed Nullable2<T>
     // can be used where a boxed<T> is use, Nullable2<T> can not implement any intefaces
     // at all (since T may not).   Do NOT add any interfaces to Nullable2!
     // 
+    /// <summary>TODO</summary>
     [Serializable]
     [System.Runtime.Versioning.NonVersionable] // This only applies to field layout
     public struct Nullable2<T> //where T : struct
@@ -30,20 +32,23 @@ namespace System
                                                                                      : @this.value!=null;
         private bool hasValue; 
         internal T value;
- 
+
+        /// <summary>TODO</summary>
         [System.Runtime.Versioning.NonVersionable]
         public Nullable2(T value) : this() {
             this.value = value;
             if (isValueType) this.hasValue = true;
-        }        
- 
+        }
+
+        /// <summary>TODO</summary>
         public bool HasValue {
             [System.Runtime.Versioning.NonVersionable]
             get {
                 return staticHasValue(this);
             }
-        } 
- 
+        }
+
+        /// <summary>TODO</summary>
         [Obsolete("Use is strongly discouraged as violating the basic premise of avoiding unnecessary exceptions.")]
         public T Value {
             get {
@@ -65,12 +70,14 @@ namespace System
         /// </remarks>
         [Obsolete("This method is a temporary work-around enabling consistent usage between Nullable<T> and Maybe<T> of the ?? operator.")]
         public T BitwiseOr(T @default) => this | @default;
- 
+
+        /// <summary>TODO</summary>
         [System.Runtime.Versioning.NonVersionable]
         public T GetValueOrDefault() {
             return value;
         }
- 
+
+        /// <summary>TODO</summary>
         [System.Runtime.Versioning.NonVersionable]
         public T GetValueOrDefault(T defaultValue) {
             return HasValue ? value : defaultValue;
@@ -85,7 +92,7 @@ namespace System
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         /// <remarks>Value-equality is tested if reference-equality fails but both sides are non-null.</remarks>
-        public static bool Equals(Nullable2<T> lhs, Nullable2<T> rhs) =>
+        public bool Equals(Nullable2<T> lhs, Nullable2<T> rhs) =>
             !lhs.HasValue ? !rhs.HasValue
                           : rhs.HasValue && (ReferenceEquals(lhs.value, rhs.value)
                                            || object.Equals((T)lhs.value, (T)rhs.value)
@@ -95,23 +102,27 @@ namespace System
         /// <summary>Tests value-inequality.</summary>
         public static bool operator != (Nullable2<T> lhs, Nullable2<T> rhs) => ! lhs.Equals(rhs);
 
+        /// <summary>TODO</summary>
         public override int GetHashCode() {
             return HasValue ? value.GetHashCode() : 0;
         }
- 
+
+        /// <summary>TODO</summary>
         public override string ToString() {
             return HasValue ? value.ToString() : "";
         }
- 
+
+        /// <summary>TODO</summary>
         [System.Runtime.Versioning.NonVersionable]
         public static implicit operator Nullable2<T>(T value) {
             return new Nullable2<T>(value);
         }
- 
-        #pragma warning disable CS0618
-        [System.Runtime.Versioning.NonVersionable]
-        public static explicit operator T(Nullable2<T> value) => value.Value;
-        #pragma warning restore CS0618
+
+        //#pragma warning disable CS0618
+        ///// <summary>TODO</summary>
+        //[System.Runtime.Versioning.NonVersionable]
+        //public static explicit operator T(Nullable2<T> value) => value.Value;
+        //#pragma warning restore CS0618
  
         // The following already obsoleted methods were removed:
         //   public int CompareTo(object other)
@@ -129,14 +140,12 @@ namespace System
         //   int IComparable<Nullable2<T>>.CompareTo(Nullable2<T> other)
         //   bool IEquatable<Nullable2<T>>.Equals(Nullable2<T> other)
     }
-        
-        [System.Runtime.InteropServices.ComVisible(true)]
-    public static class Nullable2
-    {
 
-        [System.Runtime.InteropServices.ComVisible(true)]
-        public static Nullable2<T> ToNullable2<T>(this T value) => new Nullable2<T>(value);
+    /// <summary>TODO</summary>
+    [System.Runtime.InteropServices.ComVisible(false)]
+    public static class Nullable2 {
 
+        /// <summary>TODO</summary>
         [System.Runtime.InteropServices.ComVisible(true)]
         public static int Compare<T>(Nullable2<T> n1, Nullable2<T> n2) where T : struct
         {
@@ -146,8 +155,9 @@ namespace System
             }
             if (n2.HasValue) return -1;
                 return 0;
-            }            
-        
+            }
+
+        /// <summary>TODO</summary>
         [System.Runtime.InteropServices.ComVisible(true)]
         public static bool Equals<T>(Nullable2<T> n1, Nullable2<T> n2) where T : struct
         {
@@ -158,9 +168,10 @@ namespace System
             if (n2.HasValue) return false;
                     return true;
                 }
- 
+
         // If the type provided is not a Nullable2 Type, return null.
         // Otherwise, returns the underlying type of the Nullable2 type
+        /// <summary>TODO</summary>
         public static Type GetUnderlyingType(Type nullableType) {
             if((object)nullableType == null) {
                 throw new ArgumentNullException("nullableType");

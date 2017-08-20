@@ -80,6 +80,9 @@
     <Compile Include="MaybeLinqNullTests.cs" />
     <Compile Include="MaybeTests.cs" />
     <Compile Include="MixedMaybeTests.cs" />
+    <Compile Include="MixedMaybeTests2.cs" />
+    <Compile Include="MixedMonadTests.cs" />
+    <Compile Include="Nullable2Tests.cs" />
     <Compile Include="NullableLinqTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

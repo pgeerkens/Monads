@@ -45,8 +45,8 @@ namespace PGSolutions.Monads {
     ///     <a href="https://en.wikibooks.org/wiki/Haskell/Category_theory#cite_ref-1"/> .
     /// </remarks>
     [ExcludeFromCodeCoverage] [CLSCompliant(false)]
-    public class MaybeTests {
-        public MaybeTests() { }
+    public partial class NullableMaybeTests {
+        public NullableMaybeTests() { }
 
         const string                            _v  = "4";
         static readonly X<string>               _m  = _v;
@@ -107,7 +107,7 @@ namespace PGSolutions.Monads {
         /// <summary>Join Law #2: join . fmap return  ≡  join . return  =  id.</summary>
         [Fact]
         public static void JoinLaw2() {
-            var lhs = _v.AsMonad().SelectMany(Extensions.AsMonad);
+            var lhs = _v.AsMonad().SelectMany(Nullable.AsMonad);
             var rhs = from m in _v.AsMonad()//.Select(i=>i)
                  //     from r in m.SelectMany(Extensions.ToMonad)
                       select m;
@@ -143,7 +143,7 @@ namespace PGSolutions.Monads {
         [Fact]
         public static void MonadLaw2() {
             var lhs = _m;
-            var rhs = _m.SelectMany(Extensions.AsMonad);
+            var rhs = _m.SelectMany(Nullable.AsMonad);
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs, rhs);
@@ -194,7 +194,7 @@ namespace PGSolutions.Monads {
         #endregion
     }
 
-    internal static partial class Extensions {
+    internal static partial class Nullable {
         public static X<TValue> AsMonad<TValue>(this TValue value) where TValue : class => value;
     }
 }

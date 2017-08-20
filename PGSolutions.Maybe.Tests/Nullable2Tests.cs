@@ -31,15 +31,30 @@ using System.Diagnostics.CodeAnalysis;
 
 using Xunit;
 
-namespace PGSolutions.Monads.Nullable2Tests {
-    [ExcludeFromCodeCoverage]
-    public class MixedMonadTests {
-        const int                                   _v  = 4;
-        static readonly Nullable2<int>              _m  = _v;
-        static readonly Func<int,int>               _f  = x => x + 3;
-        static readonly Func<int,string>            _g  = x => "(" + x + ")";
-        static readonly Func<int,Nullable2<int>>    _fm = x => _f(x);
-        static readonly Func<int,Nullable2<string>> _gm = x => _g(x);
+namespace PGSolutions.Monads {
+    using Maybe_T = Nullable2<object>;
+
+    using static Functions;
+
+    /// <summary>Unit tests for <see cref="X{T}"/></summary>
+    /// <remarks>
+    /// See
+    ///     <a href="https://en.wikipedia.org/wiki/Monad_(functional_programming)#fmap_and_join"/>
+    /// as well as
+    ///     <a href="https://en.wikibooks.org/wiki/Haskell/Category_theory#The_monad_laws_and_their_importance"/>
+    /// and
+    ///     <a href="https://en.wikibooks.org/wiki/Haskell/Category_theory#cite_ref-1"/> .
+    /// </remarks>
+    [ExcludeFromCodeCoverage] [CLSCompliant(false)]
+    public class MonadTests {
+        public MonadTests() { }
+
+        const string                                    _v  = "4";
+        static readonly Nullable2<string>               _m  = _v;
+        static readonly Func<string,string>             _f  = x => x + "X";
+        static readonly Func<string,string>             _g  = x => "(" + x + ")";
+        static readonly Func<string,Nullable2<string>>  _fm = x => _f(x);
+        static readonly Func<string,Nullable2<string>>  _gm = x => _g(x);
 
         #region Functor Laws
         /// <summary>Functor Law #1: fmap id ≡ id.</summary>
@@ -67,8 +82,8 @@ namespace PGSolutions.Monads.Nullable2Tests {
         /// <remarks>In expanded form: \x -> return (f x) = \x -> fmap f (return x).</remarks>
         [Fact]
         public static void ReturnLaw() {
-            var lhs = _g(_v).ToMonad();
-            var rhs = from s in _v.ToMonad() select _g(s);
+            var lhs = _g(_v).ToNullable2();
+            var rhs = from s in _v.ToNullable2() select _g(s);
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs, rhs);
@@ -77,13 +92,13 @@ namespace PGSolutions.Monads.Nullable2Tests {
         /// <summary>Join Law #1: ( join . fmap join ) ≡ ( join . join ).</summary>
         [Fact]
         public static void JoinLaw1() {
-            var m = _m.ToMonad().ToMonad();
-            var lhs = from x3 in ( from x1 in m from x2 in x1.ToMonad() select x2 )
-                      from r in x3
+            var m = _m.ToNullable2(); // ((object)((object)_m).ToMonad()).ToMonad();
+            var lhs = from x3 in ( from x1 in m from x2 in x1.ToNullable2() select x2 )
+                      from r in (Maybe_T)x3
                       select r;
             var rhs = from x1 in m
-                      from x2 in x1.ToMonad()
-                      from r  in x2
+                      from x2 in x1.ToNullable2()
+                      from r  in (Maybe_T)x2
                       select r;
 
             Assert.True(rhs.HasValue);
@@ -93,13 +108,14 @@ namespace PGSolutions.Monads.Nullable2Tests {
         /// <summary>Join Law #2: join . fmap return  ≡  join . return  =  id.</summary>
         [Fact]
         public static void JoinLaw2() {
-            var lhs = _v.ToMonad().SelectMany(Extensions.ToMonad);
-            var rhs = from m in _v.ToMonad()
+            var lhs = _v.ToNullable2().SelectMany(Monad.ToNullable2);
+            var rhs = from m in _v.ToNullable2()//.Select(i=>i)
+                                                    //     from r in m.SelectMany(Extensions.ToMonad)
                       select m;
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs, rhs);
-            Assert.True(rhs.SelectMany<int, bool>(r => r==_v) | false);
+            Assert.True(rhs.SelectMany<string, bool>(r => r==_v) | false);
         }
 
         /// <summary>Join Law #3: ( join . fmap (fmap f) ) ≡ ( fmap f . join ).</summary>
@@ -118,7 +134,7 @@ namespace PGSolutions.Monads.Nullable2Tests {
         [Fact]
         public static void MonadLaw1() {
             var lhs = _fm(_v);
-            var rhs = _v.ToMonad().SelectMany(_fm);
+            var rhs = _v.ToNullable2().SelectMany(_fm);
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs, rhs);
@@ -128,7 +144,7 @@ namespace PGSolutions.Monads.Nullable2Tests {
         [Fact]
         public static void MonadLaw2() {
             var lhs = _m;
-            var rhs = _m.SelectMany(Extensions.ToMonad);
+            var rhs = _m.SelectMany(Monad.ToNullable2);
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs, rhs);
@@ -154,5 +170,53 @@ namespace PGSolutions.Monads.Nullable2Tests {
             Assert.Equal(lhs, rhs);
         }
         #endregion
+
+        #region Null-Argument tests
+        [Fact]
+        public void MaybeXSelect() {
+            var received = _m.Select<string,string>(null);
+            Assert.False(received.HasValue);
+        }
+        [Fact]
+        public static void MaybeXSelectMany1() {
+            var received = _m.SelectMany<string,string>(null);
+            Assert.False(received.HasValue);
+        }
+        [Fact]
+        public static void MaybeXSelectMany2() {
+            var received = _m.SelectMany<string,string,string>(null, Second);
+            Assert.False(received.HasValue, "1st arg null");
+        }
+        [Fact]
+        public static void MaybeXSelectMany3() {
+            var received  = _m.SelectMany<string,string,string>(u=>u, null);
+            Assert.False(received.HasValue, "2nd arg null");
+        }
+        #endregion
+    }
+
+    public class NullTests {
+        //======================================================================
+        static readonly Nullable2<string> _maybe  = "Maybe?";
+        [Fact]
+        public static void Select1() {
+            var received = _maybe.Select<string,int>(null);
+            Assert.False(received.HasValue);
+        }
+        [Fact]
+        public static void SelectMany1() {
+            var received = _maybe.SelectMany<string,int>(null);
+            Assert.False(received.HasValue);
+        }
+        [Fact]
+        public static void SelectMany2() {
+            var received = _maybe.SelectMany<string,int,int>(null, Second);
+            Assert.False(received.HasValue, "1st arg null");
+        }
+        [Fact]
+        public static void SelectMany3() {
+            var received = _maybe.SelectMany<string,int,int>(u=>2, null);
+            Assert.False(received.HasValue, "2nd arg null");
+        }
     }
 }

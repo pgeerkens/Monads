@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 namespace PGSolutions.Monads {
     using static Task;
     using static TaskContinuationOptions;
+    using static Functions;
 
     /// <summary>LINQ extension methods for <see cref="System.Threading.Tasks.Task"/> and 
     ///          <see cref="System.Threading.Tasks.Task{TResult}"/>.
@@ -45,7 +46,7 @@ namespace PGSolutions.Monads {
             source.ContractedNotNull(nameof(source));
             selector.ContractedNotNull(nameof(selector));
 
-            return source.Flatten(value => selector(value).Task(), Functions.Second) | DefaultTask<TResult>();
+            return source.Flatten(value => selector(value).Task(), Second) | DefaultTask<TResult>();
         }
 
         /// <summary>TODO</summary>
@@ -55,7 +56,7 @@ namespace PGSolutions.Monads {
             source.ContractedNotNull(nameof(source));
             selector.ContractedNotNull(nameof(selector));
 
-            return source.Flatten(selector, Functions.Second) | DefaultTask<TResult>();
+            return source.Flatten(selector, Second) | DefaultTask<TResult>();
         }
 
         /// <summary>TODO</summary>
@@ -74,14 +75,14 @@ namespace PGSolutions.Monads {
         ) {
             source.ContractedNotNull(nameof(source));
 
-            return source.Flatten(Functions.Identity, Functions.Second) | DefaultTask<TResult>();
+            return source.Flatten(Functions.Identity, Second) | DefaultTask<TResult>();
         }
 
         /// <summary>TODO</summary>
         public static Task<Unit>            ToTaskUnit(this Task source) {
             source.ContractedNotNull(nameof(source));
 
-            return source.Flatten(value => value.Task(), Functions.Second) | DefaultTask<Unit>();
+            return source.Flatten(value => value.Task(), Second) | DefaultTask<Unit>();
         }
 
         /// <summary>TODO</summary>

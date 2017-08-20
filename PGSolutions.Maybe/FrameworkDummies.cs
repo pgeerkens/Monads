@@ -1,10 +1,15 @@
 ﻿using System;
 
+using PGSolutions;
+using PGSolutions.Monads;
+
 #region Dummy implementations standing for standard Framework methods/classes
 namespace System {
+    using static FormattableString;
+
     internal static class ThrowHelper {
         public static void ThrowInvalidOperationException(string description) {
-            throw new InvalidOperationException("Invalid operation - No value.");
+            throw new InvalidOperationException(Invariant($"Invalid operation - {description}."));
         }
     }
     internal static class ExceptionResource {
@@ -12,7 +17,7 @@ namespace System {
     }
 }
 namespace System.Runtime.Versioning {
-    internal class NonVersionableAttribute : Attribute {
+    internal sealed class NonVersionableAttribute : Attribute {
         public NonVersionableAttribute() : base() { ; }
     }
 }

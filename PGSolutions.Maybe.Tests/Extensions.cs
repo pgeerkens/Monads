@@ -26,6 +26,7 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
+using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PGSolutions.Monads {
@@ -36,4 +37,5 @@ namespace PGSolutions.Monads {
         public ExternalState() { _state = -1; }
         public int GetState() { return ++_state; }
     }
+
 }

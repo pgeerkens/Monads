@@ -38,30 +38,22 @@ namespace PGSolutions.Monads {
 
         ///<summary>Tests value-equality, returning null if either value doesn't exist.</summary>
         ///<typeparam name="T">The type of the "contained" object, being amplified to an <see cref="X{T}"/></typeparam>
-        public static bool?     AreNonNullEqual<T>(this X<T> lhs, X<T> rhs) where T:class =>
+        public static bool? AreNonNullEqual<T>(this X<T> lhs, X<T> rhs) where T : class =>
             from l in lhs from r in rhs from result in l.Equals(r) as bool? select result;
 
         ///<summary>Tests value-equality, returning null if either value doesn't exist.</summary>
         ///<typeparam name="T">The type of the "contained" object, being amplified to an <see cref="X{T}"/></typeparam>
-        public static bool?     AreNonNullUnequal<T>(this X<T> lhs, X<T> rhs) where T:class =>
-            from result in lhs.AreNonNullEqual(rhs) select ! result;
+        public static bool? AreNonNullUnequal<T>(this X<T> lhs, X<T> rhs) where T : class =>
+            from result in lhs.AreNonNullEqual(rhs) select !result;
 
         ///<summary>Tests value-equality, returning null if either value doesn't exist.</summary>
         ///<typeparam name="T">The type of the "contained" object, being amplified to an <see cref="Nullable{T}"/></typeparam>
-        public static bool?     AreNonNullEqual<T>(this T? lhs, T? rhs) where T:struct =>
-            lhs.SelectMany(l => rhs, (l,r) => l.Equals(r));
+        public static bool? AreNonNullEqual<T>(this T? lhs, T? rhs) where T : struct =>
+            lhs.SelectMany(l => rhs, (l, r) => l.Equals(r));
 
         ///<summary>Tests value-equality, returning null if either value doesn't exist.</summary>
         ///<typeparam name="T">The type of the "contained" object, being amplified to an <see cref="Nullable{T}"/></typeparam>
-        public static bool?     AreNonNullUnequal<T>(this T? lhs, T? rhs) where T:struct =>
-            lhs.SelectMany(l => rhs, (l,r) => ! l.Equals(r));
-
-        ///<summary>Tests value-equality, returning <b>Nothing</b> if either value doesn't exist.</summary>
-        public static bool? AreNonNullEqual<TValue>(this TValue lhs, TValue rhs)
-            => lhs != null && rhs != null ? lhs.Equals(rhs) : null as bool?;
-
-        ///<summary>Tests value-equality, returning <b>Nothing</b> if either value doesn't exist.</summary>
-        public static bool? AreNonNullUnequal<TValue>(this TValue lhs, TValue rhs)
-            => lhs != null && rhs != null ? ! lhs.Equals(rhs) : null as bool?;
+        public static bool? AreNonNullUnequal<T>(this T? lhs, T? rhs) where T : struct =>
+            lhs.SelectMany(l => rhs, (l, r) => !l.Equals(r));
     }
 }

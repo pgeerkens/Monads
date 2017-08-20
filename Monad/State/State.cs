@@ -30,6 +30,8 @@ using System;
 using System.Collections.Generic;
 
 namespace PGSolutions.Monads {
+    using static Functions;
+
     /// <summary>The State monad.</summary>
     /// <typeparam name="TState">Type of the internal state threaded by this instance.</typeparam>
     /// <typeparam name="TValue">Type of the calculated value exposed by this instance.</typeparam>
@@ -89,7 +91,7 @@ namespace PGSolutions.Monads {
             Func<TValue,State<TState,TResult>> selector
         ) {
             selector.ContractedNotNull(nameof(selector));
-            return @this.SelectMany(selector, Functions.Second);
+            return @this.SelectMany(selector, Second);
         }
 
         /// <summary>LINQ-compatible alias for join.</summary>
