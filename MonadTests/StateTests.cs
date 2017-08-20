@@ -60,9 +60,9 @@ namespace PGSolutions.Monads {
  
             Assert.False(isExecuted1 || isExecuted2);           // Deferred and lazy.
 
-            StructTuple<string,int> result1 = query1("state");  // Execution.
-            Assert.True(result1.Value.Equals(1 + 2 + ("b" + "1").Length));
-            Assert.Equal(result1.State, "b" + "1");
+            ValueTuple<string,int> result1 = query1("state");  // Execution.
+            Assert.True(result1.Item2.Equals(1 + 2 + ("b" + "1").Length));
+            Assert.Equal(result1.Item1, "b" + "1");
 
             Assert.True(isExecuted1 && isExecuted2);
         }
@@ -93,11 +93,11 @@ namespace PGSolutions.Monads {
             var received = _monad.SelectMany(_addOne).Select(addTwo)("a");
             var expected = _monad.Select(x => _addOne(x).SelectMany(addTwo)(""))("a");
 
-            var expectedState = expected.State;
-            var receivedState = received.State;
+            var expectedState = expected.Item1;
+            var receivedState = received.Item1;
             Assert.Equal(expectedState,receivedState);
-            var expectedValue = expected.Value.Value;
-            var receivedValue = received.Value("").Value;
+            var expectedValue = expected.Item2.Item2;
+            var receivedValue = received.Item2("").Item2;
             Assert.Equal(expectedValue,receivedValue);
         }
         #endregion
@@ -167,11 +167,11 @@ namespace PGSolutions.Monads {
     internal static partial class StateExtensions2 {
         /// <summary>η: T -> State{TState,TValue}</summary> 
         public static State<TState, TValue> State<TState, TValue>(this TValue value) =>
-                state => StructTuple.New(state, value);
+                state => NewPayload(state, value);
 
         /// <summary>η: T -> State{TState,TValue}</summary> 
         public static State<TState, TValue> State<TState, TValue>(this TValue value,
             Func<TState, TState> newState
-        ) => oldState => StructTuple.New(newState(oldState), value);
+        ) => oldState => NewPayload(newState(oldState), value);
     }
 }

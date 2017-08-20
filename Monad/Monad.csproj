@@ -159,8 +159,7 @@
     <Compile Include="Transform\SafeInt.cs" />
     <Compile Include="State\LazyState.cs" />
     <Compile Include="State\LazyStateExtensions.cs" />
-    <Compile Include="State\StatePayload.cs" />
-    <Compile Include="State\StructTuple.cs" />
+    <Compile Include="State\LazyPayload.cs" />
     <Compile Include="Tasks\TaskExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

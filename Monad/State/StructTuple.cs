@@ -29,54 +29,11 @@
 using System;
 
 namespace PGSolutions.Monads {
-    using static FormattableString;
 
-    /// <summary>TODO</summary>
-    public static class StructTuple {
-        /// <summary>Expose type inference on the corresponding constructor for <see cref="StructTuple{TState,TValue}"/>.</summary>
-        public  static StructTuple<TState,TValue> New<TState,TValue>(TState state, TValue value) =>
-            new StructTuple<TState,TValue>(state, value);
-    }
-
-    /// <summary>Class delivered by an instance of the <see cref="State{TState,TValue}"/> monad.</summary>
-    /// <typeparam name="TState">Type of the internal state.</typeparam>
-    /// <typeparam name="TValue">Type of the delivered value.</typeparam>
-    /// <remarks>
-    ///  Minor observed performance penalty for small class vs small struct.
-    /// </remarks>
-    public struct StructTuple<TState, TValue> : IEquatable<StructTuple<TState, TValue>> {
-        /// <summary>Creates a new instance from a <typeparamref name="TState"/> and a <typeparamref name="TValue"/>.</summary>
-        public StructTuple(TState state, TValue value) : this() { State = state;  Value = value; }
-
-        /// <summary>Returns the current <typeparamref name="TState"/> value.</summary>
-        public TState State { get; }
-        /// <summary>Returns the current <typeparamref name="TValue"/> value.</summary>
-        public TValue Value { get; }
-
-        #region Value Equality with IEquatable<T>.
-        /// <inheritdoc/>
-        public override bool Equals(object obj) {
-            var other = (obj as StructTuple<TState, TValue>?);
-            return other.HasValue  &&  this.Equals(other.Value);
-        }
-
-        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-        public bool Equals(StructTuple<TState, TValue> other) =>
-            Value.Equals(other.Value) && State.Equals(other.State);
-
-        /// <summary>Tests value-equality.</summary>
-        public static bool operator ==(StructTuple<TState, TValue> lhs, StructTuple<TState, TValue> rhs) =>
-            lhs.Equals(rhs);
-
-        /// <summary>Tests value-inequality.</summary>
-        public static bool operator !=(StructTuple<TState, TValue> lhs, StructTuple<TState, TValue> rhs) =>
-            !lhs.Equals(rhs);
-
-        /// <inheritdoc/>
-        public override int GetHashCode() => Value.GetHashCode() ^ State.GetHashCode();
-
-        /// <inheritdoc/>
-        public override string ToString() => Invariant($"({State},{Value})");
-        #endregion
-    }
+    ///// <summary>TODO</summary>
+    //public static class ValueTuple {
+    //    /// <summary>Expose type inference on the corresponding constructor for <see cref="ValueTuple{TState,TValue}"/>.</summary>
+    //    public  static ValueTuple<TState,TValue> New<TState,TValue>(TState state, TValue value) =>
+    //        new ValueTuple<TState,TValue>(state, value);
+    //}
 }

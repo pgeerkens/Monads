@@ -33,7 +33,7 @@ namespace PGSolutions.Monads {
     /// <summary>The State monad.</summary>
     /// <typeparam name="TState">Type of the internal state threaded by this instance.</typeparam>
     /// <typeparam name="TValue">Type of the calculated value exposed by this instance.</typeparam>
-    public delegate StatePayload<TState,TValue>         LazyState<TState,TValue>(TState s);
+    public delegate LazyPayload<TState,TValue>         LazyState<TState,TValue>(TState s);
 
     /// <summary>Core Monadic functionality for State, as Extension methods</summary>
     public static class LazyState {
@@ -48,7 +48,7 @@ namespace PGSolutions.Monads {
         public static X<LazyState<TState, TResult>>     Select<TState, TValue, TResult>(this
             LazyState<TState, TValue> @this,
             Func<TValue, TResult> selector
-        ) => selector!=null ? @this.SelectMany<TState,TValue,TResult>(x => s => StatePayload.New(s,selector(x)))
+        ) => selector!=null ? @this.SelectMany<TState,TValue,TResult>(x => s => LazyPayload.New(s,selector(x)))
                             : (X<LazyState<TState, TResult>>)null;
         #endregion
         #region m.SelectMany(,)
@@ -79,12 +79,12 @@ namespace PGSolutions.Monads {
             ? s => @this(s).Selector1(selector).Selector2(projector)
             : (LazyState<TState,TResult>)null;
 
-        static Tuple<TValue,StatePayload<TState,TSelector>> Selector1<TState,TValue,TSelector>(this StatePayload<TState,TValue> @this,
+        static Tuple<TValue,LazyPayload<TState,TSelector>> Selector1<TState,TValue,TSelector>(this LazyPayload<TState,TValue> @this,
             Func<TValue, LazyState<TState,TSelector>> selector
         ) => Tuple.Create(@this.Value, selector(@this.Value)(@this.State));
-        static StatePayload<TState,TResult> Selector2<TState,TValue,TSelector,TResult>(this Tuple<TValue,StatePayload<TState,TSelector>> @this,
+        static LazyPayload<TState,TResult> Selector2<TState,TValue,TSelector,TResult>(this Tuple<TValue,LazyPayload<TState,TSelector>> @this,
             Func<TValue, TSelector, TResult> projector
-        ) => StatePayload.New(@this.Item2.State, projector(@this.Item1,@this.Item2.Value));
+        ) => LazyPayload.New(@this.Item2.State, projector(@this.Item1,@this.Item2.Value));
         #endregion
         #region m.SelectMany()
         /// <summary>Implementation of Bind operator: (>>=): m a -> (a -> m b) -> m b.</summary>
@@ -116,46 +116,46 @@ namespace PGSolutions.Monads {
 
         #region Miscellaneous
         /// <summary>TODO</summary>
-         public static StatePayload<TState,TValue>? Apply<TState,TValue>(this X<LazyState<TState,TValue>> @this, TState s) =>
-            @this.SelectMany<LazyState<TState,TValue>, StatePayload<TState,TValue>>(m => m.Invoke(s));
+         public static LazyPayload<TState,TValue>? Apply<TState,TValue>(this X<LazyState<TState,TValue>> @this, TState s) =>
+            @this.SelectMany<LazyState<TState,TValue>, LazyPayload<TState,TValue>>(m => m.Invoke(s));
 
         /// <summary>Creates a new instance of <see cref="LazyState{TState, TValue}"/> from the supplied <paramref name="this"/></summary>
         /// <param name="this"> the <typeparamref name="TValue"/> value for the new instance.</param>
         public static LazyState<TState, TValue>         ToLazyState<TState, TValue>(this TValue @this) =>
-            s => StatePayload.New(s,@this);
+            s => LazyPayload.New(s,@this);
 
         /// <summary>Iterate the supplied <see cref="LazyState{TState,TValue}"/> until the calculated value is false.</summary>
         public static X<LazyState<TState,bool>>         DoWhile<TState>(this
             LazyState<TState,bool> @this
         ) => (LazyState<TState,bool>)(s => {
-                StatePayload<TState,bool> payload;
+                LazyPayload<TState,bool> payload;
                 do { payload = @this(s); s = payload.State; } while (payload.Value);
                 return payload;
              } );
 
-        /// <summary>Generates an unending stream of successive StructTuple{TState,T} objects.</summary>
+        /// <summary>Generates an unending stream of successive <see cref="ValueTuple{TState,T}"/> objects.</summary>
         /// <remarks>The caller is responsible for externally terminating the loop.</remarks>
-        public static IEnumerable<StatePayload<TState,TValue>>  Enumerate<TState,TValue>(this
+        public static IEnumerable<LazyPayload<TState,TValue>>  Enumerate<TState,TValue>(this
             LazyState<TState,TValue> @this,
             TState startState
         ) {
-            var tuple = StatePayload.New(startState,default(TValue));
+            var tuple = LazyPayload.New(startState,default(TValue));
             while (true) yield return tuple = @this(tuple.State);
         }
 
         /// <summary>'Gets' the current state, as both State and Value.</summary>
-        public static LazyState<TState, TState> Get<TState>() => s => StatePayload.New(s,s);
+        public static LazyState<TState, TState> Get<TState>() => s => LazyPayload.New(s,s);
         /// <summary>'Puts' the supplied state, resturning a Unit.</summary>
-        public static LazyState<TState,Unit>    Put<TState>(TState state) => s => StatePayload.New(state, Unit._);
+        public static LazyState<TState,Unit>    Put<TState>(TState state) => s => LazyPayload.New(state, Unit._);
         #endregion
 
         /// <summary>η: T -> State{TState,TValue}</summary> 
         public static LazyState<string,TValue>      ToLazyState<TValue>(this TValue value
-        ) => oldState => StatePayload.New(oldState, value);
+        ) => oldState => LazyPayload.New(oldState, value);
 
         /// <summary>η: T -> State{TState,TValue}</summary> 
         public static LazyState<TState,TValue>     ToLazyState<TState,TValue>(this TValue value,
             Func<TState,TState> transform
-        ) => oldState => StatePayload.New(transform(oldState), value);
+        ) => oldState => LazyPayload.New(transform(oldState), value);
     }
 }

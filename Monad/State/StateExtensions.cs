@@ -31,7 +31,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PGSolutions.Monads {
-    /// <summary>Extension methods for <see cref="StructTuple{TState,TValue}"/>.</summary>
+    /// <summary>Extension methods for <see cref="ValueTuple{TState,TValue}"/>.</summary>
     public static partial class StateExtensions {
 
         /// <summary>Implementation of <b>compose</b>: (>=>): f >=> g = \x -> (f x >>= g). </summary>
@@ -46,7 +46,7 @@ namespace PGSolutions.Monads {
         ) {
             follower.ContractedNotNull(nameof(follower));
 
-            return new State<TState,TResult>( s => follower(s)(@this(s).State) );
+            return new State<TState,TResult>( s => follower(s)(@this(s).Item1) );
         }
 
         /// <summary>Implementation of <b>then</b>: (>>):  mv1 >> mv2  =  mv1 >>= (\_ -> mv2)</summary>
@@ -61,7 +61,7 @@ namespace PGSolutions.Monads {
             State<TState, TValue> @this,
             State<TState, TResult> follower
         ) => @this == null || follower == null ? (State<TState,TResult>)null
-                                               : s => follower(@this(s).State);
+                                               : s => follower(@this(s).Item1);
 
         /// <summary>Return the <typeparamref name="TValue"/> value calculated against the supplied <typeparamref name="TState"/> value.</summary>
         /// <param name="this">The start state for this transformation.</param>
@@ -71,7 +71,7 @@ namespace PGSolutions.Monads {
         public static TValue?    Value<TState,TValue>(this
             State<TState,TValue> @this,
             TState s
-        ) where TValue:struct => from value in @this.Run(s) select value.Value;
+        ) where TValue:struct => from value in @this.Run(s) select value.Item2;
 
         /// <summary>Return the <typeparamref name="TState"/> value calculated against the supplied <typeparamref name="TState"/> value.</summary>
         /// <param name="this">The start state for this transformation.</param>
@@ -81,19 +81,19 @@ namespace PGSolutions.Monads {
         public static TState?    State<TState,TValue>(this
             State<TState,TValue> @this,
             TState s
-        ) where TState:struct => from value in @this.Run(s) select value.State;
+        ) where TState:struct => from value in @this.Run(s) select value.Item1;
 
-        private static StructTuple<TState,TValue>        Default<TState,TValue>() => default(StructTuple<TState,TValue>);
+        private static ValueTuple<TState,TValue>        Default<TState,TValue>() => default(ValueTuple<TState,TValue>);
 
         /// <summary>Evaluate this state-monad instance against the supplied <typeparamref name="TState"/> value.</summary>
         /// <param name="this">The start state for this transformation.</param>
         /// <param name="state">todo: describe s parameter on State</param>
         /// <typeparam name="TState">The State type for this state-monad instance.</typeparam>
         /// <typeparam name="TValue">The Value type for this state-monad instance.</typeparam>
-        public static StructTuple<TState,TValue>?   Run<TState,TValue>(this
+        public static ValueTuple<TState,TValue>?   Run<TState,TValue>(this
             State<TState,TValue> @this,
             TState state
-        ) => state == null ? (StructTuple<TState,TValue>?)null 
+        ) => state == null ? (ValueTuple<TState,TValue>?)null 
                            : (@this?.Invoke(state) ?? Default<TState,TValue>());
     }
 

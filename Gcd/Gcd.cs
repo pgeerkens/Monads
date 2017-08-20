@@ -39,14 +39,14 @@ namespace PGSolutions.Monads.Demos {
     using static Extensions;
 
 #if GcdStartAsClass
-    using PayloadMaybe  = StructTuple<X<GcdStart>, Unit>;
+    using PayloadMaybe  = ValueTuple<X<GcdStart>, Unit>;
     using GcdStartType  = X<GcdStart>;
 
     internal static class Extensions {
         public const string GcdStartTYpe = "GcdStart as class.";
         public static X<T> ToMaybe<T>(this T gcdStart) where T:class => gcdStart.AsX();
 #else
-    using PayloadMaybe  = StructTuple< GcdStart?,  Unit>;
+    using PayloadMaybe  = ValueTuple< GcdStart?,  Unit>;
     using GcdStartType  = Nullable<GcdStart>;       // AKA: GcdStart?
 
     internal static class Extensions {
@@ -69,7 +69,7 @@ namespace PGSolutions.Monads.Demos {
             );
 
         private static IEnumerable<Unit> ForAllTests(this X<IList<GcdStart>> states) =>
-            from test in  Gcd_S4.GetTests(false) | new List<ITest>()
+            from test in  GcdS4.GetTests(false) | new List<ITest>()
             let timer   = Readers.Timer()
             let isThird = Readers.MatchCounter(i => i==3, 1)
             select ( from _   in ConsoleWriteLine("{0} - {1}", GcdStartTYpe, test.Title)
@@ -96,8 +96,8 @@ namespace PGSolutions.Monads.Demos {
            select ( from state in states
                     select new {
                         Start  = state,
-                        Result = from validated in state.ToMaybe().ValidateState().State
-                                 select test.Transform(validated).Value
+                        Result = from validated in state.ToMaybe().ValidateState().Item1
+                                 select test.Transform(validated).Item2
                     } into item
                     select ConsoleWriteLine(
                         @"    GCD = {0,14} for {1}: Elapsed = {2:ss\.fff} secs; {3}",
@@ -120,7 +120,7 @@ namespace PGSolutions.Monads.Demos {
 
         /// <summary>Return a pair of positive integers with the same GCD as the supplied parameters.</summary>
         private static PayloadMaybe ValidateState(this GcdStartType start) {
-            return StructTuple.New(
+            return State.NewPayload(
                 from state in start
                 from x in state.A == 1
                        || state.B == 1            ? new GcdStart(1, 1).ToMaybe()

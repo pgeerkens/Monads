@@ -46,7 +46,7 @@ namespace PGSolutions.Monads {
             @this.ContractedNotNull(nameof(@this));
 
             return s => { while (predicate(s)) { s = @this(s); }
-                          return StatePayload.New(s, Unit._);
+                          return LazyPayload.New(s, Unit._);
                         };
         }
 
@@ -71,7 +71,7 @@ namespace PGSolutions.Monads {
             transform.ContractedNotNull(nameof(transform));
 
             return new LazyState<TState,TState>(
-                 s => StatePayload.New(transform(s), s)
+                 s => LazyPayload.New(transform(s), s)
             );
         }
     }

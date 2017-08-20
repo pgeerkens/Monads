@@ -93,7 +93,7 @@ namespace PGSolutions.Monads {
         [InlineData("Second",  5)]
         [InlineData("Third",  16)]
         public static void JoinLaw1(string state, int v) {
-            Func<int,LazyStateInt> f = i => new LazyStateInt(s => StatePayload.New(s+"-End", _f(i)) );
+            Func<int,LazyStateInt> f = i => new LazyStateInt(s => LazyPayload.New(s+"-End", _f(i)) );
 
             var actual   = v.ToLazyState().SelectMany(f);
             var expected = f(v).AsX();
@@ -109,7 +109,7 @@ namespace PGSolutions.Monads {
         [InlineData("Second",  5)]
         [InlineData("Third",  16)]
         public static void JoinLaw2(string state, int v) {
-            Func<int,LazyStateInt> f = i => new LazyStateInt(s => StatePayload.New(s+"-End", _f(i)) );
+            Func<int,LazyStateInt> f = i => new LazyStateInt(s => LazyPayload.New(s+"-End", _f(i)) );
 
             var actual   = f(v).SelectMany(i => i.ToLazyState());
             var expected = f(v).AsX();
@@ -126,9 +126,9 @@ namespace PGSolutions.Monads {
         [InlineData("Second",  5)]
         [InlineData("Third",  16)]
         public static void JoinLaw3(string state, int v) {
-            Func<int,LazyStateInt> f = i => new LazyStateInt(s => StatePayload.New(s+nameof(_f), _f(i)) );
-            Func<int,LazyStateInt> g = i => new LazyStateInt(s => StatePayload.New(s+nameof(_g), _g(i)) );
-            Func<int,LazyStateInt> h = i => new LazyStateInt(s => StatePayload.New(s+nameof(_h), _h(i)) );
+            Func<int,LazyStateInt> f = i => new LazyStateInt(s => LazyPayload.New(s+nameof(_f), _f(i)) );
+            Func<int,LazyStateInt> g = i => new LazyStateInt(s => LazyPayload.New(s+nameof(_g), _g(i)) );
+            Func<int,LazyStateInt> h = i => new LazyStateInt(s => LazyPayload.New(s+nameof(_h), _h(i)) );
 
             var actual   = f(v).SelectMany(g).SelectMany(h);
             var expected = f(v).SelectMany(a => g(a).SelectMany(h)|null);
@@ -209,7 +209,7 @@ namespace PGSolutions.Monads {
 
             Assert.False(isExecuted1 || isExecuted2);   // Deferred and lazy.
 
-            var expected = StatePayload.New(Invariant($"{start}-b{p1}"), (p1 + p2 + Invariant($"{start}-b{p1}").Length));
+            var expected = LazyPayload.New(Invariant($"{start}-b{p1}"), (p1 + p2 + Invariant($"{start}-b{p1}").Length));
             var received = query.Apply(start);        // Execution.
             Assert.Equal(expected,received);
 

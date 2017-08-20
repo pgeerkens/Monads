@@ -46,22 +46,24 @@ namespace PGSolutions.Monads.Demos {
     }
 
     /// <summary>TODO</summary>
-    public static class MethodDetails {
+    public static class MethodDetails
+    {
         /// <summary>TODO</summary>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         [SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Flags")]
         public static X<IList<IMethodDetails<TDetails>>> GetMethodDescriptions<TDetails>(this Type type, 
             Predicate<string>        predicate,
             BindingFlags             bindingFlags,
-            Func<FieldInfo,TDetails> transform
+            Func<PropertyInfo, TDetails> transform
         ) where TDetails : class =>
             from pred in predicate.AsX()
-            select  ( from @class in type?.GetNestedTypes(bindingFlags)
-                      from field  in @class?.GetFields(bindingFlags)
+            select  ( from field in type?.GetProperties(bindingFlags)
                       from atts   in field?.CustomAttributes
+                      where type != null
                       where pred.Invoke(field?.Name ?? "")
                          && atts?.AttributeType.Name == "DescriptionAttribute"
                       select new Inner<TDetails> (
-                            _name(@class,field),
+                            _name(type, field),
                             _attributes(atts),
                             transform?.Invoke(field)
                       ) as IMethodDetails<TDetails>
@@ -69,7 +71,7 @@ namespace PGSolutions.Monads.Demos {
 
         private static readonly Func<CustomAttributeData,string> _attributes = atts =>
             atts?.ConstructorArguments[0].Value as string ?? "";
-        private static readonly Func<Type,FieldInfo,string>      _name = (@class,field) =>
+        private static readonly Func<Type,PropertyInfo,string>      _name = (@class,field) =>
             ( @class?.Name + "." + field?.Name ) ?? "";
 
         private class Inner<TDetails> : IMethodDetails<TDetails> {

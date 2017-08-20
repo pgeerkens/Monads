@@ -54,7 +54,7 @@
     <Compile Include="Gcd.cs" />
     <Compile Include="GcdResult.cs" />
     <Compile Include="GcdStart.cs" />
-    <Compile Include="Gcd_S4.cs" />
+    <Compile Include="GcdS4.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="MethodDetails.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

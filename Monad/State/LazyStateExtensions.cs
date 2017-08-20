@@ -88,7 +88,7 @@ namespace PGSolutions.Monads {
         /// <param name="this">The start state for this transformation.</param>
         /// <param name="s">todo: describe s parameter on State</param>
         [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
-        public static StatePayload<TState,TValue> Run<TState, TValue>(this LazyState<TState, TValue> @this, TState s) {
+        public static LazyPayload<TState,TValue> Run<TState, TValue>(this LazyState<TState, TValue> @this, TState s) {
             @this.ContractedNotNull(nameof(@this));
 
             return  @this(s);;

@@ -53,7 +53,7 @@ namespace PGSolutions.Monads.TrafficLightDemo {
 
         static readonly FsmTransition CrossTownRed    = e => LeftTurnGreen.GetState(     300,
             from _    in e.CrossTown.SetColor          (e.Red)
-            select _);
+            select Unit._);
 
         static readonly FsmTransition LeftTurnGreen   = e => LeftTurnYellow.GetState(   3700,
             from _    in e.UpTownLeftTurn.SetColor     (e.Green)

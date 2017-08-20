@@ -27,51 +27,50 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Diagnostics.CodeAnalysis;
 
 namespace PGSolutions.Monads {
     using static FormattableString;
 
-    /// <summary>Class factory for <see cref="StatePayload{TState,TValue}"/>, with conveninece methods that perform constructor type inference.</summary>
-    public static class StatePayload {
-        /// <summary>Expose type inference on the corresponding constructor for <see cref="StatePayload{TState,TValue}"/>.</summary>
-        public static StatePayload<TState,TValue> New<TState,TValue>(TState state, TValue value) =>
-            new StatePayload<TState,TValue>(state, value);
+    /// <summary>Class factory for <see cref="LazyPayload{TState,TValue}"/>, with conveninece methods that perform constructor type inference.</summary>
+    public static class LazyPayload {
+        /// <summary>Expose type inference on the corresponding constructor for <see cref="LazyPayload{TState,TValue}"/>.</summary>
+        public static LazyPayload<TState,TValue> New<TState,TValue>(TState state, TValue value) =>
+            new LazyPayload<TState,TValue>(state, value);
     }
 
     /// <summary>TODO</summary>
     /// <typeparam name="TState">Type of the internal state.</typeparam>
     /// <typeparam name="TValue">Type of the delivered value.</typeparam>
-    public struct StatePayload<TState,TValue> {
+    public struct LazyPayload<TState,TValue> {
         /// <summary>Return a new object instance.</summary>
-        internal StatePayload(TState state, TValue value) : this(StructTuple.New(state,value)) { ; }
+        internal LazyPayload(TState state, TValue value) : this(new ValueTuple<TState,TValue>(state,value)) { ; }
         /// <summary>Return a new object instance.</summary>
-        private StatePayload(StructTuple<TState, TValue> tuple) : this(() => tuple) { ; }
+        private LazyPayload(ValueTuple<TState, TValue> tuple) : this(() => tuple) { ; }
         /// <summary>Return a new object instance.</summary>
-        private StatePayload(Func<StructTuple<TState, TValue>> valueFactory) {
-            _base = new Lazy<StructTuple<TState,TValue>>(valueFactory);
+        private LazyPayload(Func<ValueTuple<TState, TValue>> valueFactory) {
+            _base = new Lazy<ValueTuple<TState,TValue>>(valueFactory);
         }
 
-        private readonly Lazy<StructTuple<TState,TValue>> _base;
+        private readonly Lazy<ValueTuple<TState,TValue>> _base;
 
         /// <summary>Returns the calculated current <typeparamref name="TState"/> value.</summary>
-        public TState State => _base.Value.State;
+        public TState State => _base.Value.Item1;
         /// <summary>Returns the calculated current <typeparamref name="TValue"/> value.</summary>
-        public TValue Value => _base.Value.Value;
+        public TValue Value => _base.Value.Item2;
 
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
         public override bool Equals(object obj) => 
-                (obj as StatePayload<TState,TValue>?)?.Equals(this) ?? false;
+                (obj as LazyPayload<TState,TValue>?)?.Equals(this) ?? false;
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-        public bool Equals(StatePayload<TState, TValue> other) => Value.Equals(other.Value) && State.Equals(other.State);
+        public bool Equals(LazyPayload<TState, TValue> other) => Value.Equals(other.Value) && State.Equals(other.State);
 
         /// <summary>Tests value-equality.</summary>
-        public static bool operator ==(StatePayload<TState,TValue> lhs, StatePayload<TState,TValue> rhs) => lhs.Equals(rhs);
+        public static bool operator ==(LazyPayload<TState,TValue> lhs, LazyPayload<TState,TValue> rhs) => lhs.Equals(rhs);
 
         /// <summary>Tests value-inequality.</summary>
-        public static bool operator !=(StatePayload<TState,TValue> lhs, StatePayload<TState,TValue> rhs) => !lhs.Equals(rhs);
+        public static bool operator !=(LazyPayload<TState,TValue> lhs, LazyPayload<TState,TValue> rhs) => !lhs.Equals(rhs);
 
         /// <inheritdoc/>
         public override int GetHashCode() => Value.GetHashCode() ^ State.GetHashCode();

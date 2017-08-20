@@ -28,7 +28,6 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace PGSolutions.Monads {
     /// <summary>Core Monadic functionality for State, as Extension methods</summary>
@@ -47,7 +46,7 @@ namespace PGSolutions.Monads {
             @this.ContractedNotNull(nameof(@this));
 
             return s => { while (predicate(s)) { s = @this(s); }
-                          return StructTuple.New(s, Unit._);
+                          return State.NewPayload(s, Unit._);
                         };
         }
 
@@ -70,7 +69,7 @@ namespace PGSolutions.Monads {
             transform.ContractedNotNull(nameof(transform));
 
             return new State<TState,TState>(
-                 s => StructTuple.New(transform(s), s)
+                 s => State.NewPayload(transform(s), s)
             );
         }
     }

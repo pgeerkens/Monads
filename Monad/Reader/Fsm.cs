@@ -69,13 +69,10 @@ namespace PGSolutions.Monads {
         public static FsmTask<TEnv>.FsmReader  GetState<TEnv>(this FsmTask<TEnv>.FsmTransition @this,
             int delayMilliseconds,
             IO<Unit> action
-        ) where TEnv:ICancellableTask {
-     //       @this.ContractedNotNull(nameof(@this));
-
-            return e => from _ in ( from _ in action
-                                    select Task.Delay(delayMilliseconds,e.CancellationToken).ToTaskUnit()
-                                  ).Invoke()
-                        select new FsmTask<TEnv>.FsmState(() => @this(e));
-        }
+        ) where TEnv:ICancellableTask =>
+            e => from _ in ( from _ in action
+                             select Task.Delay(delayMilliseconds,e.CancellationToken).ToTaskUnit()
+                           ).Invoke()
+                 select new FsmTask<TEnv>.FsmState(() => @this(e));
     }
 }

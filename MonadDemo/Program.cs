@@ -49,9 +49,9 @@ namespace PGSolutions.Monads.Demos {
 
             var start = new GcdStart(40,1024);
 
-            Gcd_S4.BestRun(start).ToNullable().SelectMany(result => {
-                var value = result.Value;
-                var title = Gcd_S4.GetTest("Best.Run");
+            GcdS4.BestRun(start).ToNullable().SelectMany(result => {
+                var value = result.Item2;
+                var title = GcdS4.GetTest("Best.Run");
                 WriteLine(Invariant($"    GCD = {value.Gcd} for {start} - {title}"));
                 WriteLine(Invariant($"_______________________"));
                 WriteLine(Invariant($"Hit ENTER to close."));
@@ -120,7 +120,7 @@ namespace PGSolutions.Monads.Demos {
                 int gcd   = list[0];
 
                 ( from n in list 
-                  select gcd = Gcd_S4.BestRun(new GcdStart(n, gcd)).Value.Gcd
+                  select gcd = GcdS4.BestRun(new GcdStart(n, gcd)).Item2.Gcd
                 ).LastOrDefault();
 
                 WriteLine(Invariant($"    GCD = {gcd} for {list.FormatList()??""}"));

@@ -6,14 +6,13 @@ namespace PGSolutions.Monads.DIDemo {
     using static FormattableString;
 
     class DependencyInjectionExample {
-        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String)")]
         public static int Main() {
             WriteLine(BusinessLogic.Run(ConfigFactory.GetConfig1()));
-            WriteLine("==================================================");
+            WriteLine(Invariant($"=================================================="));
             ReadKey();
 
             WriteLine(BusinessLogic.Run(ConfigFactory.GetConfig2()));
-            WriteLine("==================================================");
+            WriteLine(Invariant($"=================================================="));
             ReadKey();
             return 0;
         }
