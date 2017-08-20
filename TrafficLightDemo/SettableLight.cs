@@ -40,7 +40,7 @@ namespace PGSolutions.Monads.TrafficLightDemo {
 
         IO<Unit> ISettableLight.SetColor(Image image) {
             _pictureBox.Image = image;
-            return Unit._.ToIO();
+            return Unit.Empty.ToIO();
         }
         readonly PictureBox _pictureBox;
     }

@@ -71,7 +71,7 @@ namespace PGSolutions.Monads.Demos {
 
         private static readonly Func<CustomAttributeData,string> _attributes = atts =>
             atts?.ConstructorArguments[0].Value as string ?? "";
-        private static readonly Func<Type,PropertyInfo,string>      _name = (@class,field) =>
+        private static readonly Func<Type,PropertyInfo,string>   _name       = (@class,field) =>
             ( @class?.Name + "." + field?.Name ) ?? "";
 
         private class Inner<TDetails> : IMethodDetails<TDetails> {

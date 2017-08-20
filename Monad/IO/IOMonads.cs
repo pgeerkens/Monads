@@ -50,7 +50,7 @@ namespace PGSolutions.Monads {
             action.ContractedNotNull(nameof(action));
 
             action();
-            return Unit._.ToIO();
+            return Unit.Empty.ToIO();
         }
 
         /// <summary>TODO</summary>

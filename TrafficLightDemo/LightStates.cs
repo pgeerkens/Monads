@@ -37,57 +37,57 @@ namespace PGSolutions.Monads.TrafficLightDemo {
             where TEnv           : ITrafficLight<TSettableLight,Image> 
     {
         /// <inheritdoc/>
-        protected override FsmTransition Start { get; } = e => _reset.GetState(          500,
+        protected override FsmTransition Start       => e => Reset.GetState(          500,
             from _    in e.UpDownTown.SetColor         (e.Green)
             from __   in e.CrossTown.SetColor          (e.Yellow)
             from ___  in e.UpTownLeftTurn.SetColor     (e.Green)
             from ____ in e.DownTownLeftTurn.SetColor   (e.Red)
-            select Unit._);
+            select Unit.Empty);
 
-        static readonly FsmTransition _reset          = e => LeftTurnGreen.GetState(    2000,
+        static FsmTransition Reset                   => e => LeftTurnGreen.GetState(    2000,
             from _    in e.UpDownTown.SetColor         (e.Red)
             from __   in e.CrossTown.SetColor          (e.Red)
             from ___  in e.UpTownLeftTurn.SetColor     (e.Red)
             from ____ in e.DownTownLeftTurn.SetColor   (e.Red)
-            select Unit._);
+            select Unit.Empty);
 
-        static readonly FsmTransition CrossTownRed    = e => LeftTurnGreen.GetState(     300,
+        static FsmTransition CrossTownRed            => e => LeftTurnGreen.GetState(     300,
             from _    in e.CrossTown.SetColor          (e.Red)
-            select Unit._);
+            select Unit.Empty);
 
-        static readonly FsmTransition LeftTurnGreen   = e => LeftTurnYellow.GetState(   3700,
+        static FsmTransition LeftTurnGreen           => e => LeftTurnYellow.GetState(   3700,
             from _    in e.UpTownLeftTurn.SetColor     (e.Green)
             from __   in e.DownTownLeftTurn.SetColor   (e.Green)
-            select Unit._);
+            select Unit.Empty);
 
-        static readonly FsmTransition LeftTurnYellow  = e => LeftTurnRed.GetState(      1000,
+        static FsmTransition LeftTurnYellow          => e => LeftTurnRed.GetState(      1000,
             from _    in e.UpTownLeftTurn.SetColor     (e.Yellow)
             from __   in e.DownTownLeftTurn.SetColor   (e.Yellow)
-            select Unit._);
+            select Unit.Empty);
 
-        static readonly FsmTransition LeftTurnRed     = e => UpDownTownGreen.GetState(   000,
+        static FsmTransition LeftTurnRed             => e => UpDownTownGreen.GetState(   000,
             from _    in e.UpTownLeftTurn.SetColor     (e.Red)
             from __   in e.DownTownLeftTurn.SetColor   (e.Red)
-            select Unit._);
+            select Unit.Empty);
 
-        static readonly FsmTransition UpDownTownGreen = e => UpDownTownYellow.GetState(10000,
+        static FsmTransition UpDownTownGreen         => e => UpDownTownYellow.GetState(10000,
             from _    in e.UpDownTown.SetColor         (e.Green)
-            select Unit._);
+            select Unit.Empty);
 
-        static readonly FsmTransition UpDownTownYellow= e => UpDownTownRed.GetState(    1000,
+        static FsmTransition UpDownTownYellow        => e => UpDownTownRed.GetState(    1000,
             from _    in e.UpDownTown.SetColor         (e.Yellow)
-            select Unit._);
+            select Unit.Empty);
 
-        static readonly FsmTransition UpDownTownRed   = e => CrossTownGreen.GetState(    300,
+        static FsmTransition UpDownTownRed           => e => CrossTownGreen.GetState(    300,
             from _    in e.UpDownTown.SetColor         (e.Red)
-            select Unit._);
+            select Unit.Empty);
 
-        static readonly FsmTransition CrossTownGreen  = e => CrossTownYellow.GetState(  6700,
+        static FsmTransition CrossTownGreen          => e => CrossTownYellow.GetState(  6700,
             from _    in e.CrossTown.SetColor          (e.Green)
-            select Unit._);
+            select Unit.Empty);
 
-        static readonly FsmTransition CrossTownYellow = e => CrossTownRed.GetState(     1000,
+        static FsmTransition CrossTownYellow         => e => CrossTownRed.GetState(     1000,
             from _    in e.CrossTown.SetColor          (e.Yellow)
-            select Unit._);
+            select Unit.Empty);
     }
 }

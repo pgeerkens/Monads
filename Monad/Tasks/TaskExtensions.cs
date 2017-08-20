@@ -107,8 +107,8 @@ namespace PGSolutions.Monads {
             selector.ContractedNotNull(nameof(selector));
             resultSelector.ContractedNotNull(nameof(resultSelector));
 
-            return source.ContinueWith(u => selector(Unit._)
-                         .ContinueWith(v => resultSelector(Unit._, v.Result), NotOnCanceled)
+            return source.ContinueWith(u => selector(Unit.Empty)
+                         .ContinueWith(v => resultSelector(Unit.Empty, v.Result), NotOnCanceled)
                                                                      .Result, NotOnCanceled);
         }
 

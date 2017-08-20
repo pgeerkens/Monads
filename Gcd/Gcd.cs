@@ -74,7 +74,7 @@ namespace PGSolutions.Monads.Demos {
             let isThird = Readers.MatchCounter(i => i==3, 1)
             select ( from _   in ConsoleWriteLine("{0} - {1}", GcdStartTYpe, test.Title)
                      from __  in (
-                            #if !NotComprehensiveSyntax
+                            #if NotComprehensiveSyntax
                                    states.ForThisTest(test, timer, isThird)
                                          .SelectMany(e=>e.Last())
                             #else
@@ -85,7 +85,7 @@ namespace PGSolutions.Monads.Demos {
                                  )
                      from ___ in ConsoleWriteLine(@"Elapsed Time: {0:ss\.ff} secs", timer())
                      from _x_ in ConsoleWriteLine()
-                     select Unit._
+                     select Unit.Empty
             ).Invoke();
 
         private static X<IEnumerable<IO<Unit>>> ForThisTest(this X<IList<GcdStart>> startStates, 
@@ -137,7 +137,7 @@ namespace PGSolutions.Monads.Demos {
                     #endif
                         : GcdStartDefault
                 select x,
-                Unit._);
+                Unit.Empty);
         }
     }
 }

@@ -103,8 +103,8 @@ namespace PGSolutions.Monads {
             resultSelector.ContractedNotNull(nameof(resultSelector));
 
             return from _ in source
-                   from v in selector(Unit._)
-                   select FromResult(resultSelector(Unit._, v.Result));
+                   from v in selector(Unit.Empty)
+                   select FromResult(resultSelector(Unit.Empty, v.Result));
         }
 
         /// <summary>η: T -> Task{T}</summary>

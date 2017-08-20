@@ -42,7 +42,7 @@ namespace PGSolutions.Monads.TrafficLightDemo {
         public IO<Unit> SetColor(T color) {
             color.ContractedNotNull(nameof(color));
 
-            return Unit._.ToIO();
+            return Unit.Empty.ToIO();
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 
 namespace PGSolutions.Monads.DIDemo {
     using static Console;
@@ -24,34 +23,25 @@ namespace PGSolutions.Monads.DIDemo {
             /// authorization and a logging method. Likely you could use this for sql connections,
             /// transactions, auth credentials, a pool of resources, etc.
             /// </remarks>
-            [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String)")]
-            public static Config GetConfig1() {
-                return new Config() {
-                    AuthInfo  = "'pgeerkens'",
-                    LogMethod = (str =>  WriteLine(Invariant($"! {str} !"))),
-                };
-            }
+            public static IConfig GetConfig1()
+                => new Config("'pgeerkens'", str => WriteLine(Invariant($"! {str} !")));
+
             /// <summary>What we are injecting into all our methods.</summary>
             /// <remarks>
             /// In this example we have
             /// authorization and a logging method. Likely you could use this for sql connections,
             /// transactions, auth credentials, a pool of resources, etc.
             /// </remarks>
-            [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String)")]
-            public static Config GetConfig2() {
-                return new Config() {
-                    AuthInfo  = "'Pieter'",
-                    LogMethod = (str => WriteLine(Invariant($"!?! {str} !?!"))),
-                };
-            }
-
-            //[SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String)")]
-            //private static void MyCustomLog(string str) { WriteLine("! " + str + " !"); }
+            public static IConfig GetConfig2()
+                => new Config("'Pieter'", str => WriteLine(Invariant($"!?! {str} !?!")));
 
             /// <summary>What we are injecting into all our methods.</summary>
             public class Config : IConfig {
-                public string         AuthInfo  { get; set; }
-                public Action<string> LogMethod { get; set; }
+                public Config(string authInfo, Action<string> logMethod) {
+                    AuthInfo = authInfo; LogMethod = logMethod;    
+                }
+                public string         AuthInfo  { get; }
+                public Action<string> LogMethod { get; }
             }
         }
     }

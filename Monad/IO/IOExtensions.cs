@@ -114,7 +114,7 @@ namespace PGSolutions.Monads {
         public static IO<Unit> AsIO
           (this Action action) {
             action.ContractedNotNull(nameof(action));
-            return () => { action(); return Unit._; };
+            return () => { action(); return Unit.Empty; };
         }
 
         /// <summary>TODO</summary>
@@ -123,7 +123,7 @@ namespace PGSolutions.Monads {
             action.ContractedNotNull(nameof(action));
 
             return arg => 
-                () => { action(arg); return Unit._; };
+                () => { action(arg); return Unit.Empty; };
         }
 
         /// <summary>TODO</summary>
@@ -132,7 +132,7 @@ namespace PGSolutions.Monads {
             action.ContractedNotNull(nameof(action));
 
             return (arg1, arg2) => 
-                () => { action(arg1, arg2); return Unit._; };
+                () => { action(arg1, arg2); return Unit.Empty; };
         }
 
         /// <summary>TODO</summary>
@@ -141,7 +141,7 @@ namespace PGSolutions.Monads {
             action.ContractedNotNull(nameof(action));
 
             return (arg1, arg2, arg3) =>
-                () => { action(arg1, arg2, arg3); return Unit._; };
+                () => { action(arg1, arg2, arg3); return Unit.Empty; };
         }
 
         /// <summary>TODO</summary>
@@ -150,7 +150,7 @@ namespace PGSolutions.Monads {
             action.ContractedNotNull(nameof(action));
 
             return (arg1, arg2, arg3, arg4) =>
-                () => { action(arg1, arg2, arg3, arg4); return Unit._; };
+                () => { action(arg1, arg2, arg3, arg4); return Unit.Empty; };
         }
 
         // ...

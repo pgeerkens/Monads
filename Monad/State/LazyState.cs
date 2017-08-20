@@ -146,7 +146,7 @@ namespace PGSolutions.Monads {
         /// <summary>'Gets' the current state, as both State and Value.</summary>
         public static LazyState<TState, TState> Get<TState>() => s => LazyPayload.New(s,s);
         /// <summary>'Puts' the supplied state, resturning a Unit.</summary>
-        public static LazyState<TState,Unit>    Put<TState>(TState state) => s => LazyPayload.New(state, Unit._);
+        public static LazyState<TState,Unit>    Put<TState>(TState state) => s => LazyPayload.New(state, Unit.Empty);
         #endregion
 
         /// <summary>η: T -> State{TState,TValue}</summary> 

@@ -22,7 +22,7 @@ namespace PGSolutions.Monads.DIDemo {
 
     internal static class BusinessLogic<TConfig> where TConfig:IConfig {
         public static Reader<TConfig,int>      GetIntFromDB { get {
-            return new Reader<TConfig, int>(config => {
+            return Reader.New<TConfig,int>(config => {
                 config.LogMethod(Invariant(
                         $"Getting an int from DB using credentials {config.AuthInfo}"));
                         // ....
@@ -39,7 +39,7 @@ namespace PGSolutions.Monads.DIDemo {
             } }
 
         public static Reader<TConfig,bool>     WriteStuffToDisk(int i, string s) {
-            return new Reader<TConfig,bool>(config => {
+            return Reader.New<TConfig,bool>(config => {
                 config.LogMethod(Invariant(
                     $"writing\n   {i}\n   {s}\nto disk with credentials: {config.AuthInfo}"));
                     // ....
@@ -48,7 +48,7 @@ namespace PGSolutions.Monads.DIDemo {
         }
 
         private static Reader<TConfig,Guid>     GetGuidWithAuth { get {
-            return new Reader<TConfig,Guid>(config => {
+            return Reader.New<TConfig,Guid>(config => {
                 config.LogMethod("Getting a GUID");
                 return Guid.NewGuid();
             } );

@@ -33,10 +33,8 @@ namespace PGSolutions.Monads {
     /// <summary>Class representing, conceptually, the "type" of <i>void</i>.</summary>
     public struct Unit : IEquatable<Unit>, IComparable<Unit> {
         /// <summary>The single instance of <see cref="Unit"/></summary>
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "_")]
-        [SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
         [CLSCompliant(false)]
-        public static Unit _ { get { return _this; } } static Unit _this = new Unit();
+        public static Unit Empty => new Unit();
 
         #region Comparison with IComparable<T>
         /// <inheritdoc/>

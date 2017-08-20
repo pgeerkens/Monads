@@ -55,7 +55,7 @@ namespace PGSolutions.Monads.Demos {
                 WriteLine(Invariant($"    GCD = {value.Gcd} for {start} - {title}"));
                 WriteLine(Invariant($"_______________________"));
                 WriteLine(Invariant($"Hit ENTER to close."));
-                return Unit._.ToNullable();
+                return Unit.Empty.ToNullable();
             });
 
             ReadLine();

@@ -230,9 +230,9 @@ namespace PGSolutions.Monads.Demos {
         /// <summary>TODO</summary>
         [Description("Best LINQ w/ Enumerate(Transform<TState>, TState) and w/o using 'let'.")]
         public static StateRes Run3 => GetResult(new StateInt(start =>
-                      (from s in AlgorithmTransform.Enumerate(start)
-                       where s.A == s.B
-                       select NewPayload(s, s.A)
+                      ( from s in AlgorithmTransform.Enumerate(start)
+                        where s.A == s.B
+                        select NewPayload(s, s.A)
                       ).First()));
     }
 

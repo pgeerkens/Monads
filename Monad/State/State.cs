@@ -133,7 +133,7 @@ namespace PGSolutions.Monads {
         public static State<TState,Unit>        Put<TState>(TState state) {
             state.ContractedNotNull(nameof(state));
 
-            return s => NewPayload(state, Unit._);
+            return s => NewPayload(state, Unit.Empty);
         }
     }
 

@@ -64,7 +64,7 @@ namespace PGSolutions.Monads {
 
     [ExcludeFromCodeCoverage]
     public class UnitLinqNullTests {
-        readonly static IO<Unit> _unit = Unit._.ToIO();
+        readonly static IO<Unit> _unit = Unit.Empty.ToIO();
 
         /// <summary>Unit-test constructor.</summary>
         public UnitLinqNullTests() { ; }
@@ -86,7 +86,7 @@ namespace PGSolutions.Monads {
             var received = _unit.SelectMany<Unit,int,int>(null, Functions.Second);
             Assert.True(received == null, "A: ");
 
-            received = _unit.SelectMany<Unit,Unit,int>(u=>()=>Unit._, null);
+            received = _unit.SelectMany<Unit,Unit,int>(u=>()=>Unit.Empty, null);
             Assert.True(received == null, "B: ");
         }
     }

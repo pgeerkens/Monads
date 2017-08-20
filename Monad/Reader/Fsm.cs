@@ -55,7 +55,7 @@ namespace PGSolutions.Monads {
                 var state = await Start(e)(e);
                 while (state != null)  state = await state()(e);
             } catch (OperationCanceledException) { ; }
-            return Unit._;
+            return Unit.Empty;
         }
 
         /// <summary>TODO</summary>

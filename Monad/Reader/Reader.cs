@@ -35,6 +35,10 @@ namespace PGSolutions.Monads {
     /// <summary>TODO</summary>
     public static class Reader {
         /// <summary>TODO</summary>
+        public static Reader<TEnvironment, TValue> New<TEnvironment, TValue>(Reader<TEnvironment, TValue> func) 
+            => func;
+
+        /// <summary>TODO</summary>
         public static Reader<TEnvironment,TResult>    Bind<TEnvironment,TSource, TResult>( this
             Reader<TEnvironment, TSource> @this,
             Func<TSource, Reader<TEnvironment, TResult>> selector

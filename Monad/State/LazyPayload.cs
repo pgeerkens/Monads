@@ -47,16 +47,15 @@ namespace PGSolutions.Monads {
         /// <summary>Return a new object instance.</summary>
         private LazyPayload(ValueTuple<TState, TValue> tuple) : this(() => tuple) { ; }
         /// <summary>Return a new object instance.</summary>
-        private LazyPayload(Func<ValueTuple<TState, TValue>> valueFactory) {
-            _base = new Lazy<ValueTuple<TState,TValue>>(valueFactory);
-        }
+        private LazyPayload(Func<ValueTuple<TState, TValue>> valueFactory)
+            => Base = new Lazy<ValueTuple<TState,TValue>>(valueFactory);
 
-        private readonly Lazy<ValueTuple<TState,TValue>> _base;
+        private Lazy<ValueTuple<TState,TValue>> Base { get; }
 
         /// <summary>Returns the calculated current <typeparamref name="TState"/> value.</summary>
-        public TState State => _base.Value.Item1;
+        public TState State => Base.Value.Item1;
         /// <summary>Returns the calculated current <typeparamref name="TValue"/> value.</summary>
-        public TValue Value => _base.Value.Item2;
+        public TValue Value => Base.Value.Item2;
 
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
