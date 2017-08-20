@@ -27,11 +27,9 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
     /// <summary>Extension methods supporting LINQ-comprehension syntax for the maybe monad on classes: <see cref="X{T}"/>.</summary>
-    [Pure]
     public static class MaybeLinq {
         /// <summary>LINQ-ible implementation of the monadic map operator.</summary>
         ///<remarks>Used by the LINQ <i>let</i> clause and queries with a single FROM clause.</remarks>
@@ -75,9 +73,9 @@ namespace PGSolutions.Monads {
         public static TResult Cast<TValue,TResult>(this TValue @this) where TValue:TResult 
             => @this != null ? @this : default(TResult);
     }
-#if false   // Standard pattern for C# COmprehension syntax, from spec.
-    //public delegate R Func<T1, R>(T1 arg1);
-    //public delegate R Func<T1, T2, R>(T1 arg1,T2 arg2);
+#if false  // Standard pattern for C# Comprehension Syntax; from spec.
+    public delegate R Func<T1, R>(T1 arg1);
+    public delegate R Func<T1, T2, R>(T1 arg1,T2 arg2);
     public abstract class C { abstract public C<T> Cast<T>(); }
     public abstract class C<T>:C {
         abstract public C<T> Where(Func<T,bool> predicate);

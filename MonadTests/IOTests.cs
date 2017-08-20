@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 
 using Xunit;
 
-namespace PGSolutions.Monads.MonadTests {
+namespace PGSolutions.Monads {
     [ExcludeFromCodeCoverage]
     public static class IOTests {
         [Fact]
@@ -90,7 +89,7 @@ namespace PGSolutions.Monads.MonadTests {
         [Fact]
         public static void MonadLaw1Test() {
             // Monad law 1: m.Monad().SelectMany(f) == f(m)
-            var lhs = 1.ToIO().SelectMany(addOne3); Contract.Assert(lhs  != null);
+            var lhs = 1.ToIO().SelectMany(addOne3); //Contract.Assert(lhs  != null);
             var rhs = addOne3(1);                        //Contract.Assume(rhs != null);
             Assert.Equal(lhs.Invoke(), rhs.Invoke());
         }
@@ -117,7 +116,7 @@ namespace PGSolutions.Monads.MonadTests {
             Func<int, IO<int>> addOne4 = x => { isExecuted5 = true; return (x + 1).ToIO(); };
             Func<string, IO<int>> length = x => { isExecuted6 = true; return (x.Length).ToIO(); };
             Func<int, Func<int, IO<string>>> f7 = x => y => {
-                Contract.Ensures(Contract.Result<IO<string>>() != null);
+                //Contract.Ensures(Contract.Result<IO<string>>() != null);
                 isExecuted7 = true;
                 return (new string('a', x + y)).ToIO();
             };
@@ -133,8 +132,8 @@ namespace PGSolutions.Monads.MonadTests {
             Assert.False(isExecuted7); // Laziness.
 
             var lhs = new string('a', 1 + 1 + "abc".Length);
-            Contract.Assert(query2 != null);
-            var rhs_  = query2(1);      Contract.Assume(rhs_  != null);
+            //Contract.Assert(query2 != null);
+            var rhs_  = query2(1);      //Contract.Assume(rhs_  != null);
             var rhs = rhs_("abc");
             Assert.Equal(lhs, rhs.Invoke()); // Execution.
 

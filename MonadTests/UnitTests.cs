@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 using Xunit;
 
 using PGSolutions.Monads;
 
-namespace PGSolutions.Monads.MonadTests {
+namespace PGSolutions.Monads {
 
     [ExcludeFromCodeCoverage]
     public partial class EnumerableTests {
@@ -38,7 +37,7 @@ namespace PGSolutions.Monads.MonadTests {
         /// <summary>Monad law 1: m.Monad().Bind(f) == f(m)</summary>
         [Fact]
         public static void MonadLawsTest1() {
-            var plusOne  = _plusOne(1);   Contract.Assume(plusOne != null);
+            var plusOne  = _plusOne(1);   //Contract.Assume(plusOne != null);
             var expected = plusOne.ToList();
             var received = 1.Enumerable().SelectMany(_plusOne).ToList();
             Assert.NotNull(received);

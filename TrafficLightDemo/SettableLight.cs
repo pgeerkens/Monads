@@ -26,19 +26,14 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
-using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.Windows.Forms;
 
 namespace PGSolutions.Monads.TrafficLightDemo {
     using ISettableLight  = ISettableLight<Image>;
-    using static Contract;
 
     struct SettableLight : ISettableLight {
         public SettableLight(PictureBox pictureBox) : this() {
-            pictureBox.ContractedNotNull(nameof(pictureBox));
-            Ensures(_pictureBox != null);
 
             _pictureBox = pictureBox;
         }
@@ -48,14 +43,5 @@ namespace PGSolutions.Monads.TrafficLightDemo {
             return Unit._.ToIO();
         }
         readonly PictureBox _pictureBox;
-
-        /// <summary>The invariants enforced by this struct type.</summary>
-        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
-        [ContractInvariantMethod]
-        [Pure]
-        private void ObjectInvariant() {
-            Invariant( _pictureBox != null );
-        }
     }
 }

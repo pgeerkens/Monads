@@ -33,14 +33,14 @@ using System.Linq;
 
 using Xunit;
 
-namespace PGSolutions.Monads.MaybeTests {
+namespace PGSolutions.Monads {
     [ExcludeFromCodeCoverage] [CLSCompliant(false)]
     public class EqualityExtensionsTestsMaybe {
 
         #region Weasley tests
         readonly static string[]            _strings = { "Percy", null, "George", "Ron", "Ginny" };
         readonly static IList<X<string>>    _data    = ( from e in _strings
-                                                         select e.ToMonad()
+                                                         select e.AsMonad()
                                                        ).ToList().AsReadOnly();
 
         [Theory]
@@ -124,15 +124,15 @@ namespace PGSolutions.Monads.MaybeTests {
         [InlineData("Fred Weasley", " Weasley")]
         [InlineData("Nothing!", null)]
         public static void WesDyerTest(string expected, string second) {
-            var received = ( from x in "Fred".ToMonad()
-                             from y in second.ToMonad()
+            var received = ( from x in "Fred".AsMonad()
+                             from y in second.AsMonad()
                              select x + y).ToNothingString();
             Assert.Equal(expected, received);
         }
         #endregion
     }
     [ExcludeFromCodeCoverage] [CLSCompliant(false)]
-    public class EqualityExtensionsTestsNullablee {
+    public class EqualityExtensionsTestsNullable {
         #region Other tests
         readonly static int? _maybeGeorge = 2;
         readonly static IList<int?> _data = ( from e in new List<int?>() { 0, null, 2, 3, 4 }

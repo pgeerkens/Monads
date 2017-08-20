@@ -32,176 +32,189 @@ using System.Globalization;
 
 using Xunit;
 
-namespace PGSolutions.Monads.MonadTests {
+namespace PGSolutions.Monads {
     using static LazyState;
     using static CultureInfo;
 
-    using Maybe_T = LazyState<string,object>;
+    using LazyStateInt  = LazyState<string,int>;
 
     /// <summary>Unit tests for <see cref="LazyState{TState,TValue}"/></summary>
     [ExcludeFromCodeCoverage] [CLSCompliant(false)]
     public class LazyStateTests {
         public LazyStateTests() { }
 
-        const           int                             _v  = 1;
-        readonly static LazyState<string,int>           _m  = _v.ToMonad();
-        readonly static Func<int,int>                   _f  = x => x * 2;
-        readonly static Func<int,int>                   _g  = x => x + 3;
-        static readonly Func<int,LazyState<string,int>> _fm = i => _f(i).ToMonad();
-        static readonly Func<int,LazyState<string,int>> _gm = i => _g(i).ToMonad();
+        readonly static Func<int,int>          _f  = x => x * 2;
+        readonly static Func<int,int>          _g  = x => x + 3;
+        readonly static Func<int,int>          _h  = x => 4 * (x - 1);
+        static readonly Func<int,LazyStateInt> _fm = i => _f(i).ToLazyState();
+        static readonly Func<int,LazyStateInt> _gm = i => _g(i).ToLazyState();
 
         #region Functor Laws
         /// <summary>Functor Law #1: fmap id ≡ id.</summary>
-        [Fact]
-        public static void FunctorLaw1() {
-            var lhs = _m.AsX();
-            var rhs = from i in _m select i;
+        [Theory()]
+        [InlineData("Start", 3)]
+        public static void FunctorLaw1(string state, int v) {
+            var lhs = v.ToLazyState().AsX();
+            var rhs = from i in v.ToLazyState() select i;
 
             Assert.True(rhs.HasValue);
-            Assert.Equal(lhs.Apply("Start"), rhs.Apply("Start"));
+            Assert.Equal(lhs.Apply(state), rhs.Apply(state));
         }
 
         /// <summary>Functor Law #2: fmap (f . g) ≡ (fmap f) . (fmap g).</summary>
-        [Fact]
-        public static void FunctorLaw2() {
-            var lhs = from s in _m select _f(_g(s));
-            var rhs = from s in ( from s in _m select _g(s) ) select _f(s);
+        [Theory()]
+        [InlineData("Start", 3)]
+        public static void FunctorLaw2(string state, int v) {
+            var lhs = from s in v.ToLazyState() select _f(_g(s));
+            var rhs = from s in ( from s in v.ToLazyState() select _g(s) ) select _f(s);
 
             Assert.True(rhs.HasValue);
-            Assert.Equal(lhs.Apply("Start"), rhs.Apply("Start"));
+            Assert.Equal(lhs.Apply(state), rhs.Apply(state));
         }
         #endregion
         #region Join Laws
         /// <summary>Return Law: return . f ≡ fmap f . return.</summary>
         /// <remarks>In expanded form: \x -> return (f x) = \x -> fmap f (return x).</remarks>
-        [Fact]
-        public static void ReturnLaw() {
-            var lhs = ( _g(_v).ToLazyState<string,int>() )?.Invoke("Start");
-            var rhs = ( (from s in _m select _g(s)) | null)?.Invoke("Start");
+        [Theory()]
+        [InlineData("Start", 3)]
+        public static void ReturnLaw(string state, int v) {
+            var lhs = ( _g(v).ToLazyState<string,int>() )?.Invoke(state);
+            var rhs = ( (from s in v.ToLazyState() select _g(s)) | null)?.Invoke(state);
 
+            Assert.True(lhs!=null);
             Assert.True(rhs!=null);
             Assert.Equal(lhs, rhs);
         }
 
         /// <summary>Join Law #1: ( join . fmap join ) ≡ ( join . join ).</summary>
-        [Fact]
-        public static void JoinLaw1() {
-            var m   = ((object)((object)_m).ToMonad()).ToMonad();
-            var lhs = from x3 in ( from x1 in m from x2 in x1.ToMonad() select x2 )
-                      from r in (Maybe_T)x3
-                      select r;
-            var rhs = from x1 in m
-                      from x2 in x1.ToMonad()
-                      from r  in (Maybe_T)x2
-                      select r;
+        [Theory()]
+        [InlineData("First",   1)]
+        [InlineData("Second",  5)]
+        [InlineData("Third",  16)]
+        public static void JoinLaw1(string state, int v) {
+            Func<int,LazyStateInt> f = i => new LazyStateInt(s => StatePayload.New(s+"-End", _f(i)) );
 
-            Assert.True(rhs.HasValue);
-            Assert.Equal(lhs.Apply("Start"), rhs.Apply("Start"));
+            var actual   = v.ToLazyState().SelectMany(f);
+            var expected = f(v).AsX();
+
+            Assert.True(expected.HasValue & actual.HasValue);
+            Assert.Equal(expected.Apply(state), actual.Apply(state));
         }
 
         /// <summary>Join Law #2: join . fmap return  ≡  join . return  =  id.</summary>
-        [Fact]
-        public static void JoinLaw2() {
-            var lhs = _v.ToMonad().SelectMany(Extensions.ToMonad);
-            var rhs = from m in _v.ToMonad().Select(i=>i)
-                      from r in m.SelectMany(Extensions.ToMonad)
-                      select r;
+        /// <remarks>In expanded form: \x -> join (fmap (return x) ) = \x -> join ( return x).</remarks>
+        [Theory]
+        [InlineData("First",   1)]
+        [InlineData("Second",  5)]
+        [InlineData("Third",  16)]
+        public static void JoinLaw2(string state, int v) {
+            Func<int,LazyStateInt> f = i => new LazyStateInt(s => StatePayload.New(s+"-End", _f(i)) );
 
-            Assert.True(rhs.HasValue);
-            Assert.Equal(lhs.Apply("Start"), rhs.Apply("Start"));
-            Assert.Equal(_v, rhs.Apply("Start").Value.Value);
+            var actual   = f(v).SelectMany(i => i.ToLazyState());
+            var expected = f(v).AsX();
+
+            Assert.True(expected.HasValue & actual.HasValue);
+            Assert.Equal(expected.Apply(state), actual.Apply(state));
+            Assert.Equal(expected.Apply(state).Value.Value, _f(v));
         }
 
         /// <summary>Join Law #3: ( join . fmap (fmap f) ) ≡ ( fmap f . join ).</summary>
         /// <remarks>In expanded form: \x -> join (fmap (fmap f) x) = \x -> fmap f (join x).</remarks>
-        [Fact]
-        public static void JoinLaw3() {
-            var lhs = from x1 in _m.Select(_f).Select(_g) select x1;
-            var rhs = from x2 in ( from x1 in _m select _f(x1) ) select _g(x2);
+        [Theory()]
+        [InlineData("First",   1)]
+        [InlineData("Second",  5)]
+        [InlineData("Third",  16)]
+        public static void JoinLaw3(string state, int v) {
+            Func<int,LazyStateInt> f = i => new LazyStateInt(s => StatePayload.New(s+nameof(_f), _f(i)) );
+            Func<int,LazyStateInt> g = i => new LazyStateInt(s => StatePayload.New(s+nameof(_g), _g(i)) );
+            Func<int,LazyStateInt> h = i => new LazyStateInt(s => StatePayload.New(s+nameof(_h), _h(i)) );
 
-            Assert.True(rhs.HasValue);
-            Assert.Equal(lhs.Apply("Start"), rhs.Apply("Start"));
+            var actual   = f(v).SelectMany(g).SelectMany(h);
+            var expected = f(v).SelectMany(a => g(a).SelectMany(h)|null);
+
+            Assert.True(expected.HasValue & actual.HasValue);
+            Assert.Equal(expected.Apply(state), actual.Apply(state));
+
+            actual   = from a in f(v) from b in g(a) from c in h(b) select c;
+            expected = from c in (from a in f(v) from b in g(a) select b) from d in h(c) select d;
+
+            Assert.True(expected.HasValue & actual.HasValue);
+            Assert.Equal(expected.Apply(state), actual.Apply(state));
         }
         #endregion
         #region Monad Laws
         /// <summary>Monad Law #1: (return x).Bind(f) == f(x)</summary>
-        [Fact]
-        public static void MonadLaw1() {
-            var lhs = _fm(_v);
-            var rhs = _v.ToMonad().SelectMany(_fm);
+        [Theory]
+        [InlineData("First", 3)]
+        public static void MonadLaw1(string state, int v) {
+            var lhs = _fm(v);
+            var rhs = v.ToLazyState().SelectMany(_fm);
 
             Assert.True(rhs.HasValue);
-            Assert.Equal(lhs.Invoke("Start"), rhs.Apply("Start"));
+            Assert.Equal(lhs(state), rhs.Apply(state));
         }
 
         /// <summary>Monad Law #2: M.Bind(Monad) == M</summary>
-        [Fact]
-        public static void MonadLaw2() {
-            var lhs = _m.AsX();
-            var rhs = _m.SelectMany(Extensions.ToMonad);
+        [Theory]
+        [InlineData("First", 3)]
+        public static void MonadLaw2(string state, int v) {
+            var lhs = v.ToLazyState().AsX();
+            var rhs = v.ToLazyState().SelectMany(LazyState.ToLazyState);
 
             Assert.True(rhs.HasValue);
-            Assert.Equal(lhs.Apply("Start"), rhs.Apply("Start"));
+            Assert.Equal(lhs.Apply(state), rhs.Apply(state));
         }
 
         /// <summary>Monad Law #3: (m >>= f) >>= g == m >>= ( \x -> (f x >>= g) ).</summary>
-        [Fact]
-        public static void MonadLaw3A() {
-            var lhs = from x in _m from y in _fm(x) from r in _gm(y) select r;
-            var rhs = from y in (from x in _m from r in _fm(x) select r ) from r in _gm(y) select r;
+        [Theory]
+        [InlineData("First", 3)]
+        public static void MonadLaw3A(string start, int v) {
+            var lhs = from x in v.ToLazyState() from y in _fm(x) from r in _gm(y) select r;
+            var rhs = from y in (from x in v.ToLazyState() from r in _fm(x) select r ) from r in _gm(y) select r;
 
             Assert.True(rhs.HasValue);
-            Assert.Equal(lhs.Apply("Start"), rhs.Apply("Start"));
+            Assert.Equal(lhs.Apply(start), rhs.Apply(start));
         }
 
         /// <summary>Monad Law #3: (m >>= f) >>= g == m >>= ( \x -> (f x >>= g) ).</summary>
-        [Fact]
-        public static void MonadLaw3B() {
-            var lhs = _m.SelectMany(_fm).SelectMany(_gm);
-            var rhs = _m.SelectMany(x => _fm(x).SelectMany(_gm) | null);
+        [Theory]
+        [InlineData("First", 3)]
+        public static void MonadLaw3B(string start, int v) {
+            var lhs = v.ToLazyState().SelectMany(_fm).SelectMany(_gm);
+            var rhs = v.ToLazyState().SelectMany(x => _fm(x).SelectMany(_gm) | null);
 
             Assert.True(rhs.HasValue);
-            Assert.Equal(lhs.Apply("Start"), rhs.Apply("Start"));
+            Assert.Equal(lhs.Apply(start), rhs.Apply(start));
         }
         #endregion
 
-        [Fact]
-        public static void LazyEvaluationTestSelectMany() {
+        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object,System.Object)")]
+        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object)")]
+        [Theory]
+        [InlineData("First",   1,  4)]
+        [InlineData("Second",  5,  3)]
+        [InlineData("Third",  16,  7)]
+        public static void LazyEvaluationTestSelectMany(string start, int p1, int p2) {
             bool isExecuted1 = false;
             bool isExecuted2 = false;
-            Func<LazyState<string,int>> f1 = () => 1.ToMonad<string,int>(
-                            state => { isExecuted1 = true; return (state + "a"); });
+            Func<LazyStateInt> f1 = () => p1.ToLazyState<string,int>(
+                            state => { isExecuted1 = true; return (state + "-a"); });
             Func<int, Func<int, Func<string, int>>> f2 =
                             x => y => z => { isExecuted2 = true; return x + y + z.Length; };
             var query = ( from f in f1().AsX()
                           from _ in Put(f.ToString(InvariantCulture))
-                          from a in 2.ToMonad<string, int>(state => "b" + state)
+                          from a in p2.ToLazyState<string, int>(state => $"{start}-b" + state)
                           from b in Get<string>()
                           select f2(f)(a)(b)
                         );
 
-            Assert.False(isExecuted1);                  // Deferred and lazy.
-            Assert.False(isExecuted2);                  // Deferred and lazy.
+            Assert.False(isExecuted1 || isExecuted2);   // Deferred and lazy.
 
-            var expected = StatePayload.New("b1", (1 + 2 + ("b1").Length));
-            var rceeived = query.Apply("state");        // Execution.
-            Assert.Equal(expected,rceeived);
+            var expected = StatePayload.New($"{start}-b{p1}", (p1 + p2 + ($"{start}-b{p1}").Length));
+            var received = query.Apply(start);        // Execution.
+            Assert.Equal(expected,received);
 
-            Assert.True(isExecuted1);
-            Assert.True(isExecuted2);
+            Assert.True(isExecuted1 && isExecuted2);
         }
-    }
-
-    /// <summary>Extension methods for <see cref="LazyStateTests"/>.</summary>
-    [ExcludeFromCodeCoverage]
-    internal static partial class Extensions {
-        /// <summary>η: T -> State{TState,TValue}</summary> 
-        public static LazyState<string,TValue>      ToMonad<TValue>(this TValue value) => 
-                state => StatePayload.New(state, value);
-
-        /// <summary>η: T -> State{TState,TValue}</summary> 
-        public static LazyState<TState,TValue>     ToMonad<TState,TValue>(this TValue value,
-            Func<TState,TState> transform
-        ) => oldState => StatePayload.New(transform(oldState), value);
     }
 }

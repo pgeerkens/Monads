@@ -28,18 +28,14 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
-    using static Contract;
-
     /// <summary>The State monad.</summary>
     /// <typeparam name="TState">Type of the internal state threaded by this instance.</typeparam>
     /// <typeparam name="TValue">Type of the calculated value exposed by this instance.</typeparam>
     public delegate StatePayload<TState,TValue>         LazyState<TState,TValue>(TState s);
 
     /// <summary>Core Monadic functionality for State, as Extension methods</summary>
-    [Pure]
     public static class LazyState {
         #region m.Select()
         /// <summary>Optimized implementation of operator (liftM): liftM f m = m >>= (\x -> return (f x)).</summary>
@@ -143,8 +139,6 @@ namespace PGSolutions.Monads {
             LazyState<TState,TValue> @this,
             TState startState
         ) {
-            Ensures(Result<IEnumerable<StatePayload<TState,TValue>>>() != null);
-
             var tuple = StatePayload.New(startState,default(TValue));
             while (true) yield return tuple = @this(tuple.State);
         }
@@ -154,5 +148,14 @@ namespace PGSolutions.Monads {
         /// <summary>'Puts' the supplied state, resturning a Unit.</summary>
         public static LazyState<TState,Unit>    Put<TState>(TState state) => s => StatePayload.New(state, Unit._);
         #endregion
+
+        /// <summary>η: T -> State{TState,TValue}</summary> 
+        public static LazyState<string,TValue>      ToLazyState<TValue>(this TValue value
+        ) => oldState => StatePayload.New(oldState, value);
+
+        /// <summary>η: T -> State{TState,TValue}</summary> 
+        public static LazyState<TState,TValue>     ToLazyState<TState,TValue>(this TValue value,
+            Func<TState,TState> transform
+        ) => oldState => StatePayload.New(transform(oldState), value);
     }
 }

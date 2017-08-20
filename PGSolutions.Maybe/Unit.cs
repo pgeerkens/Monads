@@ -28,7 +28,6 @@
 #endregion
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
     /// <summary>Class representing, conceptually, the "type" of <i>void</i>.</summary>
@@ -41,24 +40,24 @@ namespace PGSolutions.Monads {
 
         #region Comparison with IComparable<T>
         /// <inheritdoc/>
-        [Pure]public int CompareTo(Unit other) => 0;
+        public int CompareTo(Unit other) => 0;
         /// <summary>Returns true exactly when lhs &lt; rhs.</summary>
-        [Pure]public static bool operator <(Unit lhs, Unit rhs) => lhs.CompareTo(rhs) < 0;
+        public static bool operator <(Unit lhs, Unit rhs) => lhs.CompareTo(rhs) < 0;
         /// <summary>Returns true exactly when lhs &gt; rhs.</summary>
-        [Pure]public static bool operator >(Unit lhs, Unit rhs) => lhs.CompareTo(rhs) > 0;
+        public static bool operator >(Unit lhs, Unit rhs) => lhs.CompareTo(rhs) > 0;
         #endregion
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
-        [Pure]public override bool Equals(object obj) => obj is Unit;
+        public override bool Equals(object obj) => obj is Unit;
         /// <summary>Returns true, as all Unit instances are equal.</summary>
-        [Pure]public bool Equals(Unit other) => true;
+        public bool Equals(Unit other) => true;
         /// <summary>Returns true, as all Unit instances are equal.</summary>
-        [Pure]public static bool operator ==(Unit lhs, Unit rhs) => lhs.Equals(rhs);
+        public static bool operator ==(Unit lhs, Unit rhs) => lhs.Equals(rhs);
         /// <summary>Returns false, as all Unit instances are equal.</summary>
-        [Pure]public static bool operator !=(Unit lhs, Unit rhs) => !lhs.Equals(rhs);
+        public static bool operator !=(Unit lhs, Unit rhs) => !lhs.Equals(rhs);
 
         /// <inheritdoc/>
-        [Pure]public override int GetHashCode() => 0;
+        public override int GetHashCode() => 0;
         #endregion
     }
 }

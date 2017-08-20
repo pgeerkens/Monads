@@ -27,73 +27,29 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Diagnostics.CodeAnalysis;
 
-namespace System.Diagnostics.Contracts {
-    using Runtime.CompilerServices;
-    using static Contract;
-
+namespace PGSolutions.Monads {
     /// <summary>Extension methods to enhance Code Contracts and integration with Code Analysis.</summary>
-    [Pure]
     public static class ContractExtensions {
-#if CUSTOM_CONTRACT_VALIDATION
-        /// <summary>Throws <c>ArgumentNullException{name}</c> if <c>value</c> is null.</summary>
-        /// <param name="value">Value to be tested.</param>
-        /// <param name="name">Name of the parameter being tested, for use in the exception thrown.</param>
-        [ContractArgumentValidator]  // Requires Assemble Mode = Custom Parameter Validation
-        public static void ContractedNotNullEx<T>([ValidatedNotNull]this T value, string name) {
-              if (value == null) throw new ArgumentNullException(name);
-              EndContractBlock();
-        }
-        /// <summary>Throws <c>ArgumentNullException{name}</c> if <c>value</c> is null.</summary>
-        /// <param name="value">Value to be tested.</param>
-        /// <param name="name">Name of the parameter being tested, for use in the exception thrown.</param>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="E"></typeparam>
-        [ContractArgumentValidator]  // Requires Assemble Mode = Custom Parameter Validation
-        public static void ContractedNotNullEx<T,E>([ValidatedNotNull]this T value, string name)
-        where E:Exception {
-            Requires<E>(value != null, name);
-        }
-#else
         /// <summary>Throws <c>ContractException{name}</c> if <c>value</c> is null.</summary>
         /// <param name="value">Value to be tested.</param>
         /// <param name="name">Name of the parameter being tested, for use in the exception thrown.</param>
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "value")]
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "name")]
-        [ContractAbbreviator] // Requires Assemble Mode = Standard Contract Requires
         [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ContractedNotNull<T>([ValidatedNotNull]this T value, string name) {
-            Requires(value != null, name);
-        }
-#endif
-
-        /// <summary>Decorator for an object which is to have it's object invariants assumed.</summary>
-        [SuppressMessage("CodeCracker.Usage", "CC0057:UnusedParameters", MessageId = "t")]
-        [SuppressMessage("CodeCracker.Usage", "CC0090:MissingParametersInXmlDocs", MessageId = "t")]
-        [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "t")]
-        public static void AssumeInvariant<T>(this T t) { }
-
-        /// <summary>Asserts the 'truth' of the logical implication <paramref name="condition"/> => <paramref name="contract"/>.</summary>
-        /// <remarks>
-        /// Doesn't work anymore in VS 2015 and CC 1.10.10126.4.
-        /// Unfortunate, but not critical.
-        /// </remarks>
-        [SuppressMessage("CodeCracker.Usage", "CC0090:MissingParametersInXmlDocs", MessageId = "t")]
-        public static bool Implies(this bool condition, bool contract) {
-            Ensures(Result<bool>()  ==  (contract  ||  ! condition) );
-            return contract  ||  ! condition;
+            Debug.Assert(value != null, name);
         }
 
-        /// <summary>Returns true exactly if lower &lt;= value &lt; lower+height</summary>
-        /// <param name="value">Vlaue being tested.</param>
-        /// <param name="lower">Inclusive lower bound for the range.</param>
-        /// <param name="height">Height of the range.</param>
-        public static bool InRange(this int value, int lower, int height) {
-            Ensures( (lower <= value && value < lower+height)  ==  Result<bool>() );
-            return lower <= value && value < lower+height;
-        }
+        ///// <summary>Decorator for an object which is to have it's object invariants assumed.</summary>
+        //[SuppressMessage("CodeCracker.Usage", "CC0057:UnusedParameters", MessageId = "t")]
+        //[SuppressMessage("CodeCracker.Usage", "CC0090:MissingParametersInXmlDocs", MessageId = "t")]
+        //[SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "t")]
+        //public static void AssumeInvariant<T>(this T t) { }
     }
 
     /// <summary>Decorator for an incoming parameter that is contractually enforced as NotNull.</summary>

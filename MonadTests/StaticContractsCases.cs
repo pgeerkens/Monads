@@ -1,7 +1,6 @@
 ﻿#define CompileStaticContractsTestsX
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 
 #if CompileStaticContractsTests
 namespace PGSolutions.Utilities.Monads.StaticContracts {

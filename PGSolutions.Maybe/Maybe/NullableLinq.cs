@@ -27,11 +27,9 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
     /// <summary>Extension methods supporting LINQ-comprehension syntax for the maybe monad on structs: <see cref="Nullable{T}"/>.</summary>
-    [Pure]
     public static class NullableLinq {
         /// <summary>LINQ-compatible implementation of the monadic map operator.</summary>
         ///<remarks>
@@ -73,5 +71,13 @@ namespace PGSolutions.Monads {
         /// <param name="value"></param>
         public static TValue? ToNullable<TValue>(this TValue value) where TValue : struct =>
             value;
+
+        /// <summary>TODO</summary>
+        /// <typeparam name="TValue">The underlying type of the Nulable{}.</typeparam>
+        /// <param name="this"></param>
+        /// <param name="default"></param>
+        [Obsolete("This method is a temporary work-around enabling consistent usage between Nullable<T> and Maybe<T> of the ?? operator.")]
+        public static TValue BitwiseOr<TValue>(this TValue? @this, TValue @default) where TValue:struct
+            => @this ?? @default;
     }
 }

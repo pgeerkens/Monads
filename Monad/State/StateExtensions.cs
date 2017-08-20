@@ -28,14 +28,10 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PGSolutions.Monads {
-    using static Contract;
-
     /// <summary>Extension methods for <see cref="StructTuple{TState,TValue}"/>.</summary>
-    [Pure]
     public static partial class StateExtensions {
 
         /// <summary>Implementation of <b>compose</b>: (>=>): f >=> g = \x -> (f x >>= g). </summary>
@@ -49,7 +45,6 @@ namespace PGSolutions.Monads {
             Func<TState, State<TState,TResult>> follower
         ) {
             follower.ContractedNotNull(nameof(follower));
-            Ensures(Result<State<TState, TResult>>() != null);
 
             return new State<TState,TResult>( s => follower(s)(@this(s).State) );
         }

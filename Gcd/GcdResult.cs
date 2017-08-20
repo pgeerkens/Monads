@@ -27,7 +27,6 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 
 namespace PGSolutions.Monads.Demos {
@@ -48,7 +47,6 @@ namespace PGSolutions.Monads.Demos {
 
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
-        [Pure]
     #if GcdStartAsClass
         public override bool Equals(object obj) => (obj as GcdResult )?.Equals(this) ?? false;
     #else
@@ -56,16 +54,16 @@ namespace PGSolutions.Monads.Demos {
     #endif
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-        [Pure]public bool Equals(GcdResult other) => other!=null && Gcd == other.Gcd;
+        public bool Equals(GcdResult other) => other!=null && Gcd == other.Gcd;
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-        [Pure]public static bool operator ==(GcdResult lhs, GcdResult rhs) =>lhs?.Equals(rhs) ?? false;
+        public static bool operator ==(GcdResult lhs, GcdResult rhs) =>lhs?.Equals(rhs) ?? false;
 
         /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
-        [Pure]public static bool operator !=(GcdResult lhs, GcdResult rhs) => !lhs?.Equals(rhs) ?? false;
+        public static bool operator !=(GcdResult lhs, GcdResult rhs) => !lhs?.Equals(rhs) ?? false;
 
         /// <inheritdoc/>
-        [Pure]public override int GetHashCode() => Gcd.GetHashCode();
+        public override int GetHashCode() => Gcd.GetHashCode();
 
         /// <inheritdoc/>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object)")]

@@ -43,9 +43,7 @@ namespace PGSolutions.Monads.Demos {
     class Program {
         [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object)")]
         static string Prompt(string mode) =>
-            Format(InvariantCulture, $"{mode}: Type 'Q' to quit; <Enter> to repeat ... ");
-        //static string Prompt1(string mode) =>
-        //    Format(InvariantCulture, "{0}: Type 'Q' to quit; <Enter> to repeat ... ", mode);
+            string.Format(InvariantCulture, $"{mode}: Type 'Q' to quit; <Enter> to repeat ... ");
         #region GCD States
         static readonly IList<GcdStart> gcdStartStates = new List<GcdStart>() {
              new GcdStart(         40,            40)            //  0

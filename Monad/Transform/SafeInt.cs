@@ -27,7 +27,6 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 
 namespace PGSolutions.Monads {
@@ -106,22 +105,21 @@ namespace PGSolutions.Monads {
 
         #region Value Equality with IEquatable<T>
         /// <inheritdoc/>
-        [Pure]public override bool Equals(object obj) => (obj as SafeInt?)?.Equals(this) ?? false;
+        public override bool Equals(object obj) => (obj as SafeInt?)?.Equals(this) ?? false;
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-        [Pure]public bool Equals(SafeInt other) => _value.Equals(other._value);
+        public bool Equals(SafeInt other) => _value.Equals(other._value);
 
         /// <summary>Tests value-equality, returning false if either value doesn't exist.</summary>
-        [Pure]public static bool operator ==(SafeInt lhs, SafeInt rhs) => lhs.Equals(rhs);
+        public static bool operator ==(SafeInt lhs, SafeInt rhs) => lhs.Equals(rhs);
 
         /// <summary>Tests value-inequality, returning false if either value doesn't exist..</summary>
-        [Pure]public static bool operator !=(SafeInt lhs, SafeInt rhs) => !lhs.Equals(rhs);
+        public static bool operator !=(SafeInt lhs, SafeInt rhs) => !lhs.Equals(rhs);
 
         ///<summary>Retrieves the hash code of the object returned by the <see cref="_value"/> property.</summary>
-        [Pure]public override int GetHashCode() => (_value == null) ? 0 : _value.GetHashCode();
+        public override int GetHashCode() => (_value == null) ? 0 : _value.GetHashCode();
 
         /// <inheritdoc/>
-        [Pure]
         public override string ToString() => _value?.ToString(InvariantCulture) ?? "";
         #endregion
     }
@@ -131,7 +129,6 @@ namespace PGSolutions.Monads {
     /// courtesy Ivan Stoev: http://w3foverflow.com/question/integer-overflow-detection-c-for-add/
     /// See also <href a="https://www.fefe.de/intof.html">Catching Integer Overflows in C</href>
     /// </remarks>
-    [Pure]
     public static class SafeIntExtensions {
         /// <summary>Returns a Nullable{int} with the sum, or null if the operation fails.</summary>
         public static int? SafeAddition(this int addend1, int addend2) {

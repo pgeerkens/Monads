@@ -1,5 +1,4 @@
 ﻿namespace PGSolutions.Monads.TrafficLightDemo {
-    using static System.Diagnostics.Contracts.Contract;
 
     partial class Form1 {
         /// <summary>
@@ -14,7 +13,7 @@
         protected override void Dispose(bool disposing) {
             if (disposing && (components != null)) {
                 components.Dispose();
-                _cts.Dispose();
+                Source.Dispose();
               }
           base.Dispose(disposing);
         }

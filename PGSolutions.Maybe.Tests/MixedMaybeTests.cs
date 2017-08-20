@@ -29,13 +29,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 
 using Xunit;
 
-namespace PGSolutions.Monads.MaybeTests {
+namespace PGSolutions.Monads {
     using static CultureInfo;
     using static String;
     using static Functions;
@@ -64,7 +63,7 @@ namespace PGSolutions.Monads.MaybeTests {
 
             predicate = s => true;
             received  = Join("/", IsGeorge(defaultValue, predicate) );
-            Contract.Assert(received != null);
+            //Contract.Assert(received != null);
             Assert.True(expected?.Equals(received), 
                 Format(InvariantCulture,$"Value: Expected: '{expected}'; Received: '{received}'"));
         }
@@ -74,7 +73,7 @@ namespace PGSolutions.Monads.MaybeTests {
         [InlineData(true,  "George")]
         [InlineData(false, "Percy/Nothing/Ron/Ginny")]
         public void IncludedMiddleTest(bool comparison, string expected) {
-            expected.ContractedNotNull(nameof(expected));
+            //expected.ContractedNotNull(nameof(expected));
             Func<string,bool> predicate;
             string received;
 

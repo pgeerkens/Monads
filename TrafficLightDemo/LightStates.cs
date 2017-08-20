@@ -26,14 +26,12 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
-using System.Diagnostics.Contracts;
 using System.Drawing;
 
 namespace PGSolutions.Monads.TrafficLightDemo {
     using ISettableLight = ISettableLight<Image>;
 
     /// <summary>The Traffic LIght Finite-State-Machine.</summary>
-    [Pure]
     public class LightStates<TSettableLight,TEnv> : FsmTask<TEnv> 
             where TSettableLight : ISettableLight
             where TEnv           : ITrafficLight<TSettableLight,Image> 

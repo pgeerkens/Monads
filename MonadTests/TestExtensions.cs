@@ -27,23 +27,10 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
-namespace PGSolutions.Monads.MonadTests {
-    using static Contract;
+namespace PGSolutions.Monads {
 
-    [Pure]
     internal static partial class EnumerableExtensions {
-        public static IEnumerable<T> Enumerable<T>(this T value) {
-            Ensures(Result<IEnumerable<T>>() != null);
-            yield return value;
-        }
-    }
-
-    internal class ExternalState {
-        private int _state;
-
-        public ExternalState() { _state = -1; }
-        public int GetState() { return ++_state; }
+        public static IEnumerable<T> Enumerable<T>(this T value) { yield return value; }
     }
 }

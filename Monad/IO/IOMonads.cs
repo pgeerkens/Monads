@@ -28,7 +28,6 @@
 #endregion
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.IO;
 
 namespace PGSolutions.Monads {
@@ -56,12 +55,10 @@ namespace PGSolutions.Monads {
         }
 
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly IO<int> ConsoleRead = new Func<int>(Read).AsIO();
+        public static IO<int>    ConsoleRead => new Func<int>(Read).AsIO();
 
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly IO<string> ConsoleReadLine = new Func<string>(ReadLine).AsIO();
+        public static IO<string> ConsoleReadLine => new Func<string>(ReadLine).AsIO();
 
         /// <summary>TODO</summary>
         public static IO<ConsoleKeyInfo> ConsoleReadKey() => () => ReadKey();
@@ -123,18 +120,12 @@ namespace PGSolutions.Monads {
             ReturnIOUnit(() => WriteLine(format ?? nullFormat, arg));
 
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification ="Delegates ARE immutable.")]
-        public static readonly Func<string, IO<bool>> FileExists =
-            new Func<string, bool>(File.Exists).AsIO();
+        public static Func<string, IO<bool>>         FileExists       => new Func<string, bool>(File.Exists).AsIO();
 
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Delegates ARE immutable.")]
-        public static readonly Func<string, IO<string>> FileReadAllText =
-            new Func<string, string>(File.ReadAllText).AsIO();
+        public static Func<string, IO<string>>       FileReadAllText  => new Func<string, string>(File.ReadAllText).AsIO();
 
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes", Justification = "Delegates ARE immutable.")]
-        public static readonly Func<string, string, IO<Unit>> FileWriteAllText =
-            new Action<string, string>(File.WriteAllText).AsIO();
+        public static Func<string, string, IO<Unit>> FileWriteAllText => new Action<string, string>(File.WriteAllText).AsIO();
     }
 }

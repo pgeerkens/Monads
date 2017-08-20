@@ -27,7 +27,6 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
@@ -35,14 +34,9 @@ using System.Windows.Forms;
 namespace PGSolutions.Monads.TrafficLightDemo {
     using ITrafficLight = ITrafficLight<SettableLight,Image>;
     using static Properties.Resources;
-    using static Contract;
 
     internal static class Extensions {
-        [Pure]
         public static Bitmap SetTransparent(this Bitmap @this) {
-            @this.ContractedNotNull(nameof(@this));
-            Ensures(Result<Bitmap>() != null);
-
             @this.MakeTransparent(@this.GetPixel(1, 1));
             return @this;
         }
@@ -50,59 +44,24 @@ namespace PGSolutions.Monads.TrafficLightDemo {
 
     struct TrafficLight : ITrafficLight {
         public TrafficLight(ICancellationTokenAgent ctsSource, params PictureBox[] lights) : this() {
-            ctsSource.ContractedNotNull(nameof(ctsSource));
-            lights.ContractedNotNull(nameof(lights));
-            Requires(3 < lights.Length);
-            lights[0].ContractedNotNull("lights[0]");
-            lights[1].ContractedNotNull("lights[1]");
-            lights[2].ContractedNotNull("lights[2]");
-            lights[3].ContractedNotNull("lights[3]");
-
-            Ensures(_cancellationTokenSource        != null);
-            Ensures(_cancellationTokenSource.Source != null);
-
             _cancellationTokenSource = ctsSource;
-            _crossTownLight          = new SettableLight(lights[0]);
-            _upTownLeftTurnLight     = new SettableLight(lights[1]);
-            _downTownLeftTurnLight   = new SettableLight(lights[2]);
-            _upDownTownLight         = new SettableLight(lights[3]);
+            CrossTown          = new SettableLight(lights[0]);
+            UpTownLeftTurn     = new SettableLight(lights[1]);
+            DownTownLeftTurn   = new SettableLight(lights[2]);
+            UpDownTown         = new SettableLight(lights[3]);
         }
 
         public CancellationToken CancellationToken {
             get { return _cancellationTokenSource.Source.Token; }
         } readonly ICancellationTokenAgent _cancellationTokenSource;
 
-        public Image         Red              {
-            [Pure]get { return _red; }
-        } static readonly Image _red    = RedLight.SetTransparent();
-        public Image         Yellow           {
-            [Pure]get { return _yellow; }
-        } static readonly Image _yellow = YellowLight.SetTransparent();
-        public Image         Green            {
-            [Pure]get { return _green; }
-        } static readonly Image _green  = GreenLight.SetTransparent();
+        public Image         Red              => RedLight.SetTransparent();
+        public Image         Yellow           => YellowLight.SetTransparent();
+        public Image         Green            => GreenLight.SetTransparent();
 
-        public SettableLight CrossTown        {
-            get { return _crossTownLight; }
-        } readonly SettableLight _crossTownLight;
-        public SettableLight UpTownLeftTurn   {
-            get { return _upTownLeftTurnLight; }
-        } readonly SettableLight _upTownLeftTurnLight;
-        public SettableLight DownTownLeftTurn {
-            get { return _downTownLeftTurnLight; }
-        } readonly SettableLight _downTownLeftTurnLight;
-        public SettableLight UpDownTown       {
-            get { return _upDownTownLight; }
-        } readonly SettableLight _upDownTownLight;
-
-        /// <summary>The invariants enforced by this struct type.</summary>
-        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
-        [ContractInvariantMethod]
-        [Pure]
-        private void ObjectInvariant() {
-            Invariant(_cancellationTokenSource             != null);
-            Invariant(_cancellationTokenSource.Source      != null);
-        }
+        public SettableLight CrossTown        { get; }
+        public SettableLight UpTownLeftTurn   { get; }
+        public SettableLight DownTownLeftTurn { get; }
+        public SettableLight UpDownTown       { get; }
     }
 }

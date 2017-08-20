@@ -31,7 +31,7 @@ using System.Diagnostics.CodeAnalysis;
 
 using Xunit;
 
-namespace PGSolutions.Monads.MonadTests {
+namespace PGSolutions.Monads {
     using static Functions;
 
     /// <summary>Unit test null arguments to <see cref="MaybeLinq"/> extension methods.</summary>

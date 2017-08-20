@@ -132,6 +132,10 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.4.0\lib\net461\System.ValueTuple.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -140,11 +144,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IO\IO.cs" />
     <Compile Include="IO\IOExtensions.cs" />
     <Compile Include="IO\IOMonads.cs" />
     <Compile Include="IO\MaybeIO.cs" />
+    <Compile Include="Parser.cs" />
     <Compile Include="Reader\Fsm.cs" />
     <Compile Include="Reader\ReaderLinq.cs" />
     <Compile Include="State\LazyStateTransform.cs" />

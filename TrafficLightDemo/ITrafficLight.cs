@@ -26,14 +26,10 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
-using System.Diagnostics.Contracts;
 using System.Threading;
 
 namespace PGSolutions.Monads.TrafficLightDemo {
-    using static Contract;
-
     /// <summary>TODO</summary>
-    [ContractClass(typeof(ITrafficLightContract<,>))]
     public interface ITrafficLight<TSettableLight,T> : ICancellableTask
             where TSettableLight:ISettableLight<T>
     {
@@ -55,30 +51,28 @@ namespace PGSolutions.Monads.TrafficLightDemo {
     }
 
     /// <summary>Contract class for <see cref="ITrafficLight{T}"/>.</summary>
-    [ContractClassFor(typeof(ITrafficLight<,>))]
-    [Pure]
     public abstract class ITrafficLightContract<TSettableLight,T> : ITrafficLight<TSettableLight,T>
             where TSettableLight:ISettableLight<T>
     {
         private ITrafficLightContract() { }
 
         /// <inheritdoc/>
-        public T Red    { get { Ensures(Result<T>() != null); return default(T); } }
+        public T Red    => default(T);
         /// <inheritdoc/>
-        public T Yellow { get { Ensures(Result<T>() != null); return default(T); } }
+        public T Yellow => default(T);
         /// <inheritdoc/>
-        public T Green  { get { Ensures(Result<T>() != null); return default(T); } }
+        public T Green  => default(T);
 
         /// <inheritdoc/>
-        public TSettableLight CrossTown        { get { Ensures(Result<ISettableLight<T>>() != null); return default(TSettableLight); } }
+        public TSettableLight CrossTown        => default(TSettableLight);
         /// <inheritdoc/>
-        public TSettableLight UpTownLeftTurn   { get { Ensures(Result<ISettableLight<T>>() != null); return default(TSettableLight); } }
+        public TSettableLight UpTownLeftTurn   => default(TSettableLight);
         /// <inheritdoc/>
-        public TSettableLight DownTownLeftTurn { get { Ensures(Result<ISettableLight<T>>() != null); return default(TSettableLight); } }
+        public TSettableLight DownTownLeftTurn => default(TSettableLight);
         /// <inheritdoc/>
-        public TSettableLight UpDownTown       { get { Ensures(Result<ISettableLight<T>>() != null); return default(TSettableLight); } }
+        public TSettableLight UpDownTown       => default(TSettableLight);
 
         /// <inheritdoc/>
-        public CancellationToken CancellationToken { get { return default(CancellationToken); } }
+        public CancellationToken CancellationToken => default(CancellationToken);
     }
 }

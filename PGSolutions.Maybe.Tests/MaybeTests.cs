@@ -31,7 +31,7 @@ using System.Diagnostics.CodeAnalysis;
 
 using Xunit;
 
-namespace PGSolutions.Monads.MaybeTests {
+namespace PGSolutions.Monads {
     using Maybe_T = X<object>;
     using static Functions;
 
@@ -81,8 +81,8 @@ namespace PGSolutions.Monads.MaybeTests {
         /// <remarks>In expanded form: \x -> return (f x) = \x -> fmap f (return x).</remarks>
         [Fact]
         public static void ReturnLaw() {
-            var lhs = _g(_v).ToMonad();
-            var rhs = from s in _v.ToMonad() select _g(s);
+            var lhs = _g(_v).AsMonad();
+            var rhs = from s in _v.AsMonad() select _g(s);
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs, rhs);
@@ -91,12 +91,12 @@ namespace PGSolutions.Monads.MaybeTests {
         /// <summary>Join Law #1: ( join . fmap join ) ≡ ( join . join ).</summary>
         [Fact]
         public static void JoinLaw1() {
-            var m = ((object)((object)_m).ToMonad()).ToMonad();
-            var lhs = from x3 in ( from x1 in m from x2 in x1.ToMonad() select x2 )
+            var m = ((object)((object)_m).AsMonad()).AsMonad();
+            var lhs = from x3 in ( from x1 in m from x2 in x1.AsMonad() select x2 )
                       from r in (Maybe_T)x3
                       select r;
             var rhs = from x1 in m
-                      from x2 in x1.ToMonad()
+                      from x2 in x1.AsMonad()
                       from r  in (Maybe_T)x2
                       select r;
 
@@ -107,8 +107,8 @@ namespace PGSolutions.Monads.MaybeTests {
         /// <summary>Join Law #2: join . fmap return  ≡  join . return  =  id.</summary>
         [Fact]
         public static void JoinLaw2() {
-            var lhs = _v.ToMonad().SelectMany(Extensions.ToMonad);
-            var rhs = from m in _v.ToMonad()//.Select(i=>i)
+            var lhs = _v.AsMonad().SelectMany(Extensions.AsMonad);
+            var rhs = from m in _v.AsMonad()//.Select(i=>i)
                  //     from r in m.SelectMany(Extensions.ToMonad)
                       select m;
 
@@ -133,7 +133,7 @@ namespace PGSolutions.Monads.MaybeTests {
         [Fact]
         public static void MonadLaw1() {
             var lhs = _fm(_v);
-            var rhs = _v.ToMonad().SelectMany(_fm);
+            var rhs = _v.AsMonad().SelectMany(_fm);
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs, rhs);
@@ -143,7 +143,7 @@ namespace PGSolutions.Monads.MaybeTests {
         [Fact]
         public static void MonadLaw2() {
             var lhs = _m;
-            var rhs = _m.SelectMany(Extensions.ToMonad);
+            var rhs = _m.SelectMany(Extensions.AsMonad);
 
             Assert.True(rhs.HasValue);
             Assert.Equal(lhs, rhs);
@@ -195,6 +195,6 @@ namespace PGSolutions.Monads.MaybeTests {
     }
 
     internal static partial class Extensions {
-        public static X<TValue> ToMonad<TValue>(this TValue value) where TValue:class => value;
+        public static X<TValue> AsMonad<TValue>(this TValue value) where TValue : class => value;
     }
 }

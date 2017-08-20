@@ -27,56 +27,48 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
-    using static Contract;
-
     /// <summary>Useful delegates for the <see cref="IO{T}"/> monad.</summary>
     /// <remarks>
     /// This pretty much comes straight from Dixin's Blog:
     ///     https://weblogs.asp.net/dixin/category-theory-via-c-sharp-18-more-monad-io-monad
     /// except for all the Contract verification and some code reformatting.
     /// </remarks>
-    [Pure]
     public static class IOExtensions {
         /// <summary>TODO</summary>
         public static IO<Unit> Action
-          (Action action) {
-            action.ContractedNotNull(nameof(action));
-            return action.AsIO();
+          (Action work) {
+            work.ContractedNotNull(nameof(work));
+            return work.AsIO();
         }
 
         /// <summary>TODO</summary>
         public static Func<T, IO<Unit>> Action<T>
-          (this Action<T> action) {
-            action.ContractedNotNull(nameof(action));
-            Ensures(Result<Func<T, IO<Unit>>>() != null);
-            return action.AsIO();
+          (this Action<T> work) {
+            work.ContractedNotNull(nameof(work));
+            return work.AsIO();
         }
 
         /// <summary>TODO</summary>
         public static Func<T1, T2, IO<Unit>> Action<T1, T2>
-          (this Action<T1, T2> action) {
-            action.ContractedNotNull(nameof(action));
-            Ensures(Result<Func<T1, T2, IO<Unit>>>() != null);
-            return action.AsIO();
+          (this Action<T1, T2> work) {
+            work.ContractedNotNull(nameof(work));
+            return work.AsIO();
         }
 
         /// <summary>TODO</summary>
         public static Func<T1, T2, T3, IO<Unit>> Action<T1, T2, T3>
-          (this Action<T1, T2, T3> action) {
-            action.ContractedNotNull(nameof(action));
-            Ensures(Result<Func<T1, T2, T3, IO<Unit>>>() != null);
-            return action.AsIO();
+          (this Action<T1, T2, T3> work) {
+            work.ContractedNotNull(nameof(work));
+            return work.AsIO();
         }
 
         /// <summary>TODO</summary>
         public static Func<T1, T2, T3, T4, IO<Unit>> Action<T1, T2, T3, T4>
-          (this Action<T1, T2, T3, T4> action) {
-            action.ContractedNotNull(nameof(action));
-            Ensures(Result<Func<T1, T2, T3, T4, IO<Unit>>>() != null);
-            return action.AsIO();
+          (this Action<T1, T2, T3, T4> work) {
+            work.ContractedNotNull(nameof(work));
+            return work.AsIO();
         }
 
         // ...
@@ -92,7 +84,6 @@ namespace PGSolutions.Monads {
         public static Func<T, IO<TResult>> Func<T, TResult>
           (this Func<T, TResult> function) {
             function.ContractedNotNull(nameof(function));
-            Ensures(Result<Func<T, IO<TResult>>>() != null);
             return function.AsIO();
         }
 
@@ -100,7 +91,6 @@ namespace PGSolutions.Monads {
         public static Func<T1, T2, IO<TResult>> Func<T1, T2, TResult>
           (this Func<T1, T2, TResult> function) {
             function.ContractedNotNull(nameof(function));
-            Ensures(Result<Func<T1, T2, IO<TResult>>>() != null);
             return function.AsIO();
         }
 
@@ -108,7 +98,6 @@ namespace PGSolutions.Monads {
         public static Func<T1, T2, T3, IO<TResult>> Func<T1, T2, T3, TResult>
           (this Func<T1, T2, T3, TResult> function) {
             function.ContractedNotNull(nameof(function));
-            Ensures(Result<Func<T1, T2, T3, IO<TResult>>>() != null);
             return function.AsIO();
         }
 
@@ -116,7 +105,6 @@ namespace PGSolutions.Monads {
         public static Func<T1, T2, T3, T4, IO<TResult>> Func<T1, T2, T3, T4, TResult>
           (this Func<T1, T2, T3, T4, TResult> function) {
             function.ContractedNotNull(nameof(function));
-            Ensures(Result<Func<T1, T2, T3, T4, IO<TResult>>>() != null);
             return function.AsIO();
         }
 
@@ -126,8 +114,6 @@ namespace PGSolutions.Monads {
         public static IO<Unit> AsIO
           (this Action action) {
             action.ContractedNotNull(nameof(action));
-        //    Ensures(Result<IO<Unit>>() != null);
-
             return () => { action(); return Unit._; };
         }
 
@@ -135,7 +121,6 @@ namespace PGSolutions.Monads {
         public static Func<T, IO<Unit>> AsIO<T>
           (this Action<T> action) {
             action.ContractedNotNull(nameof(action));
-            Ensures(Result<Func<T, IO<Unit>>>() != null);
 
             return arg => 
                 () => { action(arg); return Unit._; };
@@ -145,7 +130,6 @@ namespace PGSolutions.Monads {
         public static Func<T1, T2, IO<Unit>> AsIO<T1, T2>
           (this Action<T1, T2> action) {
             action.ContractedNotNull(nameof(action));
-            Ensures(Result<Func<T1, T2, IO<Unit>>>() != null);
 
             return (arg1, arg2) => 
                 () => { action(arg1, arg2); return Unit._; };
@@ -155,7 +139,6 @@ namespace PGSolutions.Monads {
         public static Func<T1, T2, T3, IO<Unit>> AsIO<T1, T2, T3>
           (this Action<T1, T2, T3> action) {
             action.ContractedNotNull(nameof(action));
-            Ensures(Result<Func<T1, T2, T3, IO<Unit>>>() != null);
 
             return (arg1, arg2, arg3) =>
                 () => { action(arg1, arg2, arg3); return Unit._; };
@@ -165,7 +148,6 @@ namespace PGSolutions.Monads {
         public static Func<T1, T2, T3, T4, IO<Unit>> AsIO<T1, T2, T3, T4>
           (this Action<T1, T2, T3, T4> action) {
             action.ContractedNotNull(nameof(action));
-            Ensures(Result<Func<T1, T2, T3, T4, IO<Unit>>>() != null);
 
             return (arg1, arg2, arg3, arg4) =>
                 () => { action(arg1, arg2, arg3, arg4); return Unit._; };
@@ -177,7 +159,6 @@ namespace PGSolutions.Monads {
         public static IO<TResult> AsIO<TResult>
           (this Func<TResult> function) {
             function.ContractedNotNull(nameof(function));
-        //    Ensures(Result<IO<TResult>>() != null);
 
             return () => function();
         }
@@ -186,7 +167,6 @@ namespace PGSolutions.Monads {
         public static Func<T, IO<TResult>> AsIO<T, TResult>
           (this Func<T, TResult> function) {
             function.ContractedNotNull(nameof(function));
-            Ensures(Result<Func<T, IO<TResult>>>() != null);
 
             return arg =>
                 () => function(arg);
@@ -196,7 +176,6 @@ namespace PGSolutions.Monads {
         public static Func<T1, T2, IO<TResult>> AsIO<T1, T2, TResult>
           (this Func<T1, T2, TResult> function) {
             function.ContractedNotNull(nameof(function));
-            Ensures(Result<Func<T1, T2, IO<TResult>>>() != null);
 
             return (arg1, arg2) =>
                 () => function(arg1, arg2);
@@ -206,7 +185,6 @@ namespace PGSolutions.Monads {
         public static Func<T1, T2, T3, IO<TResult>> AsIO<T1, T2, T3, TResult>
           (this Func<T1, T2, T3, TResult> function) {
             function.ContractedNotNull(nameof(function));
-            Ensures(Result<Func<T1, T2, T3, IO<TResult>>>() != null);
 
             return (arg1, arg2, arg3) =>
                 () => function(arg1, arg2, arg3);
@@ -216,7 +194,6 @@ namespace PGSolutions.Monads {
         public static Func<T1, T2, T3, T4, IO<TResult>> AsIO<T1, T2, T3, T4, TResult>
           (this Func<T1, T2, T3, T4, TResult> function) {
             function.ContractedNotNull(nameof(function));
-            Ensures(Result<Func<T1, T2, T3, T4, IO<TResult>>>() != null);
 
             return (arg1, arg2, arg3, arg4) =>
                 () => function(arg1, arg2, arg3, arg4);

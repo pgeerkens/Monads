@@ -28,12 +28,11 @@
 #endregion
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 
 using Xunit;
 
-namespace PGSolutions.Monads.MonadTests {
+namespace PGSolutions.Monads {
     using static State;
 
     [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses")]
@@ -62,7 +61,7 @@ namespace PGSolutions.Monads.MonadTests {
             Assert.False(isExecuted2); // Deferred and lazy.
             StructTuple<string,int> result1 = query1("state"); // Execution.
             Assert.True(result1.Value.Equals(1 + 2 + ("b" + "1").Length));
-            Assert.True(result1.State.Equals("b" + "1"));
+            Assert.Equal(result1.State, "b" + "1");
             Assert.True(isExecuted1);
             Assert.True(isExecuted2);
         }
@@ -115,7 +114,7 @@ namespace PGSolutions.Monads.MonadTests {
         /// <summary>Monad law 2: M.Bind(Monad) == M</summary>
         [Fact]
         public static void MonadLaw2SelectMany() {
-            var received = _monad.SelectMany(StateExtensions.State<X<string>,int>);
+            var received = _monad.SelectMany(StateExtensions2.State<X<string>,int>);
             var expected = _monad;
             Assert.Equal(received.Value("a"), expected.Value("a"));
             Assert.Equal(received.State("a"), expected.State("a"));
@@ -145,7 +144,7 @@ namespace PGSolutions.Monads.MonadTests {
         /// <summary>Monad law 2: M.Bind(Monad) == M</summary>
         [Fact]
         public static void MonadLaw2SelectMany2() {
-            var received = _monad.SelectMany(StateExtensions.State<X<string>,int>,_second);
+            var received = _monad.SelectMany(StateExtensions2.State<X<string>,int>,_second);
             var expected = _monad;
             Assert.Equal(received.Value("a"), expected.Value("a"));
             Assert.Equal(received.State("a"), expected.State("a"));
@@ -164,16 +163,13 @@ namespace PGSolutions.Monads.MonadTests {
     }
 
     /// <summary>Extension methods for <see cref="StateTuple<TState,TValue>"/>.</summary>
-    internal static partial class StateExtensions {
+    internal static partial class StateExtensions2 {
         /// <summary>η: T -> State{TState,TValue}</summary> 
-        [Pure]
         public static State<TState, TValue> State<TState, TValue>(this TValue value) =>
                 state => StructTuple.New(state, value);
 
         /// <summary>η: T -> State{TState,TValue}</summary> 
-        [Pure]
-        public static State<TState, TValue> State<TState, TValue>(this
-            TValue value,
+        public static State<TState, TValue> State<TState, TValue>(this TValue value,
             Func<TState, TState> newState
         ) => oldState => StructTuple.New(newState(oldState), value);
     }

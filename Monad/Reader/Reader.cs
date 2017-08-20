@@ -27,11 +27,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
-    using static Contract;
-
     /// <summary>TODO</summary>
     public delegate TValue Reader<in TEnvironment, out TValue>(TEnvironment environment);
 
@@ -44,7 +41,6 @@ namespace PGSolutions.Monads {
         ) {
             @this.ContractedNotNull(nameof(@this));
             selector.ContractedNotNull(nameof(selector));
-            Ensures(Result<Reader<TEnvironment,TResult> >() != null);
 
             return environment => selector(@this(environment))(environment);
         }
@@ -58,7 +54,6 @@ namespace PGSolutions.Monads {
             @this.ContractedNotNull(nameof(@this));
             selector.ContractedNotNull(nameof(selector));
             resultSelector.ContractedNotNull(nameof(resultSelector));
-            Ensures(Result<Reader<TEnvironment,TResult> >() != null);
 
             return environment =>
                 {
@@ -73,7 +68,6 @@ namespace PGSolutions.Monads {
         /// <param name="value"></param>
         public static Reader<TEnvironment, T>         ToReader<TEnvironment, T>(this T value) {
             value.ContractedNotNull(nameof(value));
-            Ensures(Result<Reader<TEnvironment, T> >() != null);
 
             return environment => value;
         }

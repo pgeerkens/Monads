@@ -27,11 +27,9 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Diagnostics.Contracts;
 using System.Threading.Tasks;
 
 namespace PGSolutions.Monads {
-    using static Contract;
     using static Task;
     using static TaskContinuationOptions;
 
@@ -46,7 +44,6 @@ namespace PGSolutions.Monads {
         ) {
             source.ContractedNotNull(nameof(source));
             selector.ContractedNotNull(nameof(selector));
-            Ensures(Result<Task<TResult>>() != null);
 
             return source.Flatten(value => selector(value).Task(), Functions.Second) | DefaultTask<TResult>();
         }
@@ -57,7 +54,6 @@ namespace PGSolutions.Monads {
         ) {
             source.ContractedNotNull(nameof(source));
             selector.ContractedNotNull(nameof(selector));
-            Ensures(Result<Task<TResult>>() != null);
 
             return source.Flatten(selector, Functions.Second) | DefaultTask<TResult>();
         }
@@ -70,7 +66,6 @@ namespace PGSolutions.Monads {
             source.ContractedNotNull(nameof(source));
             selector.ContractedNotNull(nameof(selector));
             resultSelector.ContractedNotNull(nameof(resultSelector));
-            Ensures(Result<Task<TResult>>() != null);
 
             return source.Flatten(selector,resultSelector) | DefaultTask<TResult>();
         }
@@ -78,7 +73,6 @@ namespace PGSolutions.Monads {
         public static Task<TResult>         FlatMap<TResult>(this Task<Task<TResult>> source
         ) {
             source.ContractedNotNull(nameof(source));
-            Ensures(Result<Task<TResult>>() != null);
 
             return source.Flatten(Functions.Identity, Functions.Second) | DefaultTask<TResult>();
         }
@@ -86,7 +80,6 @@ namespace PGSolutions.Monads {
         /// <summary>TODO</summary>
         public static Task<Unit>            ToTaskUnit(this Task source) {
             source.ContractedNotNull(nameof(source));
-            Ensures(Result<Task<Unit>>() != null);
 
             return source.Flatten(value => value.Task(), Functions.Second) | DefaultTask<Unit>();
         }
@@ -121,14 +114,12 @@ namespace PGSolutions.Monads {
 
         /// <summary>TODO</summary>
         private static Task<TResult>        DefaultTask<TResult>() {
-            Ensures(Result<Task<TResult>>() != null);
             return Task(default(TResult));
         }
 
         /// <summary>η: T -> Task{T}</summary>
         private static Task<TResult>        Task<TResult>(this TResult value) {
-            Ensures(Result<Task<TResult>>() != null);
-            var task = FromResult(value); Assume(task != null);
+            var task = FromResult(value);
             return task;
         }
 

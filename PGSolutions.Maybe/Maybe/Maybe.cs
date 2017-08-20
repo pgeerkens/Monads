@@ -28,11 +28,8 @@
 #endregion
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
-    using static Contract;
-
     /// <summary>An immutable value-type Maybe{<typeparamref name="T"/>} monad.</summary>
     /// <typeparam name="T">The base type, which must be a class type, and will have the
     /// Equality definition track that of the base-type:
@@ -46,62 +43,54 @@ namespace PGSolutions.Monads {
     /// </remarks>
     public struct X<T> : IEquatable<X<T>>,ISafeToString where T:class {
         ///<summary>Create a new MaybeX{T}.</summary>
-        private X(T value) : this() { Value = value; Assume(HasValue == (Value != null)); }
+        private X(T value) : this() { Value = value; }
 
         ///<summary>Returns whether this MaybeX{T} has a value.</summary>
         public bool HasValue => Value != null;
         internal  T Value { get; }
 
-        ///<summary>Extract value of the MaybeX{T}, substituting <paramref name="defaultValue"/> as needed.</summary>
-        [Pure]public T BitwiseOr(T defaultValue) {
-            Ensures((defaultValue==null) || (Result<T>() != null));
-
-            return Value ?? defaultValue;
-        }
-        ///<summary>Extract value of the <see cref="X{T}"/>, substituting <paramref name="defaultValue"/> as needed.</summary>
+        ///<summary>Extract value of the <see cref="X{T}"/>, substituting <paramref name="default"/> as needed.</summary>
         ///<remarks>Substitutes for the ?? operator, which is unavailable for overload.</remarks>
-        [Pure]public static T operator | (X<T> value, T defaultValue) {
-            Ensures((defaultValue==null) || (Result<T>() != null));
-
-            return value.BitwiseOr(defaultValue);
-        }
-
-        ///<summary>The invariants enforced by this struct type.</summary>
-        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
-        [Pure] [ContractInvariantMethod]
-        private void ObjectInvariant() { Invariant(HasValue == (Value != null)); }
+        public static T operator | (X<T> maybe, T @default) => maybe.Value ?? @default;
+        ///<summary>Extract value of the X{T}, substituting <paramref name="default"/> as needed.</summary>
+        ///<remarks>
+        ///     Use of the coalescing operator (ie the pipe operator '|') is preferred except when 
+        ///     inter-operability with <see cref="Nullable{T}"/> is required.
+        /// </remarks>
+        [Obsolete("This method is a temporary work-around enabling consistent usage between Nullable<T> and Maybe<T> of the ?? operator.")]
+        public T BitwiseOr(T @default) => this | @default;
 
         ///<summary>Amplifies a <typeparamref name="T"/> to a <see cref="X{T}"/>.</summary>
-        [Pure]public static implicit operator X<T>(T value) => new X<T>(value);
+        public static implicit operator X<T>(T value) => new X<T>(value);
+
+//        ///<summary>Returns the inner (type <typeparamref name="T"/>) value for those who like to live dangerously.</summary>
+//        public static explicit operator T(X<T> value) => value.Value;
 
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
-        [Pure]public override bool Equals(object obj) => (obj as X<T>?)?.Equals(this) ?? false;
+        public override bool Equals(object obj) => (obj as X<T>?)?.Equals(this) ?? false;
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         /// <remarks>Value-equality is tested if reference-equality fails but both sides are non-null.</remarks>
-        [Pure]
         public bool Equals(X<T> other)  =>
             Value != null ? other.Value != null && (Value == other.Value || Value.Equals(other.Value))
                           : other.Value == null;
 
         /// <summary>Tests value-equality, returning false if either value doesn't exist.</summary>
-        [Pure]public static bool operator == (X<T> lhs, X<T> rhs) => lhs.Equals(rhs);
+        public static bool operator == (X<T> lhs, X<T> rhs) => lhs.Equals(rhs);
 
         /// <summary>Tests value-inequality, returning false if either value doesn't exist..</summary>
-        [Pure]public static bool operator != (X<T> lhs, X<T> rhs) => ! lhs.Equals(rhs);
+        public static bool operator != (X<T> lhs, X<T> rhs) => ! lhs.Equals(rhs);
 
         ///<summary>Returns the hash code of the contained object, or zero if that is null.</summary>
-        [Pure]public override int GetHashCode() => Value?.GetHashCode() ?? 0;
+        public override int GetHashCode() => Value?.GetHashCode() ?? 0;
 
         /// <inheritdoc/>
-        [Pure]public override string ToString() => this.Select(v => v.ToString()) | "Nothing!";
+        public override string ToString() => this.Select(v => v.ToString()) | "Nothing!";
         #endregion
     }
 
     /// <summary>Convenience extension methods for <see cref="X{T}"/></summary>
-    [Pure]
     public static class X {
         ///<summary>Amplifies a reference-type T to an <see cref="X{T}"/>.</summary>
         ///<typeparam name="T">The type of the "contained" object, being amplified to an <see cref="X{T}"/></typeparam>
@@ -122,6 +111,6 @@ namespace PGSolutions.Monads {
         ///<typeparam name="T">The type of the "contained" object, being amplified to an <see cref="X{T}"/></typeparam>
         ///<param name="this">todo: describe this parameter on GetUnderlyingType</param>
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "this")]
-        public static Type      GetUnderlyingType<T>(this X<T> @this) where T : class => typeof(T);
+        public static Type      GetUnderlyingType<T>(this X<T> @this) where T:class => typeof(T);
     }
 }

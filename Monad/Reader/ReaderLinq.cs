@@ -27,13 +27,9 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
-    using static Contract;
-
     /// <summary>TODO</summary>
-    [Pure]
     public static class ReaderLinq {
         // Select: (TSource -> TResult) -> (Reader<TEnvironment, TSource> -> Reader<TEnvironment, TResult>)
         /// <summary>Select: (TSource -> TResult) -> (Reader&lt;TEnvironment, TSource> -> Reader&lt;TEnvironment, TResult>)</summary>
@@ -43,7 +39,6 @@ namespace PGSolutions.Monads {
         ) {
             source.ContractedNotNull(nameof(source));
             selector.ContractedNotNull(nameof(selector));
-            Ensures(Result<Reader<TEnvironment,TResult>>() != null);
 
             return source.SelectMany(value => selector(value).ToReader<TEnvironment, TResult>());
         }
@@ -55,7 +50,6 @@ namespace PGSolutions.Monads {
         ) {
             source.ContractedNotNull(nameof(source));
             selector.ContractedNotNull(nameof(selector));
-            Ensures(Result<Reader<TEnvironment,TResult> >() != null);
 
             return environment => selector(source(environment))(environment);
         }
@@ -69,7 +63,6 @@ namespace PGSolutions.Monads {
             source.ContractedNotNull(nameof(source));
             selector.ContractedNotNull(nameof(selector));
             resultSelector.ContractedNotNull(nameof(resultSelector));
-            Ensures(Result<Reader<TEnvironment,TResult> >() != null);
 
             return environment =>
                 {
@@ -92,10 +85,6 @@ namespace PGSolutions.Monads {
         /// <param name="u"></param>
         /// <returns></returns>
         public static Reader<TEnvironment,Unit>       Unit<TEnvironment>(Unit u)
-        {
-            Ensures(Result<Reader<TEnvironment,Unit>>() != null);
-
-            return u.ToReader<TEnvironment, Unit>();
-        }
+        => u.ToReader<TEnvironment, Unit>();
     }
 }

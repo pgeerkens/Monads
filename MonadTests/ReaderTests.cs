@@ -27,14 +27,13 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Diagnostics.Contracts;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 
 using Xunit;
 
-namespace PGSolutions.Monads.MonadTests {
+namespace PGSolutions.Monads {
 
     [ExcludeFromCodeCoverage]
     public class ReaderTests {
@@ -81,7 +80,8 @@ namespace PGSolutions.Monads.MonadTests {
         public static void MonadLaws() {
             Reader<Tuple<bool, string>, int> left = 1.ToReader<Tuple<bool, string>, int>().Bind(addOne);
             Reader<Tuple<bool, string>, int> right = addOne(1);
-            Contract.Assume(right != null); Assert.NotNull(right);
+            //Contract.Assume(right != null);
+            Assert.NotNull(right);
             Assert.Equal(left(config), right(config));
         }
 

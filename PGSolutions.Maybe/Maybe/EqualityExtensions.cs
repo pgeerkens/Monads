@@ -26,15 +26,13 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
-using System.Diagnostics.Contracts;
+using System;
 
 namespace PGSolutions.Monads {
     /// <summary>TODO</summary>
-    [Pure]
     public static class EqualityExtensions {
         /// <summary>A string representing the object's value, or "Nothing" if it has no value.</summary>
         public static string ToNothingString<T>(this T @this) {
-            Contract.Ensures(Contract.Result<string>() != null);
             return @this != null ? @this.ToString() : "Nothing";
         }
 

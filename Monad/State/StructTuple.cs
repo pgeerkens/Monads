@@ -28,7 +28,6 @@
 #endregion
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 
 namespace PGSolutions.Monads {
@@ -59,30 +58,30 @@ namespace PGSolutions.Monads {
 
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
-        [Pure]public override bool Equals(object obj) {
+        public override bool Equals(object obj) {
             var other = (obj as StructTuple<TState, TValue>?);
             return other.HasValue  &&  this.Equals(other.Value);
         }
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-        [Pure]public bool Equals(StructTuple<TState, TValue> other) =>
+        public bool Equals(StructTuple<TState, TValue> other) =>
             Value.Equals(other.Value) && State.Equals(other.State);
 
         /// <summary>Tests value-equality.</summary>
-        [Pure]public static bool operator ==(StructTuple<TState, TValue> lhs, StructTuple<TState, TValue> rhs) =>
+        public static bool operator ==(StructTuple<TState, TValue> lhs, StructTuple<TState, TValue> rhs) =>
             lhs.Equals(rhs);
 
         /// <summary>Tests value-inequality.</summary>
-        [Pure]public static bool operator !=(StructTuple<TState, TValue> lhs, StructTuple<TState, TValue> rhs) =>
+        public static bool operator !=(StructTuple<TState, TValue> lhs, StructTuple<TState, TValue> rhs) =>
             !lhs.Equals(rhs);
 
         /// <inheritdoc/>
-        [Pure]public override int GetHashCode() => Value.GetHashCode() ^ State.GetHashCode();
+        public override int GetHashCode() => Value.GetHashCode() ^ State.GetHashCode();
 
         /// <inheritdoc/>
         [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider",
             MessageId = "System.String.Format(System.String,System.Object,System.Object)")]
-        [Pure]public override string ToString() => Format(InvariantCulture,$"({State},{Value})",new object[0]);
+        public override string ToString() => Format(InvariantCulture,$"({State},{Value})",new object[0]);
         #endregion
     }
 }

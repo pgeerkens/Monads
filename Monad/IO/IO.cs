@@ -28,7 +28,6 @@
 #endregion
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
     /// <summary>THE IO monad, for encapsulating side-effects only visible externally.</summary>
@@ -36,7 +35,6 @@ namespace PGSolutions.Monads {
     public delegate TResult IO<out TResult>();
 
     /// <summary>THe LINQ-extension methods for <see cref="IO{DateTimeResult}"/>.</summary>
-    [Pure]
     public static class IOLinq {
         /// <summary>LINQ-compatible implementation of the monadic map operator.</summary>
         public static IO<TResult>   Select<TSource,TResult>(this IO<TSource> @this,

@@ -27,15 +27,10 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PGSolutions.Monads {
-    using static Contract;
-
     /// <summary>Extension methods for <see cref="LazyState{TState,TValue}"/>.</summary>
-    [Pure]
     public static partial class LazyStateExtensions {
 
         /// <summary>Implementation of <b>compose</b>: (>=>): f >=> g = \x -> (f x >>= g). </summary>
@@ -49,7 +44,6 @@ namespace PGSolutions.Monads {
             Func<TState, LazyState<TState,TResult>> follower
         ) {
             follower.ContractedNotNull(nameof(follower));
-            Ensures(Result<LazyState<TState, TResult>>() != null);
 
             return new LazyState<TState,TResult>( s => follower(s)(@this(s).State) );
         }
@@ -68,7 +62,6 @@ namespace PGSolutions.Monads {
         ) {
             @this.ContractedNotNull(nameof(@this));
             follower.ContractedNotNull(nameof(follower));
-            Ensures(Result<LazyState<TState,TResult>>() != null);
 
             return s => follower(@this(s).State);
         }

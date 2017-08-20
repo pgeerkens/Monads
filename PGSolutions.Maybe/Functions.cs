@@ -27,13 +27,9 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
-    using static Contract;
-
     /// <summary>Constant utility functions of one and two arguments.</summary>
-    [Pure]
     public static class Functions {
         /// <summary>The identity function - Returns its argument.</summary>
         public static TValue    Identity<TValue>(TValue value) => value;
@@ -48,18 +44,16 @@ namespace PGSolutions.Monads {
     }
 
     /// <summary>Define an implementable contract guarantees a non-null return.</summary>
-    [ContractClass(typeof(ISafeToStringContracts))]
     public interface ISafeToString {
         /// <summary>Returns a String which represents the object instance.</summary>
         string ToString();
     }
 
     /// <summary>Enforceable contracts for <see cref="ISafeToString"/>.</summary>
-    [ContractClassFor(typeof(ISafeToString))]
     public abstract class ISafeToStringContracts : ISafeToString {
         private ISafeToStringContracts() { ; }
 
         /// <inheritdoc/>
-        public new string ToString() { Ensures(Result<string>() != null); return ""; }
+        public new string ToString() => "";
     }
 }

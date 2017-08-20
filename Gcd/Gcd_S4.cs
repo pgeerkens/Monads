@@ -30,7 +30,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 
@@ -61,7 +60,6 @@ namespace PGSolutions.Monads.Demos {
 
     /// <summary>TODO</summary>
     [SuppressMessage("Microsoft.Naming", "CA1707:IdentifiersShouldNotContainUnderscores")]
-    [Pure]
     public static class Gcd_S4 { // Beware! - These must be declared & initialized in this order
 
         /// <summary>TODO</summary>
@@ -260,6 +258,6 @@ namespace PGSolutions.Monads.Demos {
 
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-        public static readonly StateRes BestRun = s => Best.Run(s);
+        public static StateRes BestRun => s => Best.Run(s);
     }
 }

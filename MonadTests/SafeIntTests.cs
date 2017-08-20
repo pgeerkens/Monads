@@ -28,11 +28,10 @@
 #endregion
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 using Xunit;
 
-namespace PGSolutions.Monads.MonadTests {
+namespace PGSolutions.Monads {
     [CLSCompliant(false)]
     public static class SafeIntTests {
         #region Addition Tests
@@ -112,19 +111,17 @@ namespace PGSolutions.Monads.MonadTests {
         static readonly CultureInfo _currentCulture   = CultureInfo.CurrentUICulture;
 
         [SuppressMessage("Microsoft.Naming", "CA1720:IdentifiersShouldNotContainTypeNames", MessageId = "obj")]
-        public static string ICFormat(this string format, params object[] objArray) {
+        public static string ICFormat(this string format, params object[] array) {
             format.ContractedNotNull(nameof(format));
-            objArray.ContractedNotNull(nameof(objArray));
-            Contract.Ensures(Contract.Result<string>() != null);
-            return string.Format(_invariantCulture, format, objArray);
+            array.ContractedNotNull(nameof(array));
+            return string.Format(_invariantCulture, format, array);
         }
 
         [SuppressMessage("Microsoft.Naming", "CA1720:IdentifiersShouldNotContainTypeNames", MessageId = "obj")]
-        public static string CCFormat(this string format, params object[] objArray) {
+        public static string CCFormat(this string format, params object[] array) {
             format.ContractedNotNull(nameof(format));
-            objArray.ContractedNotNull(nameof(objArray));
-            Contract.Ensures(Contract.Result<string>() != null);
-            return string.Format(_currentCulture, format, objArray);
+            array.ContractedNotNull(nameof(array));
+            return string.Format(_currentCulture, format, array);
         }
 #if false
         /// <summary>Chaining with LINQ Comprehension syntax: all valid</summary>

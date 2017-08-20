@@ -28,12 +28,9 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PGSolutions.Monads {
-    using static Contract;
-
     /// <summary>Core Monadic functionality for State, as Extension methods</summary>
     public static class StateTransform {
         /// <summary>TODO</summary>
@@ -48,7 +45,6 @@ namespace PGSolutions.Monads {
             Predicate<TState> predicate
         ) {
             @this.ContractedNotNull(nameof(@this));
-            Ensures(Result<State<TState, Unit>>() != null);
 
             return s => { while (predicate(s)) { s = @this(s); }
                           return StructTuple.New(s, Unit._);
@@ -64,7 +60,6 @@ namespace PGSolutions.Monads {
         ) {
             @this.ContractedNotNull(nameof(@this));
             startState.ContractedNotNull(nameof(startState));
-            Ensures(Result<IEnumerable<TState>>() != null);
 
             while (true) yield return (startState = @this(startState));
         }
@@ -73,7 +68,6 @@ namespace PGSolutions.Monads {
         /// <remarks>Optimized implementation of Get.Compose(s => Put(transform(s))).</remarks>
         public static State<TState,TState>         Modify<TState>(this Transform<TState> transform) {
             transform.ContractedNotNull(nameof(transform));
-            Ensures(Result<State<TState,TState>>() != null); 
 
             return new State<TState,TState>(
                  s => StructTuple.New(transform(s), s)

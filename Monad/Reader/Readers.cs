@@ -28,24 +28,18 @@
 #endregion
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
-    using static Contract;
-
     /// <summary>Sample instances of the <see cref="Reader"/> monad pattern.</summary>
     public static class Readers {
         /// <summary>An auto-incrementing zero-baed counter.</summary>
         public static Func<int> Counter() {
-            Ensures(Result<Func<int>>() != null);
             return Counter(0);
         }
 
         /// <summary>An auto-incrementing <i>start</i>-based counter.</summary>
         /// <param name="start">The initial value of the counter.</param>
         public static Func<int> Counter(int start) {
-            Ensures(Result<Func<int>>() != null);
-
             var index = start;
             var reader = new Reader<int, int>(_ => index++);
             return () => reader(int.MinValue);
@@ -55,7 +49,6 @@ namespace PGSolutions.Monads {
         /// <param name="predicate">The condition for when <b>true</b> should be reported.</param>
         public static Func<bool> MatchCounter(Func<int, bool> predicate) {
             predicate.ContractedNotNull(nameof(predicate));
-            Ensures(Result<Func<bool>>() != null);
             return MatchCounter(predicate, 0);
         }
 
@@ -64,7 +57,6 @@ namespace PGSolutions.Monads {
         /// <param name="start">The initial value of the counter.</param>
         public static Func<bool> MatchCounter(Func<int, bool> predicate, int start) {
             predicate.ContractedNotNull(nameof(predicate));
-            Ensures(Result<Func<bool>>() != null);
 
             var index = start;
             var reader = new Reader<int, bool>(_ => predicate(index++));
@@ -73,7 +65,6 @@ namespace PGSolutions.Monads {
 
         /// <summary>A timer that, on each invocation, reports the <see cref="TimeSpan"/> since its creation.</summary>
         public static Func<TimeSpan> Timer() {
-            Ensures(Result<Func<TimeSpan>>() != null);
 
             var oldTime = DateTime.Now;
             var timer = new Reader<DateTime, TimeSpan>(newTime => newTime - oldTime);
@@ -83,8 +74,6 @@ namespace PGSolutions.Monads {
         #region  What is Timer() really doing?
         /// <summary>TODO</summary>
         public static Func<TimeSpan> Timer2() {
-            Ensures(Result<Func<TimeSpan>>() != null);
-
             return new _TimerInternals_().Invoke;
         }
 
@@ -98,14 +87,6 @@ namespace PGSolutions.Monads {
             }
             private readonly DateTime _oldTime;
             private readonly Reader<DateTime, TimeSpan> _timer;
-
-            /// <summary>The invariants enforced by this struct type.</summary>
-            [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-            [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
-            [ContractInvariantMethod]
-            [Pure]private void ObjectInvariant() {
-                Invariant(_timer != null);
-            }
         }
         #endregion
     }

@@ -27,13 +27,9 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
-    using static Contract;
-
     /// <summary>Optimized Monadic functionality for State, as Extension methods</summary>
     public static class LazyStateTransform {
         /// <summary>TODO</summary>
@@ -48,7 +44,6 @@ namespace PGSolutions.Monads {
             Predicate<TState> predicate
         ) {
             @this.ContractedNotNull(nameof(@this));
-            Ensures(Result<LazyState<TState, Unit>>() != null);
 
             return s => { while (predicate(s)) { s = @this(s); }
                           return StatePayload.New(s, Unit._);
@@ -64,7 +59,6 @@ namespace PGSolutions.Monads {
         ) {
             @this.ContractedNotNull(nameof(@this));
             startState.ContractedNotNull(nameof(startState));
-            Ensures(Result<IEnumerable<TState>>() != null);
 
             while (true) yield return (startState = @this(startState));
         }
@@ -75,7 +69,6 @@ namespace PGSolutions.Monads {
             Transform<TState> transform
         ) {
             transform.ContractedNotNull(nameof(transform));
-            Ensures(Result<LazyState<TState,TState>>() != null); 
 
             return new LazyState<TState,TState>(
                  s => StatePayload.New(transform(s), s)

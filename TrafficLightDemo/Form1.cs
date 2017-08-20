@@ -27,15 +27,12 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PGSolutions.Monads.TrafficLightDemo {
-    using static Contract;
     using LightStates = LightStates<SettableLight,ITrafficLight<SettableLight,Image>>;
 
     public interface ICancellationTokenAgent {
@@ -44,13 +41,10 @@ namespace PGSolutions.Monads.TrafficLightDemo {
 
     public partial class Form1 : Form, ICancellationTokenAgent {
         public Form1() {
-            Ensures( _cts != null );
-
             InitializeComponent();
 
-            _cts = new CancellationTokenSource();   Assert(_cts != null);
+            Source = new CancellationTokenSource();
 
-            this.AssumeInvariant();
             _trafficLight = new TrafficLight(this,
                     CrossTownLight,
                     UpTownLeftTurnLight,
@@ -64,35 +58,14 @@ namespace PGSolutions.Monads.TrafficLightDemo {
         private void Form1_Load(object sender, EventArgs e) { ResetLights(sender,e); }
 
         private async void ResetLights(object sender, EventArgs e) {
-            if (_cts != null) _cts.Cancel();
-            _cts = new CancellationTokenSource();
+            if (Source != null) Source.Cancel();
+            Source = new CancellationTokenSource();
             await StartLightsAsync();
         }
 
         private async Task<Unit> StartLightsAsync() => await new LightStates().Run(_trafficLight);
 
-        public CancellationTokenSource Source {
-            get {Ensures(Result<CancellationTokenSource>() != null); return _cts; }
-        }
-        CancellationTokenSource _cts;
-
-        /// <summary>The invariants enforced by this struct type.</summary>
-        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
-        [ContractInvariantMethod]
-        [Pure]
-        private void ObjectInvariant() {
-          Invariant(UpTownLeftTurnLight   != null);
-          Invariant(DownTownLeftTurnLight != null);
-          Invariant(CrossTownLight        != null);
-          Invariant(UpDownTownLight       != null);
-
-          Invariant(label1 != null);
-          Invariant(label2 != null);
-          Invariant(label3 != null);
-          Invariant(label4 != null);
-
-          Invariant( _cts != null );
-        }
+        public CancellationTokenSource Source { get; private set; }
+  //      CancellationTokenSource _cts;
     }
 }

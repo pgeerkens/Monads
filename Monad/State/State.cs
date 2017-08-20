@@ -29,18 +29,14 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 namespace PGSolutions.Monads {
-    using static Contract;
-
     /// <summary>The State monad.</summary>
     /// <typeparam name="TState">Type of the internal state threaded by this instance.</typeparam>
     /// <typeparam name="TValue">Type of the calculated value exposed by this instance.</typeparam>
     public delegate StructTuple<TState,TValue>      State<TState,TValue>(TState s);
 
     /// <summary>Core Monadic functionality for State, as Extension methods</summary>
-    [Pure]
     public static class State {
         /// <summary>TODO</summary>
         /// <typeparam name="TState">Type of the state to and from which this delegate selects</typeparam>
@@ -51,8 +47,6 @@ namespace PGSolutions.Monads {
         public static State<TState,bool>        DoWhile<TState>(this
             State<TState,bool> @this
         ) {
-            Ensures(Result<State<TState,bool>>() != null);
-
             return s => {
                 StructTuple<TState,bool> payload;
                 do { payload = @this(s); s = payload.State; } while (payload.Value);
@@ -65,8 +59,6 @@ namespace PGSolutions.Monads {
             State<TState,TValue> @this,
             TState startState
         ) {
-            Ensures(Result<IEnumerable<StructTuple<TState,TValue>>>() != null);
-
             var tuple = StructTuple.New(startState,default(TValue));
             while (true) yield return (tuple = @this(tuple.State));
         }
@@ -77,8 +69,6 @@ namespace PGSolutions.Monads {
             Func<TValue, TResult> selector
         ) {
             selector.ContractedNotNull(nameof(selector));
-            Ensures(Result<State<TState, TResult>>() != null);
-
             return @this.SelectMany<TState,TValue,TResult>(x => s => StructTuple.New(s,selector(x)));
             //return s => {
             //    var sourceResult = @this(s);
@@ -102,8 +92,6 @@ namespace PGSolutions.Monads {
             Func<TValue,State<TState,TResult>> selector
         ) {
             selector.ContractedNotNull(nameof(selector));
-            Ensures(Result<State<TState, TResult>>() != null);
-
             return @this.SelectMany(selector, Functions.Second);
             //return s => {
             //    var sourceResult = @this(s);
@@ -125,7 +113,6 @@ namespace PGSolutions.Monads {
         ) {
             selector.ContractedNotNull(nameof(selector));
             projector.ContractedNotNull(nameof(projector));
-            Ensures(Result<State<TState, TResult>>() != null);
 
             return s => {
                 var sourceResult = @this(s);
@@ -139,30 +126,23 @@ namespace PGSolutions.Monads {
         /// <summary>TODO</summary>
         public static State<TState, TValue>     ToState<TState, TValue>(this TValue @this
         ) {
-            Ensures(Result<State<TState, TValue>>() != null);
-
             return s => StructTuple.New(s,@this);
         }
 
         /// <summary>Get's the current state as both State and Value.</summary>
         public static State<TState, TState>     Get<TState>() {
-            Ensures(Result<State<TState,TState>>() != null);
-
             return state => StructTuple.New(state, state);
         }
 
         /// <summary>Performs <param name="selector"/> on the result from a Get.</summary>
         public static State<TState,Unit>        GetCompose<TState>(Selector<TState,Unit> selector) {
             selector.ContractedNotNull(nameof(selector));
-            Ensures(Result<State<TState,Unit>>() != null);
-
             return s => selector(s)(s);
         }
 
         /// <summary>Puts the supplied state, resturning a Unit.</summary>
         public static State<TState,Unit>        Put<TState>(TState state) {
             state.ContractedNotNull(nameof(state));
-            Ensures(Result<State<TState,Unit>>() != null);
 
             return s => StructTuple.New(state, Unit._);
         }

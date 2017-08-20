@@ -28,13 +28,10 @@
 #endregion
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace PGSolutions.Monads {
-    using static Contract;
-
     /// <summary>TODO</summary>
     public interface ICancellableTask {
         /// <summary>TODO</summary>
@@ -66,7 +63,6 @@ namespace PGSolutions.Monads {
     }
 
     /// <summary>TODO</summary>
-    [Pure]
     public static class FsmExtensions {
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter")]
@@ -74,8 +70,7 @@ namespace PGSolutions.Monads {
             int delayMilliseconds,
             IO<Unit> action
         ) where TEnv:ICancellableTask {
-            @this.ContractedNotNull(nameof(@this));
-            Ensures(Result<FsmTask<TEnv>.FsmReader>() != null);
+     //       @this.ContractedNotNull(nameof(@this));
 
             return e => from _ in ( from _ in action
                                     select Task.Delay(delayMilliseconds,e.CancellationToken).ToTaskUnit()

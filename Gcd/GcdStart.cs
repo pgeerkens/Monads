@@ -27,7 +27,6 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 
 namespace PGSolutions.Monads.Demos {
@@ -52,22 +51,22 @@ namespace PGSolutions.Monads.Demos {
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
         #if GcdStartAsClass
-        [Pure]public override bool Equals(object obj) => (obj as GcdStart )?.Equals(this) ?? false;
+        public override bool Equals(object obj) => (obj as GcdStart )?.Equals(this) ?? false;
         #else
-        [Pure]public override bool Equals(object obj) => (obj as GcdStart?)?.Equals(this) ?? false;
+        public override bool Equals(object obj) => (obj as GcdStart?)?.Equals(this) ?? false;
         #endif
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-        [Pure]public bool Equals(GcdStart other) => other!=null && A==other.A && B==other.B;
+        public bool Equals(GcdStart other) => other!=null && A==other.A && B==other.B;
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
-        [Pure]public static bool operator ==(GcdStart lhs, GcdStart rhs) => lhs?.Equals(rhs) ?? false;
+        public static bool operator ==(GcdStart lhs, GcdStart rhs) => lhs?.Equals(rhs) ?? false;
 
         /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
-        [Pure]public static bool operator !=(GcdStart lhs, GcdStart rhs) => !lhs?.Equals(rhs) ?? false;
+        public static bool operator !=(GcdStart lhs, GcdStart rhs) => !lhs?.Equals(rhs) ?? false;
 
         /// <inheritdoc/>
-        [Pure]public override int GetHashCode() => A.GetHashCode() ^ B.GetHashCode();
+        public override int GetHashCode() => A.GetHashCode() ^ B.GetHashCode();
 
         /// <inheritdoc/>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object,System.Object)")]
