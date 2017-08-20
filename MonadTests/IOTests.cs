@@ -8,14 +8,14 @@ namespace PGSolutions.Monads {
     public static class IOTests {
         [Fact]
         public static void IOTest() {
-            bool isExecuted1 = false;
-            bool isExecuted2 = false;
-            bool isExecuted3 = false;
-            bool isExecuted4 = false;
-            IO<int> one = () => { isExecuted1 = true; return 1; };
-            IO<int> two = () => { isExecuted2 = true; return 2; };
-            Func<int, IO<int>> addOne = x => { isExecuted3 = true; return (x + 1).ToIO(); };
-            Func<int, Func<int, IO<int>>> add = x => y => { isExecuted4 = true; return (x + y).ToIO(); };
+            bool isExecuted1 = false,
+                 isExecuted2 = false,
+                 isExecuted3 = false,
+                 isExecuted4 = false;
+            IO<int> one                       = () => { isExecuted1 = true; return 1; };
+            IO<int> two                       = () => { isExecuted2 = true; return 2; };
+            Func<int, IO<int>> addOne         = x  => { isExecuted3 = true; return (x + 1).ToIO(); };
+            Func<int, Func<int, IO<int>>> add = x  => y => { isExecuted4 = true; return (x + y).ToIO(); };
 
             var query1 = ( from x in one
                            from y in two
@@ -24,33 +24,23 @@ namespace PGSolutions.Monads {
                            let addOne2 = add(x)
                            select addOne2(z)
                          );
-            Assert.False(isExecuted1); // Laziness.
-            Assert.False(isExecuted2); // Laziness.
-            Assert.False(isExecuted3); // Laziness.
-            Assert.False(isExecuted4); // Laziness.
+            Assert.False(isExecuted1 || isExecuted2 || isExecuted3 || isExecuted4); // Laziness.
 
             int lhs = 1 + 2 + 1;
             int rhs = query1.Invoke().Invoke();
             Assert.Equal(lhs, rhs); // Execution.
 
-            Assert.True(isExecuted1);
-            Assert.True(isExecuted2);
-            Assert.True(isExecuted3);
-            Assert.True(isExecuted4);
+            Assert.True(isExecuted1 && isExecuted2 && isExecuted3 && isExecuted4);
         }
 
         [Fact]
         public static void IOTestFunctional() {
-            bool isExecuted1 = false;
-            bool isExecuted2 = false;
-            bool isExecuted3 = false;
-            bool isExecuted4 = false;
-            bool isExecuted5 = false;
-            bool isExecuted6 = false;
-            IO<int> one = () => { isExecuted1 = true; return 1; };
-            IO<int> two = () => { isExecuted2 = true; return 2; };
-            Func<int, IO<int>> addOne = x => { isExecuted3 = true; return (x + 1).ToIO(); };
-            Func<int, Func<int, IO<int>>> add = x => y => { isExecuted4 = true; return (x + y).ToIO(); };
+            bool isExecuted1 = false, isExecuted2 = false, isExecuted3 = false,
+                 isExecuted4 = false, isExecuted5 = false, isExecuted6 = false;
+            IO<int> one                       = () => { isExecuted1 = true; return 1; };
+            IO<int> two                       = () => { isExecuted2 = true; return 2; };
+            Func<int, IO<int>> addOne         = x  => { isExecuted3 = true; return (x + 1).ToIO(); };
+            Func<int, Func<int, IO<int>>> add = x  => y => { isExecuted4 = true; return (x + y).ToIO(); };
 
             var query1 = one.SelectMany(x => two,          (x,y) => new { x, y })
                             .SelectMany(X => addOne(X.y),  (X,z) => new { X.x, X.y, z })
@@ -64,23 +54,15 @@ namespace PGSolutions.Monads {
 
             var query = query1.SelectMany(Times2).SelectMany(Minus1);
 
-            Assert.False(isExecuted1); // Laziness.
-            Assert.False(isExecuted2); // Laziness.
-            Assert.False(isExecuted3); // Laziness.
-            Assert.False(isExecuted4); // Laziness.
-            Assert.False(isExecuted5); // Laziness.
-            Assert.False(isExecuted6); // Laziness.
+            Assert.False(isExecuted1 || isExecuted2 || isExecuted3
+                      || isExecuted4 || isExecuted5 || isExecuted6); // Laziness.
 
             int lhs = 2 * (1 + 2 + 1) - 1;
-            int rhs = query.Invoke();
+            int rhs = query();
             Assert.Equal(lhs, rhs);
 
-            Assert.True(isExecuted1); // Delayed execution.
-            Assert.True(isExecuted2); // Delayed execution.
-            Assert.True(isExecuted3); // Delayed execution.
-            Assert.True(isExecuted4); // Delayed execution.
-            Assert.True(isExecuted5); // Delayed execution.
-            Assert.True(isExecuted6); // Delayed execution.
+            Assert.True(isExecuted1 && isExecuted2 && isExecuted3
+                     && isExecuted4 && isExecuted5 && isExecuted6); // Delayed execution.
         }
 
         static Func<int, IO<int>> addOne3 = x => (x + 1).ToIO();
@@ -89,9 +71,11 @@ namespace PGSolutions.Monads {
         [Fact]
         public static void MonadLaw1Test() {
             // Monad law 1: m.Monad().SelectMany(f) == f(m)
-            var lhs = 1.ToIO().SelectMany(addOne3); //Contract.Assert(lhs  != null);
-            var rhs = addOne3(1);                        //Contract.Assume(rhs != null);
-            Assert.Equal(lhs.Invoke(), rhs.Invoke());
+            var lhs = 1.ToIO().SelectMany(addOne3);
+            var rhs = addOne3(1);
+            Assert.NotNull(lhs);
+            Assert.NotNull(rhs);
+            Assert.Equal(lhs(), rhs());
         }
 
         [Fact]
@@ -99,7 +83,7 @@ namespace PGSolutions.Monads {
             // Monad law 2: M.SelectMany(Monad) == M
             var lhs = M.SelectMany(m => m.ToIO());
             var rhs = M;
-            Assert.Equal(lhs.Invoke(), rhs.Invoke());
+            Assert.Equal(lhs(), rhs());
         }
 
         [Fact]
@@ -108,15 +92,12 @@ namespace PGSolutions.Monads {
             Func<int, IO<int>> addTwo = x => (x + 2).ToIO();
             var lhs1 = M.SelectMany(addOne3).SelectMany(addTwo);
             var rhs1 = M.SelectMany(x => addOne3(x).SelectMany(addTwo));
-            Assert.Equal(lhs1.Invoke(), rhs1.Invoke());
+            Assert.Equal(lhs1(), rhs1());
 
-            bool isExecuted5 = false;
-            bool isExecuted6 = false;
-            bool isExecuted7 = false;
-            Func<int, IO<int>> addOne4 = x => { isExecuted5 = true; return (x + 1).ToIO(); };
-            Func<string, IO<int>> length = x => { isExecuted6 = true; return (x.Length).ToIO(); };
+            bool isExecuted5 = false, isExecuted6 = false, isExecuted7 = false;
+            Func<int, IO<int>> addOne4          = x => { isExecuted5 = true; return (x + 1).ToIO(); };
+            Func<string, IO<int>> length        = x => { isExecuted6 = true; return (x.Length).ToIO(); };
             Func<int, Func<int, IO<string>>> f7 = x => y => {
-                //Contract.Ensures(Contract.Result<IO<string>>() != null);
                 isExecuted7 = true;
                 return (new string('a', x + y)).ToIO();
             };
@@ -127,19 +108,14 @@ namespace PGSolutions.Monads {
                                                                      select f7 (x) (y)            
                                                                    ).Invoke();
 
-            Assert.False(isExecuted5); // Laziness.
-            Assert.False(isExecuted6); // Laziness.
-            Assert.False(isExecuted7); // Laziness.
+            Assert.False(isExecuted5 || isExecuted6 || isExecuted7); // Laziness.
 
             var lhs = new string('a', 1 + 1 + "abc".Length);
-            //Contract.Assert(query2 != null);
-            var rhs_  = query2(1);      //Contract.Assume(rhs_  != null);
-            var rhs = rhs_("abc");
-            Assert.Equal(lhs, rhs.Invoke()); // Execution.
+            var rhs_  = query2(1);  Assert.NotNull(rhs_);
+            var rhs = rhs_("abc");  Assert.NotNull(rhs);
+            Assert.Equal(lhs, rhs()); // Execution.
 
-            Assert.True(isExecuted5);
-            Assert.True(isExecuted6);
-            Assert.True(isExecuted7);
+            Assert.True(isExecuted5 && isExecuted6 && isExecuted7); // Deferred execution
         }
     }
 }

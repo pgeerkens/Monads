@@ -57,11 +57,11 @@ namespace PGSolutions.Monads {
             Func<TValue, Nullable2<T>> selector,
             Func<TValue, T, TResult> projector
         ) => @this.HasValue && selector!=null && projector!=null
-                ? selector(@this.value).Select(e => projector(@this.value, e))// ?? null
+                ? selector(@this.value).Select(e => projector(@this.value, e))
                 : new Nullable2<TResult>();
 
         /// <summary>LINQ-ible Cast implementation. Argument is "boxed" if not already a class object.</summary>
-        public static Nullable2<T> Cast<T>(this Nullable2<object> @this) //where T: class 
+        public static Nullable2<T> Cast<T>(this Nullable2<object> @this)
             => from obj in @this select (T)obj;
 
         /// <summary>LINQ-ible Cast implementation for a class object.</summary>

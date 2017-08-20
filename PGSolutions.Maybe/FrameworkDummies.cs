@@ -1,9 +1,4 @@
-﻿using System;
-
-using PGSolutions;
-using PGSolutions.Monads;
-
-#region Dummy implementations standing for standard Framework methods/classes
+﻿#region Dummy implementations standing for standard Framework methods/classes
 namespace System {
     using static FormattableString;
 

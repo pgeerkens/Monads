@@ -48,10 +48,10 @@ namespace PGSolutions.Monads {
         /// <summary>TODO</summary>
         /// <typeparam name="TValue"></typeparam>
         /// <param name="value"></param>
-        public static TValue? ToNullable<TValue>(this TValue value) where TValue : struct => value;
+        public static TValue?       ToNullable<TValue>(this TValue value) where TValue : struct => value;
 
         /// <summary>TODO</summary>
         [System.Runtime.InteropServices.ComVisible(true)]
-        public static Nullable2<T> ToNullable2<T>(this T value) => new Nullable2<T>(value);
+        public static Nullable2<T>  ToNullable2<T>(this T value) => new Nullable2<T>(value);
     }
 }

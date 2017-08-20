@@ -41,7 +41,7 @@ namespace PGSolutions.Monads.Demos {
     enum Syntax { Imperative, Fluent, Query, Unknown }
     class Program {
         static string Prompt(string mode) =>
-            Invariant($"{mode}: Type 'Q' to quit; <Enter> to repeat ... ");
+                Invariant($"{mode}: Type 'Q' to quit; <Enter> to repeat ... ");
         static readonly IList<GcdStart> gcdStartStates = new List<GcdStart>() {
              new GcdStart(         40,            40)            //  0
             ,new GcdStart(        1024,           40)            //  1
@@ -51,7 +51,7 @@ namespace PGSolutions.Monads.Demos {
             ,new GcdStart(           2,       199999)            //  4
             ,new GcdStart(           2, short.MaxValue*40 - 1)   //  5
             ,new GcdStart(        6553,        32765)            //  6
-            ,new GcdStart(     - 32765,         6553)            //  7
+            ,new GcdStart(      -32765,         6553)            //  7
             ,new GcdStart(       32765,        -6553)            //  8
             ,new GcdStart(       32768, int.MinValue)            //  9
             ,new GcdStart(int.MinValue,        32768)            // 10
@@ -65,7 +65,7 @@ namespace PGSolutions.Monads.Demos {
                     passNo == 0  ?  i < 13
                                  :  i < 2 || 11 < i;
 
-        static Syntax syntax = Imperative;
+        static Syntax syntax = Query;
         static int Main() => ( syntax==Imperative ? ImperativeSyntax("Imperative Syntax")
                              : syntax==Fluent     ? FluentSyntax("Fluent (Method) Syntax")
                              : syntax==Query      ? QuerySyntax("Query (Comprehension) Syntax")

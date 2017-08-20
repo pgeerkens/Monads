@@ -7,14 +7,7 @@
     using System;
 
 namespace PGSolutions.Monads {
-    using System.Globalization;
-    using System.Reflection;    
     using System.Collections.Generic;
-    using System.Runtime;
-    using System.Runtime.CompilerServices;    
-    using System.Security;
-
-    using PGSolutions.Monads;
 
     // Warning, don't put System.Runtime.Serialization.On*Serializ*Attribute
     // on this class without first fixing ObjectClone::InvokeVtsCallbacks
