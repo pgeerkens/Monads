@@ -85,7 +85,6 @@
   <ItemGroup>
     <Compile Include="EqualityExtensionsTests.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="MaybeLinqNullTests.cs" />
     <Compile Include="MaybeTests.cs" />
     <Compile Include="MixedMaybeTests.cs" />

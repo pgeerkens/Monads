@@ -34,6 +34,7 @@ using Xunit;
 
 namespace PGSolutions.Monads {
     using static LazyState;
+    using static FormattableString;
     using static CultureInfo;
 
     using LazyStateInt  = LazyState<string,int>;
@@ -188,8 +189,6 @@ namespace PGSolutions.Monads {
         }
         #endregion
 
-        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object,System.Object)")]
-        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object)")]
         [Theory]
         [InlineData("First",   1,  4)]
         [InlineData("Second",  5,  3)]
@@ -203,14 +202,14 @@ namespace PGSolutions.Monads {
                             x => y => z => { isExecuted2 = true; return x + y + z.Length; };
             var query = ( from f in f1().AsX()
                           from _ in Put(f.ToString(InvariantCulture))
-                          from a in p2.ToLazyState<string, int>(state => $"{start}-b" + state)
+                          from a in p2.ToLazyState<string, int>(state => Invariant($"{start}-b{state}"))
                           from b in Get<string>()
                           select f2(f)(a)(b)
                         );
 
             Assert.False(isExecuted1 || isExecuted2);   // Deferred and lazy.
 
-            var expected = StatePayload.New($"{start}-b{p1}", (p1 + p2 + ($"{start}-b{p1}").Length));
+            var expected = StatePayload.New(Invariant($"{start}-b{p1}"), (p1 + p2 + Invariant($"{start}-b{p1}").Length));
             var received = query.Apply(start);        // Execution.
             Assert.Equal(expected,received);
 

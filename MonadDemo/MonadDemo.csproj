@@ -59,7 +59,6 @@
     <None Include="App.config" />
     <None Include="MonadDemo.ruleset" />
     <None Include="Monads.snk" />
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -82,8 +81,8 @@
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
-     <!-- Adjust as appropriate -->
-     <PackagesRootDirectory Condition="$(PackagesRootDirectory) == ''">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\packages'))</PackagesRootDirectory>
+    <!-- Adjust as appropriate -->
+    <PackagesRootDirectory Condition="$(PackagesRootDirectory) == ''">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\packages'))</PackagesRootDirectory>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>

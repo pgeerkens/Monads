@@ -26,7 +26,6 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
@@ -124,7 +123,7 @@ namespace PGSolutions.Monads.Demos {
 #endregion
 
         /// <summary>TODO</summary>
-        internal static class Imperative {
+        public static class Imperative {
 
             // ~ 0.14 sec
             /// <summary>TODO</summary>
@@ -142,7 +141,7 @@ namespace PGSolutions.Monads.Demos {
             /// <summary>TODO</summary>
             [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
             [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
-            [Description("Fully imperative; unrolled w substitution.")]
+            [Description("Fully imperative; unrolled w/ substitution.")]
             public static readonly StateRes Run2 = GetResult(new StateInt(_run2));
             private static PayloadInt _run2(GcdStart s) {
                 s.ContractedNotNull (nameof(s));
@@ -157,7 +156,7 @@ namespace PGSolutions.Monads.Demos {
         }
 
         /// <summary>TODO</summary>
-        internal static class Haskell {
+        public static class Haskell {
         #region Older Haskell implementations
               /* from http://mvanier.livejournal.com/5846.html
                   gcd_s3 :: State GCDState Int
@@ -205,7 +204,7 @@ namespace PGSolutions.Monads.Demos {
         }
 
         /// <summary>TODO</summary>
-        internal static class Linq {
+        public static class Linq {
         #region Older LINQ implementations
               // ~ 3.5 sec
             private static readonly StateInt _run1 = new StateInt(start =>
@@ -246,7 +245,7 @@ namespace PGSolutions.Monads.Demos {
 
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
-        internal static class Best {
+        public static class Best {
               // ~ 1.0 sec
             private static readonly StateInt _run = AlgorithmTransform.DoWhile(s => s.A != s.B)
                                                                       .Then(GcdExtract);

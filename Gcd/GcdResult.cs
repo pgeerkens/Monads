@@ -27,11 +27,9 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Globalization;
 
 namespace PGSolutions.Monads.Demos {
-    using static CultureInfo;
-    using static String;
+    using static FormattableString;
 
     /// <summary>TODO</summary>
 #if GcdStartAsClass
@@ -66,8 +64,7 @@ namespace PGSolutions.Monads.Demos {
         public override int GetHashCode() => Gcd.GetHashCode();
 
         /// <inheritdoc/>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object)")]
-        public override string ToString() => Format(InvariantCulture,$"    GCD = {Gcd}") ?? nameof(this.GetType);
+        public override string ToString() => Invariant($"    GCD = {Gcd}") ?? nameof(this.GetType);
         #endregion
     }
 }

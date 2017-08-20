@@ -27,7 +27,6 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace PGSolutions.Monads {
@@ -72,22 +71,18 @@ namespace PGSolutions.Monads {
             ReturnIOUnit(() => Write(arg));
 
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.Write(System.String,System.Object)")]
         public static IO<Unit> ConsoleWrite<T>(string format, T arg) =>
              ReturnIOUnit(() => Write(format ?? nullFormat, arg));
 
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.Write(System.String,System.Object,System.Object)")]
         public static IO<Unit> ConsoleWrite<T1,T2>(string format, T1 arg1, T2 arg2) =>
              ReturnIOUnit(() => Write(format ?? nullFormat, arg1, arg2));
 
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.Write(System.String,System.Object,System.Object,System.Object)")]
         public static IO<Unit> ConsoleWrite<T1,T2,T3>(string format, T1 arg1, T2 arg2, T3 arg3) =>
              ReturnIOUnit(() => Write(format ?? nullFormat, arg1, arg2, arg3));
 
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.Write(System.String,System.Object[])")]
         public static IO<Unit> ConsoleWrite(string format, params object[] arg) =>
             ReturnIOUnit(() => Write(format ?? nullFormat, arg));
 
@@ -100,22 +95,18 @@ namespace PGSolutions.Monads {
             ReturnIOUnit(() => WriteLine(value));
 
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String,System.Object)")]
-        public static IO<Unit> ConsoleWriteLine<T>(string format, T arg) =>
-            ReturnIOUnit(() => WriteLine(format ?? nullFormat, arg));
+        public static IO<Unit> ConsoleWriteLine<T>(string formatNotLocalized, T arg) =>
+            ReturnIOUnit(() => WriteLine(formatNotLocalized ?? nullFormat, arg));
 
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String,System.Object,System.Object)")]
         public static IO<Unit> ConsoleWriteLine<T1,T2>(string format, T1 arg1, T2 arg2) =>
              ReturnIOUnit(() => WriteLine(format ?? nullFormat, arg1, arg2));
 
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String,System.Object,System.Object,System.Object)")]
         public static IO<Unit> ConsoleWriteLine<T1,T2,T3>(string format, T1 arg1, T2 arg2, T3 arg3) =>
              ReturnIOUnit(() => WriteLine(format ?? nullFormat, arg1, arg2, arg3));
 
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String,System.Object[])")]
         public static IO<Unit> ConsoleWriteLine(string format, params object[] arg) =>
             ReturnIOUnit(() => WriteLine(format ?? nullFormat, arg));
 

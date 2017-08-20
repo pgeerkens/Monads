@@ -28,7 +28,6 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 
@@ -36,14 +35,13 @@ namespace PGSolutions.Monads.Demos {
     using static Console;
     using static CultureInfo;
     using static IOMonads;
-    using static String;
+    using static FormattableString;
     using static Syntax;
 
     enum Syntax { Imperative, Fluent, Query, Unknown }
     class Program {
-        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object)")]
         static string Prompt(string mode) =>
-            string.Format(InvariantCulture, $"{mode}: Type 'Q' to quit; <Enter> to repeat ... ");
+            Invariant($"{mode}: Type 'Q' to quit; <Enter> to repeat ... ");
         #region GCD States
         static readonly IList<GcdStart> gcdStartStates = new List<GcdStart>() {
              new GcdStart(         40,            40)            //  0
@@ -69,7 +67,7 @@ namespace PGSolutions.Monads.Demos {
                     passNo == 0  ?  i < 13
                                  :  i < 2 || 11 < i;
 
-        static Syntax syntax = Query;
+        static Syntax syntax = Imperative;
         static int Main() => ( syntax==Imperative ? ImperativeSyntax("Imperative Syntax")
                              : syntax==Fluent     ? FluentSyntax("Fluent (Method) Syntax")
                              : syntax==Query      ? QuerySyntax("Query (Comprehension) Syntax")
@@ -87,11 +85,9 @@ namespace PGSolutions.Monads.Demos {
                 var c = ReadKey();
                 WriteLine();
 
-                if (c.KeyChar.ToUpper() == 'Q') yield return 0;
+                if (c.KeyChar.ToUpper(InvariantCulture) == 'Q') yield return 0;
             }
         }
-        #region Fluent syntax
-        [SuppressMessage("Microsoft.Globalization", "CA1304:SpecifyCultureInfo", MessageId = "PGSolutions.Monads.Demos.CharExtensions.ToUpper(System.Char)")]
         static IEnumerable<int> FluentSyntax(string mode) =>
             ( Enumerable.Range(0,int.MaxValue)
                         .Select(pass => new {pass, counter = Readers.Counter(0)})
@@ -102,12 +98,9 @@ namespace PGSolutions.Monads.Demos {
                ( (Gcd.Run(enumerable.ToList()) ).ToIO()
                     .SelectMany(_ => ConsoleWrite(Prompt(mode)),(_,__) => new {})
                     .SelectMany(_ => ConsoleReadKey(),          (_, c) => new {c})
-                    .SelectMany(_ => ConsoleWriteLine(),        (_,__) => _.c.KeyChar.ToUpper() == 'Q')
+                    .SelectMany(_ => ConsoleWriteLine(),        (_,__) => _.c.KeyChar.ToUpper(InvariantCulture) == 'Q')
                ).Invoke()
             ).Select(list => 0);
-        #endregion
-        #region Comprehension syntax
-        [SuppressMessage("Microsoft.Globalization", "CA1304:SpecifyCultureInfo", MessageId = "PGSolutions.Monads.Demos.CharExtensions.ToUpper(System.Char)")]
         static IEnumerable<int> QuerySyntax(string mode) =>
             from pass  in Enumerable.Range(0, int.MaxValue)
             let counter = Readers.Counter(0)
@@ -119,16 +112,13 @@ namespace PGSolutions.Monads.Demos {
                    from __  in ConsoleWrite(Prompt(mode))
                    from c   in ConsoleReadKey()
                    from ___ in ConsoleWriteLine()
-                   select c.KeyChar.ToUpper() == 'Q'
+                   select c.KeyChar.ToUpper(InvariantCulture) == 'Q'
                   ).Invoke()
             select 0;
-        #endregion
     }
 
     public static class CharExtensions {
-        public static char ToLower(this char c) => c.ToLower(InvariantCulture);
         public static char ToLower(this char c, CultureInfo culture) => char.ToUpper(c,culture);
-        public static char ToUpper(this char c) => c.ToUpper(InvariantCulture);
         public static char ToUpper(this char c, CultureInfo culture) => char.ToUpper(c,culture);
     }
 }

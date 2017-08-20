@@ -28,18 +28,16 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 
 using PGSolutions.Monads;
 
 namespace PGSolutions.Monads.Demos {
     using static String;
-    using static CultureInfo;
+    using static FormattableString;
     using static Console;
 
     static class Program {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object,System.Object,System.Object)")]
         static void Main() {
             BasicTest();
 
@@ -54,9 +52,9 @@ namespace PGSolutions.Monads.Demos {
             Gcd_S4.BestRun(start).ToNullable().SelectMany(result => {
                 var value = result.Value;
                 var title = Gcd_S4.GetTest("Best.Run");
-                WriteLine($"    GCD = {value.Gcd} for {start} - {title}");
-                WriteLine("_______________________");
-                WriteLine("Hit ENTER to close.");
+                WriteLine(Invariant($"    GCD = {value.Gcd} for {start} - {title}"));
+                WriteLine(Invariant($"_______________________"));
+                WriteLine(Invariant($"Hit ENTER to close."));
                 return Unit._.ToNullable();
             });
 
@@ -103,7 +101,6 @@ namespace PGSolutions.Monads.Demos {
             WriteLine("_______________________");
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object)")]
         private static void ExternalStateTest() {
             WriteLine();
             var state = new ExternalState();
@@ -111,13 +108,12 @@ namespace PGSolutions.Monads.Demos {
             var y = x();
 
             for (int i = 0; i++ < 5; ) state.GetState();
-            WriteLine(Format(InvariantCulture,$"y:     {y} (Expect 1)"));
-            WriteLine(Format(InvariantCulture,$"state: {state.Value} (Expect 6)"));
-            WriteLine(Format(InvariantCulture,$"x():   {x()} (Expect 7)"));
+            WriteLine(Invariant($"y:     {y} (Expect 1)"));
+            WriteLine(Invariant($"state: {state.Value} (Expect 6)"));
+            WriteLine(Invariant($"x():   {x()} (Expect 7)"));
             WriteLine("_______________________");
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object,System.Object)")]
         private static void GcdTest1(IList<int> list) {
             list.ContractedNotNull(nameof(list));
             if (list.Any()) {
@@ -127,7 +123,7 @@ namespace PGSolutions.Monads.Demos {
                   select gcd = Gcd_S4.BestRun(new GcdStart(n, gcd)).Value.Gcd
                 ).LastOrDefault();
 
-                WriteLine($"    GCD = {gcd} for {list.FormatList()??""}");
+                WriteLine(Invariant($"    GCD = {gcd} for {list.FormatList()??""}"));
                 WriteLine();
             }
         }

@@ -1,4 +1,6 @@
-﻿namespace PGSolutions.Monads.TrafficLightDemo {
+﻿using System.Runtime.CompilerServices;
+
+namespace PGSolutions.Monads.TrafficLightDemo {
 
     partial class Form1 {
         /// <summary>
@@ -24,6 +26,7 @@
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
+        [CompilerGenerated]
         private void InitializeComponent() {
             this.UpTownLeftTurnLight = new System.Windows.Forms.PictureBox();
             this.DownTownLeftTurnLight = new System.Windows.Forms.PictureBox();

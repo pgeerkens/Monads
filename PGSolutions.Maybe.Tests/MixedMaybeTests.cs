@@ -29,13 +29,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Linq;
 
 using Xunit;
 
 namespace PGSolutions.Monads {
-    using static CultureInfo;
+    using static FormattableString;
     using static String;
     using static Functions;
 
@@ -47,13 +46,12 @@ namespace PGSolutions.Monads {
         readonly static IList<string>    _data        = _strings.ToList().AsReadOnly();
         readonly static Func<int, int?>  _addOne      = x => (x + 1);
         readonly static Func<int, int?>  _addEight    = x => (x + 8);
-        readonly static Func<int,string> _concatEight = i => Format(InvariantCulture,$"{i}eight");
+        readonly static Func<int,string> _concatEight = i => Invariant($"{i}eight");
 
         readonly Func<string,Func<string,bool>,IEnumerable<string>> IsGeorge = (s,test) => 
                 from e in _data where test(e) select e ?? s;
         #endregion
 
-        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object,System.Object)")]
         [Theory]
         [InlineData("",       "Percy//George/Ron/Ginny")]
         [InlineData("Nothing","Percy/Nothing/George/Ron/Ginny")]
@@ -65,7 +63,7 @@ namespace PGSolutions.Monads {
             received  = Join("/", IsGeorge(defaultValue, predicate) );
             //Contract.Assert(received != null);
             Assert.True(expected?.Equals(received), 
-                Format(InvariantCulture,$"Value: Expected: '{expected}'; Received: '{received}'"));
+                Invariant($"Value: Expected: '{expected}'; Received: '{received}'"));
         }
 
         /// <summary>Verify that == and != are opposites, and the former implemented as Equals().</summary>

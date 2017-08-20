@@ -29,15 +29,13 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Linq;
 
 using PGSolutions.Monads;
 
 namespace PGSolutions.Monads.Demos {
-    using static CultureInfo;
     using static IOMonads;
-    using static String;
+    using static FormattableString;
     using static Extensions;
 
 #if GcdStartAsClass
@@ -76,7 +74,7 @@ namespace PGSolutions.Monads.Demos {
             let isThird = Readers.MatchCounter(i => i==3, 1)
             select ( from _   in ConsoleWriteLine("{0} - {1}", GcdStartTYpe, test.Title)
                      from __  in (
-                            #if NotComprehensiveSyntax
+                            #if !NotComprehensiveSyntax
                                    states.ForThisTest(test, timer, isThird)
                                          .SelectMany(e=>e.Last())
                             #else
@@ -90,7 +88,6 @@ namespace PGSolutions.Monads.Demos {
                      select Unit._
             ).Invoke();
 
-        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object)")]
         private static X<IEnumerable<IO<Unit>>> ForThisTest(this X<IList<GcdStart>> startStates, 
             ITest           test, 
             Func<TimeSpan>  elapsed, 
@@ -106,14 +103,14 @@ namespace PGSolutions.Monads.Demos {
                         @"    GCD = {0,14} for {1}: Elapsed = {2:ss\.fff} secs; {3}",
                         ( from r in item.Result
                     #if true
-                          from s in Format(InvariantCulture,$"{r.Gcd,14:N0}").AsX()
+                          from s in Invariant($"{r.Gcd,14:N0}").AsX()
                           select s
                         ) | "incalculable",
                     #elif GcdStartAsClass
-                          select Format(InvariantCulture,$"{r.Gcd,14:N0}")
+                          select Invariant($"{r.Gcd,14:N0}")
                         ) | "incalculable",
                     #else
-                          select Format(InvariantCulture,$"{r.Gcd,14:N0}").AsX()
+                          select Invariant($"{r.Gcd,14:N0}").AsX()
                         ) ?? "incalculable",
                     #endif
                         item.Start,

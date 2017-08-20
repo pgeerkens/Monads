@@ -27,12 +27,9 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 
 namespace PGSolutions.Monads {
-    using static CultureInfo;
-    using static String;
+    using static FormattableString;
 
     /// <summary>TODO</summary>
     public static class StructTuple {
@@ -79,9 +76,7 @@ namespace PGSolutions.Monads {
         public override int GetHashCode() => Value.GetHashCode() ^ State.GetHashCode();
 
         /// <inheritdoc/>
-        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider",
-            MessageId = "System.String.Format(System.String,System.Object,System.Object)")]
-        public override string ToString() => Format(InvariantCulture,$"({State},{Value})",new object[0]);
+        public override string ToString() => Invariant($"({State},{Value})");
         #endregion
     }
 }

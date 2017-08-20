@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace PGSolutions.Monads.DIDemo {
     using static Console;
+    using static FormattableString;
 
     class DependencyInjectionExample {
         [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String)")]
@@ -24,12 +25,11 @@ namespace PGSolutions.Monads.DIDemo {
             /// authorization and a logging method. Likely you could use this for sql connections,
             /// transactions, auth credentials, a pool of resources, etc.
             /// </remarks>
-            [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object)")]
             [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String)")]
             public static Config GetConfig1() {
                 return new Config() {
                     AuthInfo  = "'pgeerkens'",
-                    LogMethod = (str =>  WriteLine($"! {str} !")),
+                    LogMethod = (str =>  WriteLine(Invariant($"! {str} !"))),
                 };
             }
             /// <summary>What we are injecting into all our methods.</summary>
@@ -38,12 +38,11 @@ namespace PGSolutions.Monads.DIDemo {
             /// authorization and a logging method. Likely you could use this for sql connections,
             /// transactions, auth credentials, a pool of resources, etc.
             /// </remarks>
-            [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object)")]
             [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "System.Console.WriteLine(System.String)")]
             public static Config GetConfig2() {
                 return new Config() {
                     AuthInfo  = "'Pieter'",
-                    LogMethod = (str => WriteLine($"!?! {str} !?!")),
+                    LogMethod = (str => WriteLine(Invariant($"!?! {str} !?!"))),
                 };
             }
 

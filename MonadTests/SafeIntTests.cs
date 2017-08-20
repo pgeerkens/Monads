@@ -148,7 +148,6 @@ namespace PGSolutions.Monads {
         /// <remarks>
         /// after Mike Hadlow: http://mikehadlow.blogspot.ca/2011/01/monads-in-c-5-maybe.html
         /// </remarks>
-        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.Int32.ToString")]
         [Theory]
         [InlineData(4, true,  "Hello World! 6 ")]
         [InlineData(0, false, "Nothing")]

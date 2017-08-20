@@ -29,13 +29,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Linq;
 
 using Xunit;
 
 namespace PGSolutions.Monads.Nullable2Tests {
-    using static CultureInfo;
+    using static FormattableString;
     using static String;
 
     [ExcludeFromCodeCoverage]
@@ -59,8 +58,8 @@ namespace PGSolutions.Monads.Nullable2Tests {
             received  = Join("/", _isGeorge(defaultValue, predicate) );
 
             Assert.True(received != null);
-            Assert.True(expected?.Equals(received), 
-                Format(InvariantCulture,$"Value: Expected: '{expected}'; Received: '{received}'"));
+            Assert.True(expected?.Equals(received),
+                Invariant($"Value: Expected: '{expected}'; Received: '{received}'"));
         }
 
         /// <summary>Verify that == and != are opposites, and the former implemented as Equals().</summary>
@@ -86,7 +85,7 @@ namespace PGSolutions.Monads.Nullable2Tests {
         [InlineData(null,  "Nothing")]
         public void ExcludedMiddleTest(bool? c, string expected) {
             Func<string,bool> predicate;
-            Nullable2<bool>   comparison = c.HasValue ? c.Value : new Nullable2<bool>();
+            Nullable2<bool>   comparison = c??new Nullable2<bool>(); // c.HasValue ? c.Value : new Nullable2<bool>();
 
             predicate     = s => s.AreNonNullEqual(_maybeGeorge).Equals(comparison);
             var received  = Join("/", _isGeorge("Nothing", predicate) );

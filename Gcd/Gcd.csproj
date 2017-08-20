@@ -62,7 +62,6 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="Monads.snk" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Monad\Monad.csproj">
@@ -81,8 +80,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-      <!-- Adjust as appropriate -->
-      <PackagesRootDirectory Condition="$(PackagesRootDirectory) == ''">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\packages'))</PackagesRootDirectory>
+    <!-- Adjust as appropriate -->
+    <PackagesRootDirectory Condition="$(PackagesRootDirectory) == ''">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\packages'))</PackagesRootDirectory>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>

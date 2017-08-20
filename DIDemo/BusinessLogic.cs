@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 
 namespace PGSolutions.Monads.DIDemo {
-    using static CultureInfo;
-    using static String;
+    using static FormattableString;
 
     public interface IConfig {
         string         AuthInfo  { get; }
@@ -17,18 +14,16 @@ namespace PGSolutions.Monads.DIDemo {
             return (from intDb        in BusinessLogic<TConfig>.GetIntFromDB
                     from netstr       in BusinessLogic<TConfig>.GetStringFromNetwork
                     from writeSuccess in BusinessLogic<TConfig>.WriteStuffToDisk(intDb, netstr)
-                    select writeSuccess ? Format(InvariantCulture,$"\nWe wrote\n   {intDb}\nand\n   {netstr}\nto disk")
+                    select writeSuccess ? Invariant($"\nWe wrote\n   {intDb}\nand\n   {netstr}\nto disk")
                                         : "\nerror!"
             ) (config);
         }
     }
 
     internal static class BusinessLogic<TConfig> where TConfig:IConfig {
-        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider",
-            MessageId = "System.String.Format(System.String,System.Object)")]
         public static Reader<TConfig,int>      GetIntFromDB { get {
             return new Reader<TConfig, int>(config => {
-                config.LogMethod(Format(InvariantCulture,
+                config.LogMethod(Invariant(
                         $"Getting an int from DB using credentials {config.AuthInfo}"));
                         // ....
                 return 4;
@@ -43,11 +38,9 @@ namespace PGSolutions.Monads.DIDemo {
                         );
             } }
 
-        [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider",
-            MessageId = "System.String.Format(System.String,System.Object,System.Object,System.Object)")]
         public static Reader<TConfig,bool>     WriteStuffToDisk(int i, string s) {
             return new Reader<TConfig,bool>(config => {
-                config.LogMethod(Format(InvariantCulture,
+                config.LogMethod(Invariant(
                     $"writing\n   {i}\n   {s}\nto disk with credentials: {config.AuthInfo}"));
                     // ....
                 return true;

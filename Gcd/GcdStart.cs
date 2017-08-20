@@ -30,8 +30,7 @@ using System;
 using System.Globalization;
 
 namespace PGSolutions.Monads.Demos {
-    using static CultureInfo;
-    using static String;
+    using static FormattableString;
 
     /// <summary>TODO</summary>
 #if GcdStartAsClass    // performance improvement of ~20% for functional, decrease of ~50% for imperative!
@@ -69,8 +68,7 @@ namespace PGSolutions.Monads.Demos {
         public override int GetHashCode() => A.GetHashCode() ^ B.GetHashCode();
 
         /// <inheritdoc/>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.String.Format(System.String,System.Object,System.Object)")]
-        public override string ToString() => Format(InvariantCulture,$"({A,14:N0}, {B,14:N0})") ?? nameof(this.GetType);
+        public override string ToString() => Invariant($"({A,14:N0}, {B,14:N0})") ?? nameof(this.GetType);
         #endregion
     }
 }

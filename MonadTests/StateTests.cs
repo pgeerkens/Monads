@@ -39,10 +39,10 @@ namespace PGSolutions.Monads {
     public class StateTests {
         public StateTests() { }
 
-        readonly static State<X<string>,int>           _monad = 1.State<X<string>,int>();
-        readonly static Func<int,int>               _addOneX = x => (x + 1);
+        readonly static State<X<string>,int>           _monad   = 1.State<X<string>,int>();
+        readonly static Func<int,int>                  _addOneX = x => (x + 1);
         readonly static Func<int,State<X<string>,int>> _addOne  = x => (x + 1).State<X<string>,int>();
-        readonly static Func<int,int,int>           _second  = (u,v) => v;
+        readonly static Func<int,int,int>              _second  = (u,v) => v;
 
         [Fact]
         public static void LazyEvaluationTestSelectMany() {
@@ -57,13 +57,14 @@ namespace PGSolutions.Monads {
                                         from y in 2.State<string, int>(state => "b" + state)
                                         from z in Get<string>()
                                         select f2(x)(y)(z);
-            Assert.False(isExecuted1); // Deferred and lazy.
-            Assert.False(isExecuted2); // Deferred and lazy.
-            StructTuple<string,int> result1 = query1("state"); // Execution.
+ 
+            Assert.False(isExecuted1 || isExecuted2);           // Deferred and lazy.
+
+            StructTuple<string,int> result1 = query1("state");  // Execution.
             Assert.True(result1.Value.Equals(1 + 2 + ("b" + "1").Length));
             Assert.Equal(result1.State, "b" + "1");
-            Assert.True(isExecuted1);
-            Assert.True(isExecuted2);
+
+            Assert.True(isExecuted1 && isExecuted2);
         }
 
         #region Select() Monad Law Tests
