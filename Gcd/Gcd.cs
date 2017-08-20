@@ -120,7 +120,7 @@ namespace PGSolutions.Monads.Demos {
 
         /// <summary>Return a pair of positive integers with the same GCD as the supplied parameters.</summary>
         private static PayloadMaybe ValidateState(this GcdStartType start) {
-            return new PayloadMaybe(
+            return StructTuple.New(
                 from state in start
                 from x in state.A == 1
                        || state.B == 1            ? new GcdStart(1, 1).ToMaybe()

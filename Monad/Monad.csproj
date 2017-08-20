@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PGSolutions.Monads</RootNamespace>
     <AssemblyName>Monad</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <CodeContractsAssemblyMode>1</CodeContractsAssemblyMode>
     <TargetFrameworkProfile />
@@ -132,10 +132,6 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.ValueTuple.4.4.0\lib\net461\System.ValueTuple.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -147,7 +143,7 @@
     <Compile Include="IO\IO.cs" />
     <Compile Include="IO\IOExtensions.cs" />
     <Compile Include="IO\IOMonads.cs" />
-    <Compile Include="IO\MaybeIO.cs" />
+    <Compile Include="Transform\MaybeIO.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Reader\Fsm.cs" />
     <Compile Include="Reader\ReaderLinq.cs" />
@@ -170,7 +166,6 @@
   <ItemGroup>
     <None Include="Monad.ruleset" />
     <None Include="Monads.snk" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\CustomDictionary.xml">

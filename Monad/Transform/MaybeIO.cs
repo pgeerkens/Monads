@@ -27,7 +27,6 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Linq;
 
 namespace PGSolutions.Monads {
     /// <summary>TODO</summary>
@@ -48,10 +47,6 @@ namespace PGSolutions.Monads {
                                          projector?.Invoke(t, e).ToIO() ?? null
                                      ) ?? null)
             | null;
-            //@this.HasValue ? selector?.Invoke(@this.Value).SelectMany(e =>
-            //                     projector?.Invoke(@this.Value, e).ToIO() ?? null
-            //                 ) ?? null
-            //               : null;
         #endregion
         //================================================================================
         #region IO<TSource> lifted to X<TResult>
