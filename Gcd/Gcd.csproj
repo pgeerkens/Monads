@@ -52,10 +52,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Gcd.cs" />
+    <Compile Include="GcdBest.cs" />
+    <Compile Include="GcdLinq.cs" />
     <Compile Include="GcdResult.cs" />
     <Compile Include="GcdStart.cs" />
     <Compile Include="GcdS4.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="GcdHaskell.cs" />
+    <Compile Include="GcdImperative.cs" />
     <Compile Include="MethodDetails.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
