@@ -137,7 +137,6 @@ namespace PGSolutions.Monads {
         }
     }
 
-
     /// <summary>TODO</summary>
     public static class MaybeState {
         /// <summary>TODO</summary>

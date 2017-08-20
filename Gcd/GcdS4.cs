@@ -26,15 +26,16 @@
 //     OTHER DEALINGS IN THE SOFTWARE.
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 
 using PGSolutions.Monads;
-using System;
 
-namespace PGSolutions.Monads.Demos {
+namespace PGSolutions.Monads.Demos
+{
     using StateBool = State<GcdStart, bool>;
     using StateInt = State<GcdStart, int>;
     using StateRes = State<GcdStart, GcdResult>;
@@ -42,16 +43,6 @@ namespace PGSolutions.Monads.Demos {
     using static State;
     using static StateTransform;
     using static BindingFlags;
-
-    /// <summary>TODO</summary>
-    public interface ITest {
-        /// <summary>TODO</summary>
-        StateRes Transform { get; }
-        /// <summary>TODO</summary>
-        string   Title     { get; }
-        /// <summary>TODO</summary>
-        string   Name      { get; }
-    }
 
     /// <summary>TODO</summary>
     public static class GcdS4 { // Beware! - These must be declared & initialized in this order

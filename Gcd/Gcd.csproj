@@ -60,6 +60,8 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="GcdHaskell.cs" />
     <Compile Include="GcdImperative.cs" />
+    <Compile Include="IMethodDetails.cs" />
+    <Compile Include="ITest.cs" />
     <Compile Include="MethodDetails.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

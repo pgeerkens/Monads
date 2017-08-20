@@ -35,25 +35,15 @@ using System.Reflection;
 using PGSolutions.Monads;
 
 namespace PGSolutions.Monads.Demos {
-    /// <summary>TODO</summary>
-    public interface IMethodDetails<TDetails> {
-        /// <summary>TODO</summary>
-        string   Name        { get; }
-        /// <summary>TODO</summary>
-        string   Description { get; }
-        /// <summary>TODO</summary>
-        TDetails Details     { get; }
-    }
 
     /// <summary>TODO</summary>
-    public static class MethodDetails
-    {
+    public static class MethodDetails {
         /// <summary>TODO</summary>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         [SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Flags")]
         public static X<IList<IMethodDetails<TDetails>>> GetMethodDescriptions<TDetails>(this Type type, 
-            Predicate<string>        predicate,
-            BindingFlags             bindingFlags,
+            Predicate<string>            predicate,
+            BindingFlags                 bindingFlags,
             Func<PropertyInfo, TDetails> transform
         ) where TDetails : class =>
             from pred in predicate.AsX()
@@ -82,7 +72,7 @@ namespace PGSolutions.Monads.Demos {
             }
             public string   Name        { get; }
             public string   Description { get; }
-            public TDetails Details   { get; }
+            public TDetails Details     { get; }
         }
     }
 }
