@@ -41,15 +41,8 @@ namespace PGSolutions.Monads {
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "name")]
         [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void ContractedNotNull<T>([ValidatedNotNull]this T value, string name) {
-            Debug.Assert(value != null, name);
-        }
-
-        ///// <summary>Decorator for an object which is to have it's object invariants assumed.</summary>
-        //[SuppressMessage("CodeCracker.Usage", "CC0057:UnusedParameters", MessageId = "t")]
-        //[SuppressMessage("CodeCracker.Usage", "CC0090:MissingParametersInXmlDocs", MessageId = "t")]
-        //[SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "t")]
-        //public static void AssumeInvariant<T>(this T t) { }
+        public static void ContractedNotNull<T>([ValidatedNotNull]this T value, string name) =>
+            Debug.Assert(value != null, $"Parameter {name} must not be null.");
     }
 
     /// <summary>Decorator for an incoming parameter that is contractually enforced as NotNull.</summary>

@@ -120,10 +120,10 @@ namespace PGSolutions.Monads.Demos {
             /// <summary>TODO</summary>
             public string Name { get; }
         }
-#endregion
+        #endregion
 
         /// <summary>TODO</summary>
-        public static class Imperative {
+        internal static class Imperative {
 
             // ~ 0.14 sec
             /// <summary>TODO</summary>
@@ -156,7 +156,7 @@ namespace PGSolutions.Monads.Demos {
         }
 
         /// <summary>TODO</summary>
-        public static class Haskell {
+        private static class Haskell {
         #region Older Haskell implementations
               /* from http://mvanier.livejournal.com/5846.html
                   gcd_s3 :: State GCDState Int
@@ -182,6 +182,7 @@ namespace PGSolutions.Monads.Demos {
                                         : Put(s)).Then(GcdBody)
                                                  .DoWhile().Then(GcdExtract);
             /// <summary>TODO</summary>
+            [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
             [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
             [Description("Straight Haskel (iterative).")]
             public static readonly StateRes Run1 = GetResult(_run1);
@@ -190,6 +191,7 @@ namespace PGSolutions.Monads.Demos {
             private static readonly StateInt _run2 = AlgorithmTransform.Modify().Then(GcdBody)
                                                                        .DoWhile().Then(GcdExtract);
             /// <summary>TODO</summary>
+            [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
             [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
             [Description("Straight Haskel w/ Modify() instead of Get.Compose(s => Put(transform(s))).")]
             public static readonly StateRes Run2 = GetResult(_run2);
@@ -198,13 +200,14 @@ namespace PGSolutions.Monads.Demos {
               // ~ 1.5 sec
             private static readonly StateInt _run3 = AlgorithMonad.DoWhile().Then(GcdExtract);
             /// <summary>TODO</summary>
+            [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
             [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
             [Description("Straight Haskel w/ DoWhile().")]
             public static readonly StateRes Run3 = GetResult(_run3);
         }
 
         /// <summary>TODO</summary>
-        public static class Linq {
+        private static class Linq {
         #region Older LINQ implementations
               // ~ 3.5 sec
             private static readonly StateInt _run1 = new StateInt(start =>
@@ -215,6 +218,7 @@ namespace PGSolutions.Monads.Demos {
                             select Payload.New(s, A)
                           ).First());
             /// <summary>TODO</summary>
+            [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
             [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
             [Description("Basic LINQ w/ Enumerate(Transform<TState>, TState) and using l'let'.")]
             public static readonly StateRes Run1 = GetResult(_run1);
@@ -226,6 +230,7 @@ namespace PGSolutions.Monads.Demos {
                             select payload
                           ).First()).Then(GcdExtract);
             /// <summary>TODO</summary>
+            [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
             [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
             [Description("Better LINQ w/ Enumerate(State<TState,TValue>, TState).")]
             public static readonly StateRes Run2 = GetResult(_run2); 
@@ -238,14 +243,14 @@ namespace PGSolutions.Monads.Demos {
                             select Payload.New(s, s.A)
                           ).First());
             /// <summary>TODO</summary>
+            [SuppressMessage("Microsoft.Security", "CA2104:DoNotDeclareReadOnlyMutableReferenceTypes")]
             [SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
             [Description("Best LINQ w/ Enumerate(Transform<TState>, TState) and w/o using 'let'.")]
             public static readonly StateRes Run3 = GetResult(_run3);
         }
 
         /// <summary>TODO</summary>
-        [SuppressMessage("Microsoft.Design", "CA1034:NestedTypesShouldNotBeVisible")]
-        public static class Best {
+        private static class Best {
               // ~ 1.0 sec
             private static readonly StateInt _run = AlgorithmTransform.DoWhile(s => s.A != s.B)
                                                                       .Then(GcdExtract);

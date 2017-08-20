@@ -42,18 +42,4 @@ namespace PGSolutions.Monads {
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "p1")]
         public static TSecond   Second<TFirst,TSecond>(TFirst p1, TSecond p2) => p2;
     }
-
-    /// <summary>Define an implementable contract guarantees a non-null return.</summary>
-    public interface ISafeToString {
-        /// <summary>Returns a String which represents the object instance.</summary>
-        string ToString();
-    }
-
-    /// <summary>Enforceable contracts for <see cref="ISafeToString"/>.</summary>
-    public abstract class ISafeToStringContracts : ISafeToString {
-        private ISafeToStringContracts() { ; }
-
-        /// <inheritdoc/>
-        public new string ToString() => "";
-    }
 }

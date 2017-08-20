@@ -33,9 +33,9 @@ namespace PGSolutions.Monads.Demos {
 
     /// <summary>TODO</summary>
 #if GcdStartAsClass
-    public class  GcdResult : IEquatable<GcdResult>, ISafeToString {
+    public class  GcdResult : IEquatable<GcdResult>{ //, ISafeToString {
 #else
-    public struct GcdResult : IEquatable<GcdResult>, ISafeToString {
+    public struct GcdResult : IEquatable<GcdResult>{ //, ISafeToString {
 #endif
         /// <summary>TODO</summary>
         public GcdResult(int gcd) { Gcd = gcd; }
@@ -53,18 +53,24 @@ namespace PGSolutions.Monads.Demos {
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         public bool Equals(GcdResult other) => other!=null && Gcd == other.Gcd;
-
+#if GcdStartAsClass
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         public static bool operator ==(GcdResult lhs, GcdResult rhs) =>lhs?.Equals(rhs) ?? false;
 
         /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
         public static bool operator !=(GcdResult lhs, GcdResult rhs) => !lhs?.Equals(rhs) ?? false;
+#else
+        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
+        public static bool operator ==(GcdResult lhs, GcdResult rhs) =>  lhs.Equals(rhs);
 
+        /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
+        public static bool operator !=(GcdResult lhs, GcdResult rhs) => !lhs.Equals(rhs);
+#endif
         /// <inheritdoc/>
         public override int GetHashCode() => Gcd.GetHashCode();
 
         /// <inheritdoc/>
         public override string ToString() => Invariant($"    GCD = {Gcd}") ?? nameof(this.GetType);
-        #endregion
+#endregion
     }
 }

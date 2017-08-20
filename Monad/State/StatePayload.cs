@@ -42,7 +42,7 @@ namespace PGSolutions.Monads {
     /// <summary>TODO</summary>
     /// <typeparam name="TState">Type of the internal state.</typeparam>
     /// <typeparam name="TValue">Type of the delivered value.</typeparam>
-    public struct StatePayload<TState,TValue> : ISafeToString {
+    public struct StatePayload<TState,TValue> {
         /// <summary>Return a new object instance.</summary>
         internal StatePayload(TState state, TValue value) : this(StructTuple.New(state,value)) { ; }
         /// <summary>Return a new object instance.</summary>

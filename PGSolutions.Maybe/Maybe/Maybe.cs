@@ -41,7 +41,7 @@ namespace PGSolutions.Monads {
     /// Equality tracks the base type, with the further proviseo that two instances
     /// can only be equal when <see cref="HasValue"/> is true for both instances.
     /// </remarks>
-    public struct X<T> : IEquatable<X<T>>,ISafeToString where T:class {
+    public struct X<T> : IEquatable<X<T>> where T:class {
         ///<summary>Create a new MaybeX{T}.</summary>
         private X(T value) : this() { Value = value; }
 

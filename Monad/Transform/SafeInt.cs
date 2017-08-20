@@ -50,7 +50,7 @@ namespace PGSolutions.Monads {
     }
 
     /// <summary>TODO</summary>
-    public struct SafeInt : ISafeEquatable<SafeInt>, IEquatable<SafeInt>, ISafeComparable<SafeInt>, ISafeToString {
+    public struct SafeInt : ISafeEquatable<SafeInt>, IEquatable<SafeInt>, ISafeComparable<SafeInt> {
         ///<summary>Create a new Maybe{T}.</summary>
         private SafeInt(int? value) : this() {
             _value    = value;
@@ -65,10 +65,9 @@ namespace PGSolutions.Monads {
         /// <summary>TODO</summary>
         /// <param name="lhs"></param>
         /// <param name="defaultValue"></param>
-        public static int operator | (SafeInt lhs, int defaultValue) =>
-             lhs._value.HasValue ? lhs._value.Value : defaultValue;
+        public static int operator | (SafeInt lhs, int defaultValue) => lhs._value ?? defaultValue;
         /// <summary><see cref="BitwiseOr"/></summary>
-        public static int BitwiseOr(SafeInt lhs, int defaultValue) => lhs | defaultValue;
+        public static int BitwiseOr(SafeInt lhs, int defaultValue)   => lhs | defaultValue;
 
         /// <summary>Returns a SafeInt with the sum, or null if the operation fails.</summary>
         public static SafeInt operator + (SafeInt addend1, SafeInt addend2) =>

@@ -42,7 +42,6 @@ namespace PGSolutions.Monads.Demos {
     class Program {
         static string Prompt(string mode) =>
             Invariant($"{mode}: Type 'Q' to quit; <Enter> to repeat ... ");
-        #region GCD States
         static readonly IList<GcdStart> gcdStartStates = new List<GcdStart>() {
              new GcdStart(         40,            40)            //  0
             ,new GcdStart(        1024,           40)            //  1
@@ -61,7 +60,6 @@ namespace PGSolutions.Monads.Demos {
             ,new GcdStart(      -32767, int.MaxValue-1)          // 12
             ,new GcdStart(           2, short.MaxValue*1000 - 1) // 13
         };
-        #endregion
 
         static bool _predicate(int passNo, int i) =>
                     passNo == 0  ?  i < 13

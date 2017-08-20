@@ -27,16 +27,15 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #endregion
 using System;
-using System.Globalization;
 
 namespace PGSolutions.Monads.Demos {
     using static FormattableString;
 
     /// <summary>TODO</summary>
 #if GcdStartAsClass    // performance improvement of ~20% for functional, decrease of ~50% for imperative!
-    public class  GcdStart : IEquatable<GcdStart>, ISafeToString {
+    public class  GcdStart : IEquatable<GcdStart> {
 #else
-    public struct GcdStart : IEquatable<GcdStart>, ISafeToString {
+    public struct GcdStart : IEquatable<GcdStart> {
 #endif
    
         /// <summary>TODO</summary>
@@ -57,18 +56,24 @@ namespace PGSolutions.Monads.Demos {
 
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         public bool Equals(GcdStart other) => other!=null && A==other.A && B==other.B;
-
+#if GcdStartAsClass
         /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
         public static bool operator ==(GcdStart lhs, GcdStart rhs) => lhs?.Equals(rhs) ?? false;
 
         /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
         public static bool operator !=(GcdStart lhs, GcdStart rhs) => !lhs?.Equals(rhs) ?? false;
+#else
+        /// <summary>Tests value-equality, returning <b>false</b> if either value doesn't exist.</summary>
+        public static bool operator ==(GcdStart lhs, GcdStart rhs) =>  lhs.Equals(rhs);
 
+        /// <summary>Tests value-inequality, returning <b>false</b> if either value doesn't exist..</summary>
+        public static bool operator !=(GcdStart lhs, GcdStart rhs) => !lhs.Equals(rhs);
+#endif
         /// <inheritdoc/>
         public override int GetHashCode() => A.GetHashCode() ^ B.GetHashCode();
 
         /// <inheritdoc/>
         public override string ToString() => Invariant($"({A,14:N0}, {B,14:N0})") ?? nameof(this.GetType);
-        #endregion
+#endregion
     }
 }

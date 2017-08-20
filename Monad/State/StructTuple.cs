@@ -44,7 +44,7 @@ namespace PGSolutions.Monads {
     /// <remarks>
     ///  Minor observed performance penalty for small class vs small struct.
     /// </remarks>
-    public struct StructTuple<TState, TValue> : IEquatable<StructTuple<TState, TValue>>, ISafeToString {
+    public struct StructTuple<TState, TValue> : IEquatable<StructTuple<TState, TValue>> {
         /// <summary>Creates a new instance from a <typeparamref name="TState"/> and a <typeparamref name="TValue"/>.</summary>
         public StructTuple(TState state, TValue value) : this() { State = state;  Value = value; }
 
