@@ -63,9 +63,6 @@ namespace PGSolutions.Monads {
         ///<summary>Amplifies a <typeparamref name="T"/> to a <see cref="X{T}"/>.</summary>
         public static implicit operator X<T>(T value) => new X<T>(value);
 
-//        ///<summary>Returns the inner (type <typeparamref name="T"/>) value for those who like to live dangerously.</summary>
-//        public static explicit operator T(X<T> value) => value.Value;
-
         #region Value Equality with IEquatable<T>.
         /// <inheritdoc/>
         public override bool Equals(object obj) => (obj as X<T>?)?.Equals(this) ?? false;
@@ -92,11 +89,6 @@ namespace PGSolutions.Monads {
 
     /// <summary>Convenience extension methods for <see cref="X{T}"/></summary>
     public static class X {
-        ///<summary>Amplifies a reference-type T to an <see cref="X{T}"/>.</summary>
-        ///<typeparam name="T">The type of the "contained" object, being amplified to an <see cref="X{T}"/></typeparam>
-        ///<remarks>The monad <i>unit</i> function.</remarks>
-        public static X<T>      New<T>(T value) where T:class => value;
-
         ///<summary>Amplifies a reference-type <typeparamref name="T"/> to an <see cref="X{T}"/>.</summary>
         ///<typeparam name="T">The type of the "contained" object, being amplified to an <see cref="X{T}"/></typeparam>
         ///<remarks>The monad <i>unit</i> function.</remarks>
@@ -113,4 +105,26 @@ namespace PGSolutions.Monads {
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "this")]
         public static Type      GetUnderlyingType<T>(this X<T> @this) where T:class => typeof(T);
     }
+
+#if false  // Standard pattern for C# Comprehension Syntax; from spec.
+    public delegate R Func<T1, R>(T1 arg1);
+    public delegate R Func<T1, T2, R>(T1 arg1,T2 arg2);
+    public abstract class C { abstract public C<T> Cast<T>(); }
+    public abstract class C<T>:C {
+        abstract public C<T> Where(Func<T,bool> predicate);
+        abstract public C<U> Select<U>(Func<T,U> selector);
+        abstract public C<V> SelectMany<U, V>(Func<T,C<U>> selector,Func<T,U,V> resultSelector);
+        abstract public C<V> Join<U, K, V>(C<U> inner,Func<T,K> outerKeySelector,Func<U,K> innerKeySelector,Func<T,U,V> resultSelector);
+        abstract public C<V> GroupJoin<U, K, V>(C<U> inner,Func<T,K> outerKeySelector,Func<U,K> innerKeySelector,Func<T,C<U>,V> resultSelector);
+        abstract public O<T> OrderBy<K>(Func<T,K> keySelector);
+        abstract public O<T> OrderByDescending<K>(Func<T,K> keySelector);
+        abstract public C<G<K,T>> GroupBy<K>(Func<T,K> keySelector);
+        abstract public C<G<K,E>> GroupBy<K, E>(Func<T,K> keySelector,Func<T,E> elementSelector);
+    }
+    public abstract class O<T>:C<T> {
+        abstract public O<T> ThenBy<K>(Func<T,K> keySelector);
+        abstract public O<T> ThenByDescending<K>(Func<T,K> keySelector);
+    }
+    public abstract class G<K, T>:C<T> { public K Key { get; } }
+#endif
 }

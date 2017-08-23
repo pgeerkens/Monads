@@ -40,7 +40,7 @@ namespace PGSolutions.Monads {
         #region Weasley tests
         readonly static string[]            _strings = { "Percy", null, "George", "Ron", "Ginny" };
         readonly static IList<X<string>>    _data    = ( from e in _strings
-                                                         select e.AsMonad()
+                                                         select e.AsMaybe()
                                                        ).ToList().AsReadOnly();
 
         [Theory]
@@ -124,8 +124,8 @@ namespace PGSolutions.Monads {
         [InlineData("Fred Weasley", " Weasley")]
         [InlineData("Nothing!", null)]
         public static void WesDyerTest(string expected, string second) {
-            var received = ( from x in "Fred".AsMonad()
-                             from y in second.AsMonad()
+            var received = ( from x in "Fred".AsMaybe()
+                             from y in second.AsMaybe()
                              select x + y).ToNothingString();
             Assert.Equal(expected, received);
         }

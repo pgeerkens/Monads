@@ -38,19 +38,13 @@ namespace PGSolutions.Monads {
         ) where TValue : class where TResult : class =>
             @this.HasValue ? projector?.Invoke(@this.Value) : null;
 
-        ///<summary>The monadic Bind operation of type <typeparamref name="TValue"/> to <typeparamref name="TResult"/>.</summary>
-        ///<remarks>Convenient; but not used by LINQ.</remarks>
-        public static X<TResult>    Bind<TValue, TResult>(this X<TValue> @this,
-            Func<TValue, X<TResult>> selector
-        ) where TValue : class where TResult : class =>
-            @this.HasValue ? selector?.Invoke(@this.Value) ?? null
-                           : null;
-
         ///<summary>Alias for the monadic bind operation on type <typeparamref name="TValue"/>.</summary>
         ///<remarks>Convenient; but not used by LINQ.</remarks>
         public static X<TResult>    SelectMany<TValue, TResult>(this X<TValue> @this,
             Func<TValue, X<TResult>> selector
-        ) where TValue : class where TResult : class => @this.Bind(selector);
+        ) where TValue : class where TResult : class =>
+            @this.HasValue ? selector?.Invoke(@this.Value) ?? null
+                           : null;
 
         /// <summary>LINQ-ible implementation of the monadic join operator.</summary>
         /// <remarks>Used by LINQ queries with multiple <i>from</i> clauses.</remarks>
@@ -63,16 +57,35 @@ namespace PGSolutions.Monads {
                            : null;
 
         /// <summary>LINQ-ible Cast implementation. Argument is "boxed" if not already a class object.</summary>
-        public static X<T> Cast<T>(this X<object> @this) where T: class => from obj in @this select (T)obj;
+        public static X<T>          Cast<T>(this X<object> @this) where T: class => from obj in @this select (T)obj;
 
         /// <summary>LINQ-ible Cast implementation for a class object.</summary>
         /// <typeparam name="TValue"></typeparam>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="this"></param>
         /// <returns></returns>
-        public static TResult Cast<TValue,TResult>(this TValue @this) where TValue:TResult 
+        public static TResult       Cast<TValue,TResult>(this TValue @this) where TValue:TResult 
             => @this != null ? @this : default(TResult);
+
+        /// <summary>LINQ-ible Cast implementation, first "Box"ing the supplied struct.</summary>
+        public static X<Box<T>>     Cast<T>(this T t) where T:struct => t.ToBox().AsX();
+
+        /// <summary>FlatMap, defiend as fmap f m == m >>= (return . f) or m => m.Select(f).</summary>
+        public static Func<X<TValue>, X<TResult>>   Fmap<TValue, TResult>(Func<TValue, TResult> f
+        ) where TValue:class where TResult:class
+            => m => m.Select(f);
+
+        /// <summary>Function Composition, defined as f . g == v => f(g(v)).</summary>
+        public static Func<TValue, TResult>         Compose<TValue,T,TResult>(this Func<T,TResult> f, Func<TValue,T> g
+        ) where TValue:class where T:class where TResult:class
+            => v => f(g(v));
+
+        /// <summary>Monadic Composition (ie >=>, read as "then", in Haskell) defined as (f >=> g) x = (f x) >>= g.</summary>
+        public static Func<TValue, X<TResult>>      Then<TValue, T, TResult>(this Func<TValue,X<T>> f, Func<T,X<TResult>> g
+        ) where TValue : class where T : class where TResult : class
+            => v => f(v).SelectMany(g);
     }
+
 #if false  // Standard pattern for C# Comprehension Syntax; from spec.
     public delegate R Func<T1, R>(T1 arg1);
     public delegate R Func<T1, T2, R>(T1 arg1,T2 arg2);

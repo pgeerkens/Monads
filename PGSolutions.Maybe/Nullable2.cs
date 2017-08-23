@@ -43,14 +43,7 @@ namespace PGSolutions.Monads {
 
         /// <summary>TODO</summary>
         [Obsolete("Use is strongly discouraged as violating the basic premise of avoiding unnecessary exceptions.")]
-        public T Value {
-            get {
-                if (!HasValue) {
-                   ThrowHelper.ThrowInvalidOperationException(ExceptionResource.InvalidOperation_NoValue);
-                }
-                return value;
-            }
-        }
+        public T Value => HasValue ? Value : throw new InvalidOperationException(ExceptionResource.InvalidOperation_NoValue);
 
         ///<summary>Extract value of the <see cref="X{T}"/>, substituting <paramref name="default"/> as needed.</summary>
         ///<remarks>Substitutes for the ?? operator, which is unavailable for overload.</remarks>

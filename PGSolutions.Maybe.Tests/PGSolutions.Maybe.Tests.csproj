@@ -77,8 +77,8 @@
   <ItemGroup>
     <Compile Include="EqualityExtensionsTests.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="MaybeLinqNullTests.cs" />
-    <Compile Include="MaybeTests.cs" />
+    <Compile Include="MaybeClassMonadTests.cs" />
+    <Compile Include="MaybeStructMonadTests.cs" />
     <Compile Include="MixedMaybeTests.cs" />
     <Compile Include="MixedMaybeTests2.cs" />
     <Compile Include="MixedMonadTests.cs" />
