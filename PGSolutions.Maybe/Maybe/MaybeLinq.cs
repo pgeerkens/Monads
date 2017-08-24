@@ -33,14 +33,14 @@ namespace PGSolutions.Monads {
     public static class MaybeLinq {
         /// <summary>LINQ-ible implementation of the monadic map operator.</summary>
         ///<remarks>Used by the LINQ <i>let</i> clause and queries with a single FROM clause.</remarks>
-        public static X<TResult>    Select<TValue, TResult>(this X<TValue> @this,
+        public static X<TResult>        Select<TValue, TResult>(this X<TValue> @this,
             Func<TValue, TResult> projector
         ) where TValue : class where TResult : class =>
             @this.HasValue ? projector?.Invoke(@this.Value) : null;
 
         ///<summary>Alias for the monadic bind operation on type <typeparamref name="TValue"/>.</summary>
         ///<remarks>Convenient; but not used by LINQ.</remarks>
-        public static X<TResult>    SelectMany<TValue, TResult>(this X<TValue> @this,
+        public static X<TResult>        SelectMany<TValue, TResult>(this X<TValue> @this,
             Func<TValue, X<TResult>> selector
         ) where TValue : class where TResult : class =>
             @this.HasValue ? selector?.Invoke(@this.Value) ?? null
@@ -48,7 +48,7 @@ namespace PGSolutions.Monads {
 
         /// <summary>LINQ-ible implementation of the monadic join operator.</summary>
         /// <remarks>Used by LINQ queries with multiple <i>from</i> clauses.</remarks>
-        public static X<TResult>    SelectMany<TValue, T, TResult>(this X<TValue> @this,
+        public static X<TResult>        SelectMany<TValue, T, TResult>(this X<TValue> @this,
             Func<TValue, X<T>> selector,
             Func<TValue, T, TResult> projector
         ) where TValue : class where T : class where TResult: class =>
@@ -57,18 +57,24 @@ namespace PGSolutions.Monads {
                            : null;
 
         /// <summary>LINQ-ible Cast implementation. Argument is "boxed" if not already a class object.</summary>
-        public static X<T>          Cast<T>(this X<object> @this) where T: class => from obj in @this select (T)obj;
+        public static X<T>              Cast<T>(this X<object> @this) where T: class => from obj in @this select (T)obj;
 
         /// <summary>LINQ-ible Cast implementation for a class object.</summary>
         /// <typeparam name="TValue"></typeparam>
         /// <typeparam name="TResult"></typeparam>
         /// <param name="this"></param>
         /// <returns></returns>
-        public static TResult       Cast<TValue,TResult>(this TValue @this) where TValue:TResult 
+        public static TResult           Cast<TValue,TResult>(this TValue @this) where TValue:TResult 
             => @this != null ? @this : default(TResult);
 
         /// <summary>LINQ-ible Cast implementation, first "Box"ing the supplied struct.</summary>
-        public static X<Box<T>>     Cast<T>(this T t) where T:struct => t.ToBox().AsX();
+        public static X<Box<T>>         Cast<T>(this T t) where T:struct => t.ToBox().AsX();
+
+        /// <summary>TODO</summary>
+        public static X<TValue>         AsMaybe<TValue>(this TValue v) where TValue : class => v.AsX();
+
+        /// <summary>TODO</summary>
+        public static X<Box<TValue>>    ToMaybe<TValue>(this TValue v) where TValue : struct => v.ToBox().AsX();
 
         /// <summary>FlatMap, defiend as fmap f m == m >>= (return . f) or m => m.Select(f).</summary>
         public static Func<X<TValue>, X<TResult>>   Fmap<TValue, TResult>(Func<TValue, TResult> f

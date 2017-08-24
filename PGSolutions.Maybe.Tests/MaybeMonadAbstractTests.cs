@@ -32,19 +32,8 @@ using System.Diagnostics.CodeAnalysis;
 using Xunit;
 
 namespace PGSolutions.Monads {
-    using static Functions;
-    using static MaybeLinq;
     using static FormattableString;
-
-    /// <summary>TODO</summary>
-    internal static partial class MaybeFunctors {
-        /// <summary>TODO</summary>
-        public static X<TValue>                     AsMaybe<TValue>(this TValue v) where TValue:class  => v.AsX();
-        /// <summary>TODO</summary>
-        public static X<Box<TValue>>                Tomaybe<TValue>(this TValue v) where TValue:struct => v.ToBox().AsX();
-    }
-
-    /// <summary>Unit tests for <see cref="X{T}"/></summary>
+    /// <summary>Unit tests for <see cref="X{T}"/> where T:struct</summary>
     /// <remarks>
     /// See
     ///     <a href="https://en.wikipedia.org/wiki/Monad_(functional_programming)#fmap_and_join"/>
@@ -54,43 +43,53 @@ namespace PGSolutions.Monads {
     ///     <a href="https://en.wikibooks.org/wiki/Haskell/Category_theory#cite_ref-1"/> .
     /// </remarks>
     [ExcludeFromCodeCoverage] [CLSCompliant(false)]
-    public class MaybeClassMonadTests {
-        public MaybeClassMonadTests() { }
+    public class MaybeMonadAbstractTestsMaybeMonadTests<T> where T:class {
+        public MaybeMonadAbstractTestsMaybeMonadTests(Func<T,T> ff, Func<T,T>gg, Func<T,T>hh) {
+            f  = ff;
+            g  = gg;
+            h  = hh;
+        }
 
+        #region utility delegates
         #pragma warning disable IDE1006
-        private static Func<string,string> f => s => s + "X";
-        private static Func<string,string> g => s => "(" + s + ")";
-        private static Func<string,string> h => s => s + s;
-#pragma warning restore IDE1006
+        private Func<T, T>        f { get; }
+        private Func<T, T>        g { get; }
+        private Func<T, T>        h { get; }
 
-        private static Func<string,string> Identity => Functions.Identity;
+        private Func<T, X<T>>     fm => u => AsMonad(f(u));
+        private Func<T, X<T>>     gm => u => AsMonad(g(u));
+        private Func<T, X<T>>     hm => u => AsMonad(h(u));
+        #pragma warning restore IDE1006
+
+        protected virtual Func<T, X<T>>                    AsMonad { get; }
+        protected virtual Func<Func<T,T>, Func<X<T>,X<T>>> Fmap    { get; }
+
+        private Func<T, T>        Identity => Functions.Identity;
+        private Func<T, T, T>     Second   => Functions.Second;
+        private Func<T, T>        Null2A   => null;
+        private Func<T, X<T>>     Null2B   => null;
+        private Func<T, T,T>      Null3    => null;
+        #endregion
 
         #region Functor expression of the Monad requirements
         /// <summary>Return Law: return . f ≡ fmap f . return.</summary>
-        [Theory]
-        [InlineData("4")]
-        public static void FunctorLeftIdentity<T>(string v) {
-            var lhs = g(v);
-            var rhs = Fmap(g)(v.AsMaybe());
+        public void FunctorLeftIdentityInner(T v) {
+            var lhs = AsMonad(f(v));
+            var rhs = Fmap(f)(AsMonad(v));
 
             Assert.True(lhs==rhs, Invariant($"lhs: '{lhs}'; rhs: '{rhs}'"));
         }
 
         /// <summary>Functor Law #1: fmap id ≡ id.</summary>
-        [Theory]
-        [InlineData("4")]
-        public static void FunctorRightIdentity(string v) {
-            var m   = v.AsMaybe();
-            var lhs = m;
-            var rhs = Fmap(Identity)(m);
+        public void FunctorRightIdentityInner(T v) {
+            var lhs = Fmap(Identity)(v);
+            var rhs = v;
 
             Assert.True(lhs==rhs, Invariant($"lhs: '{lhs}'; rhs: '{rhs}'"));
         }
 
         /// <summary>Functor Law #2: fmap (f . g) ≡ (fmap f) . (fmap g).</summary>
-        [Theory]
-        [InlineData("4")]
-        public static void FunctorAssociativity(string v) {
+        public void FunctorAssociativityInner(T v) {
             var m   = v.AsMaybe();
             var lhs = Fmap(f.Compose(g)) (m);
             var rhs = Fmap(f) (Fmap(g) (m));
@@ -99,13 +98,7 @@ namespace PGSolutions.Monads {
         }
 
         /// <summary>Monad Associativity: (f >=> g) >=> h ≡ f >=> (g >=> h).</summary>
-        [Theory]
-        [InlineData("4")]
-        public static void MonadAssociativity(string v) {
-            Func<string, X<string>> fm = u => f(u).AsMaybe();
-            Func<string, X<string>> gm = u => g(u).AsMaybe();
-            Func<string, X<string>> hm = u => h(u).AsMaybe();
-
+        public void MonadAssociativityInner(T v) {
             var lhs = fm.Then(gm).Then(hm) (v);
             var rhs = fm.Then(gm.Then(hm)) (v);
 
@@ -115,19 +108,16 @@ namespace PGSolutions.Monads {
 
         #region LINQ-syntax expression of the Monad requirements
         /// <summary>Monad Law #1: (return x) >>= f == return f(x).</summary>
-        [Theory]
-        [InlineData("4")]
-        public static void LinqLeftIdentity(string v) {
-            var lhs = from x in v.AsMaybe() select f(v);
+        public void LinqLeftIdentityInner(T v) {
+            var m   = v.AsMaybe();
+            var lhs = from x in m select f(v);
             var rhs = f(v).AsMaybe();
 
             Assert.True(lhs==rhs, Invariant($"lhs: '{lhs}'; rhs: '{rhs}'"));
         }
 
         /// <summary>Monad Law #2: m >>= return = m.</summary>
-        [Theory]
-        [InlineData("4")]
-        public static void LinqRightIdentity(string v) {
+        public void LinqRightIdentityInner(T v) {
             var m   = v.AsMaybe();
             var lhs = from x in m select x;
             var rhs = m;
@@ -135,10 +125,8 @@ namespace PGSolutions.Monads {
             Assert.True(lhs==rhs, Invariant($"lhs: '{lhs}'; rhs: '{rhs}'"));
         }
 
-        /// <summary>Monad Law #3: (m >>= f) >>= g == m >>= ( \x -> (f x >>= g) ).</summary>
-        [Theory]
-        [InlineData("4")]
-        public static void LinqAssociativity(string v) {
+        /// <summavirtual ry>Monad Law #3: (m >>= f) >>= g == m >>= ( \x -> (f x >>= g) ).</summary>
+        public void LinqAssociativityInner(T v) {
             var m   = v.AsMaybe();
             var lhs = from y in (from x in m select f(x)) select g(y);
             var rhs = m.SelectMany(x => from y in f(x).AsMaybe() select g(y));
@@ -148,32 +136,28 @@ namespace PGSolutions.Monads {
         #endregion
 
         #region Null-Argument tests
-        [Theory]
-        [InlineData("4")]
-        public static void MaybeXSelect(string v) {
+        public void MaybeXSelectInner(T v) {
             var m = v.AsMaybe();
-            var received = m.Select<string,string>(null);
+            var received = m.Select(Null2A);
+
             Assert.True(received == null);
         }
-        [Theory]
-        [InlineData("4")]
-        public static void MaybeXSelectMany1(string v) {
+        public void MaybeXSelectMany1Inner(T v) {
             var m = v.AsMaybe();
-            var received = m.SelectMany<string,string>(null);
+            var received = m.SelectMany(Null2B);
+
             Assert.True(received == null);
         }
-        [Theory]
-        [InlineData("4")]
-        public static void MaybeXSelectMany2(string v) {
+        public void MaybeXSelectMany2Inner(T v) {
             var m = v.AsMaybe();
-            var received = m.SelectMany<string,string,string>(null, Second);
+            var received = m.SelectMany(null, Second);
+
             Assert.True(received == null, "1st arg null");
         }
-        [Theory]
-        [InlineData("4")]
-        public static void MaybeXSelectMany3(string v) {
+        public void MaybeXSelectMany3Inner(T v) {
             var m = v.AsMaybe();
-            var received  = m.SelectMany<string,string,string>(MaybeFunctors.AsMaybe, null);
+            var received = m.SelectMany(AsMonad, Null3);
+
             Assert.True(received == null, "2nd arg null");
         }
         #endregion
